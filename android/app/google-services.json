@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "406654937423",
+    "firebase_url": "https://gameboy-22c94-default-rtdb.firebaseio.com",
+    "project_id": "gameboy-22c94",
+    "storage_bucket": "gameboy-22c94.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406654937423:android:c686442d440b51d1d97d3a",
+        "android_client_info": {
+          "package_name": "com.rareapps.gameboy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "406654937423-jbim5pvd7ip96503pkl5l9ip1j3r080c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rareapps.gameboy",
+            "certificate_hash": "89c3a957e02fbb9aa97050ea3684bb7d81846f4b"
+          }
+        },
+        {
+          "client_id": "406654937423-pi5ab36rkv6d0cdhs10qlsi43f0u1phh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBityAfJF8XiTmmJcjZBNJkfBsvtG846WY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "406654937423-pi5ab36rkv6d0cdhs10qlsi43f0u1phh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -11,9 +11,9 @@ class Wordle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var userId = context.getAppData().activeUser!.userID;
-    return BlocProvider<WordleGameEngine>(
-      create: (BuildContext context) => WordleGameEngine(userId),
-      child: BlocBuilder<WordleGameEngine, WordleState>(
+    return BlocProvider<WordleGameBloc>(
+      create: (BuildContext context) => WordleGameBloc(userId),
+      child: BlocBuilder<WordleGameBloc, WordleState>(
         buildWhen: (previousState, currentState) {
           if (currentState is WordleLoaded) {
             return true;

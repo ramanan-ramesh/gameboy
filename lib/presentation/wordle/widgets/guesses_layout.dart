@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'guess_row.dart';
+import 'guess_row/guess_row.dart';
 
 class GuessesLayout extends StatelessWidget {
   const GuessesLayout({super.key});

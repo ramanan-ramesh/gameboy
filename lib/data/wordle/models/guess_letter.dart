@@ -1,9 +1,16 @@
+import 'package:equatable/equatable.dart';
 import 'package:gameboy/data/wordle/models/letter_match_description.dart';
 
-class GuessLetter {
+class GuessLetter extends Equatable {
   String guessLetter;
-  LetterMatchDescription? letterMatchDescription;
+  LetterMatchDescription letterMatchDescription;
 
   GuessLetter(
       {required this.guessLetter, required this.letterMatchDescription});
+  GuessLetter.notYetGuessed()
+      : guessLetter = '',
+        letterMatchDescription = LetterMatchDescription.notYetMatched;
+
+  @override
+  List<Object?> get props => [guessLetter, letterMatchDescription];
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/presentation/extensions.dart';
+import 'package:gameboy/presentation/wordle/bloc/events.dart';
 
 class GameBar extends StatelessWidget implements PreferredSizeWidget {
-  static const String _appLogoAsset = 'assets/images/wordle_logo.webp';
+  static const String _wordleLogoAsset = 'assets/images/wordle_logo.webp';
   final double? contentWidth;
 
   @override
@@ -35,7 +37,7 @@ class GameBar extends StatelessWidget implements PreferredSizeWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Image.asset(
-                      _appLogoAsset,
+                      _wordleLogoAsset,
                       width: 40,
                       height: 40,
                     ),
@@ -50,8 +52,10 @@ class GameBar extends StatelessWidget implements PreferredSizeWidget {
                 ],
               ),
               IconButton(
-                onPressed: null,
-                icon: Icon(Icons.info_rounded),
+                onPressed: () {
+                  context.addGameEvent(RequestStats());
+                },
+                icon: Icon(Icons.query_stats_rounded),
               ),
             ],
           ),

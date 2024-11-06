@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/wordle/models/extensions.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
 import 'package:gameboy/presentation/extensions.dart';
 import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
 import 'package:gameboy/presentation/wordle/bloc/events.dart';
-import 'package:gameboy/presentation/wordle/bloc/extensions.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
+import 'package:gameboy/presentation/wordle/widgets/extensions.dart';
 
 class KeyboardLayout extends StatefulWidget {
   const KeyboardLayout({super.key});
@@ -20,50 +21,81 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   static const _secondRow = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'];
   static const _thirdRow = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'];
 
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _handleKeyEvent(KeyEvent keyEvent) {
+    if (context.getCurrentWordleState() is RequestStats) {
+      return;
+    }
+    if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
+        keyEvent.logicalKey.keyLabel.length == 1 &&
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+      context.addGameEvent(SubmitLetter(letter: keyEvent.logicalKey.keyLabel));
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
+      context.addGameEvent(RemoveLetter());
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
+      context.addGameEvent(SubmitWord());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<WordleGameBloc, WordleState>(
-      buildWhen: (previousState, currentState) {
-        return false;
-      },
-      builder: (BuildContext context, WordleState state) {
-        var allGuessedLetters = context.getGameEngineData().allGuessedLetters;
-        var firstRowWidgets = _firstRow
-            .map((key) =>
-                _buildLetterInputKey(context, key, 10, allGuessedLetters))
-            .toList();
-        var secondRowWidgets = _secondRow
-            .map(
-              (key) =>
-                  _buildLetterInputKey(context, key, 10, allGuessedLetters),
-            )
-            .toList();
-        var thirdRowWidgets = _thirdRow
-            .map((key) =>
-                _buildLetterInputKey(context, key, 10, allGuessedLetters))
-            .toList();
-        secondRowWidgets.insert(
-          0,
-          Expanded(
-            child: Container(),
-            flex: 5,
-          ),
-        );
-        secondRowWidgets.add(
-          Expanded(
-            child: Container(),
-            flex: 5,
-          ),
-        );
+    var allGuessedLetters = context.getGameEngineData().allGuessedLetters;
+    var firstRowWidgets = _firstRow
+        .map((key) => _buildLetterInputKey(context, key, 10, allGuessedLetters))
+        .toList();
+    var secondRowWidgets = _secondRow
+        .map(
+          (key) => _buildLetterInputKey(context, key, 10, allGuessedLetters),
+        )
+        .toList();
+    var thirdRowWidgets = _thirdRow
+        .map((key) => _buildLetterInputKey(context, key, 10, allGuessedLetters))
+        .toList();
+    secondRowWidgets.insert(
+      0,
+      Expanded(
+        child: Container(),
+        flex: 5,
+      ),
+    );
+    secondRowWidgets.add(
+      Expanded(
+        child: Container(),
+        flex: 5,
+      ),
+    );
 
-        thirdRowWidgets.insert(
-            0,
-            _buildActionIconKey(
-                context, Icons.backspace_rounded, 10, KeyType.backspace));
-        thirdRowWidgets
-            .add(_buildActionLetterKey(context, KeyType.enter, 'Enter', 20));
-
-        return Container(
+    thirdRowWidgets.insert(
+        0,
+        _buildActionIconKey(
+            context, Icons.backspace_rounded, 10, RemoveLetter()));
+    thirdRowWidgets
+        .add(_buildActionLetterKey(context, SubmitWord(), 'Enter', 20));
+    FocusScope.of(context).requestFocus(_focusNode);
+    return KeyboardListener(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: BlocListener<WordleGameBloc, WordleState>(
+        listener: (BuildContext context, WordleState state) {
+          if (state is GuessWordSubmitted ||
+              state is GameWon ||
+              state is GameLost) {
+            Future.delayed(Duration(seconds: 6), () {
+              if (mounted) {
+                setState(() {});
+              }
+            });
+          }
+        },
+        child: Container(
           color: Colors.white12,
           child: Column(
             children: [
@@ -93,25 +125,16 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
               )
             ],
           ),
-        );
-      },
-      listener: (BuildContext context, WordleState state) {
-        if (state is GuessWordSubmitted ||
-            state is GameWon ||
-            state is GameLost) {
-          Future.delayed(Duration(seconds: 6), () {
-            setState(() {});
-          });
-        }
-      },
+        ),
+      ),
     );
   }
 
   Widget _buildActionLetterKey(
-      BuildContext context, KeyType keyType, String keyName, int flex) {
+      BuildContext context, WordleEvent actionEvent, String keyName, int flex) {
     return _buildActionInputKey(
         context,
-        keyType,
+        actionEvent,
         Text(
           keyName,
           style: TextStyle(color: Colors.white),
@@ -120,10 +143,10 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   }
 
   Widget _buildActionIconKey(
-      BuildContext context, IconData icon, int flex, KeyType keyType) {
+      BuildContext context, IconData icon, int flex, WordleEvent event) {
     return _buildActionInputKey(
         context,
-        keyType,
+        event,
         Icon(
           icon,
           size: 20,
@@ -162,15 +185,15 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   }
 
   Widget _buildActionInputKey(
-      BuildContext context, KeyType keyType, Widget key, int flex) {
+      BuildContext context, WordleEvent actionEvent, Widget key, int flex) {
     return Expanded(
       flex: flex,
       child: Container(
         margin: const EdgeInsets.all(5),
-        color: Colors.black12,
+        color: Colors.white12,
         child: InkWell(
           onTap: () {
-            context.addGameEvent(SubmitKey(key: keyType));
+            context.addGameEvent(actionEvent);
           },
           child: Center(
             child: key,

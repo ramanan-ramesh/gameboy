@@ -24,10 +24,13 @@ class GuessWordSubmitted extends WordleState {
 
 class GameWon extends WordleState {
   int guessedIndex;
-  GameWon({required this.guessedIndex});
+  bool isStartup;
+  GameWon({required this.guessedIndex, this.isStartup = false});
 }
 
 class GameLost extends WordleState {
-  int guessedIndex;
-  GameLost({required this.guessedIndex});
+  bool isStartup;
+  GameLost({this.isStartup = false});
 }
+
+class ShowStats extends WordleState {}

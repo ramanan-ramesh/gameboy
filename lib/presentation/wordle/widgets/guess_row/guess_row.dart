@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/wordle/constants.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
 import 'package:gameboy/data/wordle/models/guess_word.dart';
 import 'package:gameboy/presentation/extensions.dart';
 import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
-import 'package:gameboy/presentation/wordle/bloc/extensions.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
+import 'package:gameboy/presentation/wordle/widgets/extensions.dart';
 import 'package:gameboy/presentation/wordle/widgets/guess_row/dancing_guess_letter.dart';
 import 'package:gameboy/presentation/wordle/widgets/guess_row/flipped_guess_letter.dart';
 
@@ -27,13 +28,21 @@ class GuessRow extends StatelessWidget {
             guessWord: guessWord,
           );
         } else if (state is GameWon && state.guessedIndex == guessIndex) {
+          if (state.isStartup) {
+            return _DancingGuessWord(
+              guessWord: guessWord,
+            );
+          }
           return _FlippedGuessWordsWithDance(
             guessWord: guessWord,
           );
-        } else if (state is GameLost && state.guessedIndex == guessIndex) {
-          return _FlippedGuessWordsWithDance(
-            guessWord: guessWord,
-          );
+        } else if (state is GameLost &&
+            guessIndex == WordleConstants.numberOfGuesses - 1) {
+          if (!state.isStartup) {
+            return _FlippedGuessWordsWithDance(
+              guessWord: guessWord,
+            );
+          }
         }
         return Row(
           children: guessWord.guessLetters
@@ -56,7 +65,7 @@ class GuessRow extends StatelessWidget {
         } else if (currentState is GameWon) {
           return currentState.guessedIndex == guessIndex;
         } else if (currentState is GameLost) {
-          return currentState.guessedIndex == guessIndex;
+          return WordleConstants.numberOfGuesses - 1 == guessIndex;
         }
         return false;
       },
@@ -98,6 +107,41 @@ class _FlippedGuessWordsState extends State<_FlippedGuessWords> {
         indexOfGuessLetter++) {
       var guessLetter = widget.guessWord.guessLetters[indexOfGuessLetter];
       var guessLetterWidget = FlippedGuessLetter(
+        guessLetter: guessLetter,
+        indexOfGuessLetter: indexOfGuessLetter,
+      );
+      guessLetterWidgets.add(guessLetterWidget);
+    }
+
+    return Row(
+      children: guessLetterWidgets
+          .map(
+            (guessLetterWidget) => Expanded(
+              child: guessLetterWidget,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+class _DancingGuessWord extends StatefulWidget {
+  final GuessWord guessWord;
+  const _DancingGuessWord({super.key, required this.guessWord});
+
+  @override
+  State<_DancingGuessWord> createState() => _DancingGuessWordState();
+}
+
+class _DancingGuessWordState extends State<_DancingGuessWord> {
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> guessLetterWidgets = [];
+    for (var indexOfGuessLetter = 0;
+        indexOfGuessLetter < widget.guessWord.guessLetters.length;
+        indexOfGuessLetter++) {
+      var guessLetter = widget.guessWord.guessLetters[indexOfGuessLetter];
+      var guessLetterWidget = DancingGuessLetter(
         guessLetter: guessLetter,
         indexOfGuessLetter: indexOfGuessLetter,
       );

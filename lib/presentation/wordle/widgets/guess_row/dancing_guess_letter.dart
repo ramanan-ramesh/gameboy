@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
-import 'package:gameboy/presentation/extensions.dart';
+import 'package:gameboy/presentation/wordle/widgets/extensions.dart';
 
 class DancingGuessLetter extends StatefulWidget {
   final GuessLetter guessLetter;

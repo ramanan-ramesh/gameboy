@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/presentation/extensions.dart';
 
 class UsernameEditField extends StatelessWidget {
   InputDecoration? inputDecoration;
@@ -25,7 +24,7 @@ class UsernameEditField extends StatelessWidget {
         if (username != null) {
           var isEmailValid = _isEmailValid(username);
           if (!isEmailValid) {
-            return context.withLocale().enterValidEmail;
+            return 'Enter a valid email';
           }
           return null;
         }

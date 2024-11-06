@@ -14,7 +14,6 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
       : _appDataRepository = appDataFacade as AppDataModifier,
         super(Startup()) {
     on<ChangeTheme>(_onThemeChange);
-    on<ChangeLanguage>(_onLanguageChange);
     on<ChangeUser>(_onUserChange);
     on<Logout>(_onLogout);
     on<LoadGame>(_onLoadGame);
@@ -23,15 +22,6 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   FutureOr<void> _onThemeChange(
       ChangeTheme event, Emitter<MasterPageState> emit) {
     emit(ActiveThemeModeChanged(themeMode: event.themeModeToChangeTo));
-  }
-
-  FutureOr<void> _onLanguageChange(
-      ChangeLanguage event, Emitter<MasterPageState> emit) async {
-    if (_appDataRepository.activeLanguage == event.languageToChangeTo) {
-      return;
-    }
-    await _appDataRepository.updateActiveLanguage(event.languageToChangeTo);
-    emit(ActiveLanguageChanged(language: event.languageToChangeTo));
   }
 
   FutureOr<void> _onUserChange(

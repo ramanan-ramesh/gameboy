@@ -8,7 +8,6 @@ import 'package:gameboy/presentation/app/blocs/authentication/auth_states.dart';
 import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
 import 'package:gameboy/presentation/app/pages/login/username_edit_field.dart';
-import 'package:gameboy/presentation/extensions.dart';
 
 import 'form_submitter_button.dart';
 import 'password_field.dart';
@@ -151,7 +150,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
     return Column(
       children: [
         Text(
-          context.withLocale().alternativeLogin,
+          'Sign in with',
           style: Theme.of(context).textTheme.titleMedium,
           textAlign: TextAlign.center,
         ),
@@ -201,8 +200,8 @@ class _LoginPageFormState extends State<_LoginPageForm>
             borderRadius: BorderRadius.circular(_roundedCornerRadius),
           ),
           tabs: [
-            Tab(text: context.withLocale().login),
-            Tab(text: context.withLocale().register),
+            Tab(text: 'Login'),
+            Tab(text: 'Register'),
           ],
         ),
       ),
@@ -240,18 +239,18 @@ class _LoginPageFormState extends State<_LoginPageForm>
     String? errorText;
     if (authState is AuthenticationFailure) {
       if (authState.failureReason == AuthenticationFailures.WrongPassword) {
-        errorText = context.withLocale().wrong_password_entered;
+        errorText = 'Wrong password entered';
       }
     }
     return PasswordField(
       controller: _passwordController,
       textInputAction: TextInputAction.done,
-      labelText: context.withLocale().password,
+      labelText: 'Password',
       errorText: errorText,
       validator: (password) {
         if (password != null) {
           if (password.length <= 6) {
-            return context.withLocale().password_short;
+            return 'Password is too short';
           }
         }
         return null;
@@ -264,10 +263,11 @@ class _LoginPageFormState extends State<_LoginPageForm>
     if (authState is AuthenticationFailure) {
       if (authState.failureReason ==
           AuthenticationFailures.UsernameAlreadyExists) {
-        errorText = context.withLocale().userNameAlreadyExists;
+        errorText =
+            'This username is already registered. You can login with it instead';
       } else if (authState.failureReason ==
           AuthenticationFailures.NoSuchUsernameExists) {
-        errorText = context.withLocale().noSuchUserExists;
+        errorText = 'No such username exists. You can register with it instead';
       }
     }
     return UsernameEditField(
@@ -275,7 +275,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
       controller: _usernameController,
       inputDecoration: InputDecoration(
         icon: const Icon(Icons.person_2_rounded),
-        labelText: context.withLocale().userName,
+        labelText: 'UserName',
         errorText: errorText,
       ),
     );

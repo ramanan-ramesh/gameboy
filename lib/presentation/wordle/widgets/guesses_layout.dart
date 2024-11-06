@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/data/wordle/constants.dart';
 
 import 'guess_row/guess_row.dart';
 
@@ -11,11 +12,11 @@ class GuessesLayout extends StatelessWidget {
       widthFactor: 0.7,
       child: Column(
         children: List<Widget>.generate(
-          6,
+          WordleConstants.numberOfGuesses,
           (index) => Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: GuessRow(guessIndex: index + 1),
+              child: GuessRow(guessIndex: index),
             ),
           ),
         ),

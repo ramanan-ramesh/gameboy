@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/app/implementations/app_data_repository.dart';
 import 'package:gameboy/data/app/models/app_data_facade.dart';
@@ -78,14 +76,6 @@ class _ContentPage extends StatelessWidget {
         var appLevelData = context.getAppData();
         var currentTheme = appLevelData.activeThemeMode;
         return MaterialApp(
-          locale: Locale(appLevelData.activeLanguage),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
           title: _appTitle,
           debugShowCheckedModeBanner: false,
           darkTheme: _createDarkThemeData(context),

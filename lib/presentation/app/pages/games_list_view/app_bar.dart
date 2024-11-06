@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
-import 'package:gameboy/presentation/extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   static const String _appLogoAsset = 'assets/images/logo.png';
@@ -53,7 +52,7 @@ class _UserProfilePopupMenu extends StatelessWidget {
                   color: Theme.of(context).iconTheme.color,
                 ),
                 SizedBox(width: 8),
-                Text(context.withLocale().logout),
+                Text('Logout'),
               ],
             ),
             onTap: () {

@@ -4,13 +4,14 @@ import 'package:gameboy/data/wordle/models/stat_modifier.dart';
 abstract class Stats {
   int get numberOfGamesPlayed;
   Iterable<String> get lastGuessedWords;
-  List<int> get wonPositions;
+  Iterable<int> get wonPositions;
   int get maxStreak;
   DateTime? get lastCompletedMatchDay;
   int get currentStreak;
   int get winPercentage => numberOfGamesPlayed == 0
       ? 0
-      : (wonPositions.length / numberOfGamesPlayed * 100).round();
+      : (wonPositions.reduce((a, b) => a + b) / numberOfGamesPlayed * 100)
+          .round();
   int get numberOfGamesWon => wonPositions.fold(0, (a, b) => a + b);
 
   static Future<StatModifier> createInstance(String userId) async {

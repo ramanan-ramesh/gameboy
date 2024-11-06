@@ -5,9 +5,8 @@ class SubmitLetter extends WordleEvent {
   SubmitLetter({required this.letter});
 }
 
-class SubmitKey extends WordleEvent {
-  final KeyType key;
-  SubmitKey({required this.key});
-}
+class RemoveLetter extends WordleEvent {}
 
-enum KeyType { backspace, enter }
+class SubmitWord extends WordleEvent {}
+
+class RequestStats extends WordleEvent {}

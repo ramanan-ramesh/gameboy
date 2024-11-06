@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/extensions.dart';
-import 'package:gameboy/presentation/app/widgets/button.dart';
-import 'package:gameboy/presentation/extensions.dart';
 
 class OnBoardingPage extends StatelessWidget {
   VoidCallback? onNavigateToNextPage;
@@ -30,7 +28,7 @@ class OnBoardingPage extends StatelessWidget {
             child: FittedBox(
                 fit: BoxFit.fill,
                 child: Text(
-                  context.withLocale().onboardingTitle,
+                  'Gameboy: Where words play hard to get!',
                   style: const TextStyle(
                       color: Colors.black,
                       fontSize: 45,
@@ -48,7 +46,6 @@ class OnBoardingPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                LanguageSwitcher(),
                 if (!isBigLayout)
                   FloatingActionButton.large(
                     onPressed: onNavigateToNextPage,

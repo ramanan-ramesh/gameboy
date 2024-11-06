@@ -10,7 +10,7 @@ import 'events.dart';
 import 'states.dart';
 
 class _LoadGame extends WordleEvent {
-  String userId;
+  final String userId;
   _LoadGame(this.userId);
 }
 
@@ -20,9 +20,11 @@ class WordleGameBloc extends Bloc<WordleEvent, WordleState> {
 
   WordleGameBloc(String userId) : super(GameLoading()) {
     on<_LoadGame>(_onLoadGame);
-    on<SubmitKey>(_onSubmitKey);
     on<SubmitLetter>(_onSubmitLetter);
     add(_LoadGame(userId));
+    on<RequestStats>(_onRequestStats);
+    on<RemoveLetter>(_onRemoveLetter);
+    on<SubmitWord>(_onSubmitWord);
   }
 
   FutureOr<void> _onLoadGame(_LoadGame event, Emitter<WordleState> emit) async {
@@ -33,6 +35,23 @@ class WordleGameBloc extends Bloc<WordleEvent, WordleState> {
 
     emit(WordleLoaded(
         wordleStats: statsInstance!, gameEngineData: gameEngineDriver!));
+    if (statsInstance!.lastCompletedMatchDay != null &&
+        _areOnSameDay(statsInstance!.lastCompletedMatchDay!, DateTime.now())) {
+      if (statsInstance!.lastGuessedWords.last
+          .isEqualTo(gameEngineDriver!.wordOfTheDay)) {
+        emit(GameWon(
+            guessedIndex: statsInstance!.lastGuessedWords.length - 1,
+            isStartup: true));
+        return;
+      }
+      emit(GameLost(isStartup: true));
+    }
+  }
+
+  static bool _areOnSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   FutureOr<void> _onSubmitLetter(
@@ -43,34 +62,49 @@ class WordleGameBloc extends Bloc<WordleEvent, WordleState> {
     }
   }
 
-  FutureOr<void> _onSubmitKey(SubmitKey event, Emitter<WordleState> emit) {
-    if (event.key == KeyType.enter) {
-      var canSubmitGuess = gameEngineDriver!.canSubmitWord();
-      if (canSubmitGuess) {
-        if (!gameEngineDriver!
-            .isWordInDictionary(gameEngineDriver!.guessWordUnderEdit!.word)) {
-          emit(SubmissionNotInDictionary());
-        } else {
-          var currentGuessIndex = gameEngineDriver!.guessWordUnderEdit!.index;
-          var currentGuessWord = gameEngineDriver!.guessWordUnderEdit!.word;
+  FutureOr<void> _onRequestStats(
+      RequestStats event, Emitter<WordleState> emit) {
+    emit(ShowStats());
+  }
+
+  FutureOr<void> _onRemoveLetter(
+      RemoveLetter event, Emitter<WordleState> emit) {
+    var didRemoveLetter = gameEngineDriver!.didRemoveLetter();
+    if (didRemoveLetter) {
+      emit(GuessEdited());
+    }
+  }
+
+  FutureOr<void> _onSubmitWord(
+      SubmitWord event, Emitter<WordleState> emit) async {
+    var canSubmitGuess = gameEngineDriver!.canSubmitWord();
+    if (canSubmitGuess) {
+      if (!gameEngineDriver!
+          .isWordInDictionary(gameEngineDriver!.guessWordUnderEdit!.word)) {
+        emit(SubmissionNotInDictionary());
+      } else {
+        var currentGuessIndex = gameEngineDriver!.guessWordUnderEdit!.index;
+        var currentGuessWord = gameEngineDriver!.guessWordUnderEdit!.word;
+        var didRegisterGuess = await statsInstance!
+            .registerGuess(currentGuessIndex, currentGuessWord);
+        if (didRegisterGuess) {
           var shouldMoveToNextGuess = gameEngineDriver!.trySubmitWord();
           if (shouldMoveToNextGuess) {
-            var lastGuessedIndex =
-                gameEngineDriver!.guessWordUnderEdit!.index - 1;
-            emit(GuessWordSubmitted(guessIndex: lastGuessedIndex));
+            emit(GuessWordSubmitted(guessIndex: currentGuessIndex));
           } else {
             if (currentGuessWord.isEqualTo(gameEngineDriver!.wordOfTheDay)) {
-              emit(GameWon(guessedIndex: currentGuessIndex));
+              var didRegisterWin = await statsInstance!.registerWin();
+              if (didRegisterWin) {
+                emit(GameWon(guessedIndex: currentGuessIndex));
+              }
             } else {
-              emit(GameLost(guessedIndex: currentGuessIndex));
+              var didRegisterLoss = await statsInstance!.registerLoss();
+              if (didRegisterLoss) {
+                emit(GameLost());
+              }
             }
           }
         }
-      }
-    } else if (event.key == KeyType.backspace) {
-      var didRemoveLetter = gameEngineDriver!.didRemoveLetter();
-      if (didRemoveLetter) {
-        emit(GuessEdited());
       }
     }
   }

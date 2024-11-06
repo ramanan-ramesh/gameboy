@@ -6,12 +6,6 @@ abstract class MasterPageEvent {}
 
 class LoadApp extends MasterPageEvent {}
 
-class ChangeLanguage extends MasterPageEvent {
-  String languageToChangeTo;
-
-  ChangeLanguage({required this.languageToChangeTo});
-}
-
 class ChangeTheme extends MasterPageEvent {
   ThemeMode themeModeToChangeTo;
 

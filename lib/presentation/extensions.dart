@@ -1,48 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:gameboy/data/wordle/models/guess_letter.dart';
-import 'package:gameboy/data/wordle/models/letter_match_description.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/wordle/models/game__engine_data.dart';
+import 'package:gameboy/data/wordle/models/stats.dart';
+import 'package:gameboy/presentation/wordle/bloc/states.dart';
 
-extension AppLocalizationsExt on BuildContext {
-  AppLocalizations withLocale() {
-    return AppLocalizations.of(this)!;
-  }
-}
+import 'wordle/bloc/bloc.dart';
+import 'wordle/bloc/events.dart';
 
-extension GuessLetterExt on GuessLetter {
-  Color getTextColor() {
-    switch (letterMatchDescription) {
-      case LetterMatchDescription.notYetMatched:
-      case LetterMatchDescription.inWordRightPosition:
-      case LetterMatchDescription.notInWord:
-        return Colors.white;
-      case LetterMatchDescription.inWordWrongPosition:
-        return Colors.black;
-    }
+extension BuildContextExt on BuildContext {
+  GameEngineData getGameEngineData() {
+    return RepositoryProvider.of<GameEngineData>(this);
   }
 
-  Color getGuessTileBackgroundColor() {
-    switch (letterMatchDescription) {
-      case LetterMatchDescription.notYetMatched:
-      case LetterMatchDescription.notInWord:
-        return Colors.white12;
-      case LetterMatchDescription.inWordRightPosition:
-        return Colors.green;
-      case LetterMatchDescription.inWordWrongPosition:
-        return Colors.yellow;
-    }
+  WordleState getCurrentWordleState() {
+    return BlocProvider.of<WordleGameBloc>(this).state;
   }
 
-  Color getKeyboardTileBackgroundColor() {
-    switch (letterMatchDescription) {
-      case LetterMatchDescription.notYetMatched:
-        return Colors.white12;
-      case LetterMatchDescription.notInWord:
-        return Colors.black12;
-      case LetterMatchDescription.inWordRightPosition:
-        return Colors.green;
-      case LetterMatchDescription.inWordWrongPosition:
-        return Colors.yellow;
-    }
+  Stats getStatsRepository() {
+    return RepositoryProvider.of<Stats>(this);
+  }
+
+  void addGameEvent(WordleEvent event) {
+    BlocProvider.of<WordleGameBloc>(this).add(event);
   }
 }

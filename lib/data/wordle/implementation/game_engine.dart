@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -18,37 +17,36 @@ class GameEngine extends GameEngineDriver {
   List<String> _attemptedGuesses;
 
   static Future<GameEngineDriver> createEngine(
-      List<String> attemptedGuesses) async {
+      List<String> attemptedGuessesToday) async {
     var referenceDateTime = DateTime.now();
     var wordOfTheDay = await _getWordOfTheDay(referenceDateTime);
     var allowedGuesses = await _getAllowedGuesses();
 
-    var allGuessedLetters = <GuessLetter>[];
-    for (var attemptedGuess in attemptedGuesses) {
+    var allGuessedLetters = <String, LetterMatchDescription>{};
+    for (var attemptedGuess in attemptedGuessesToday) {
       var guessWord = _createGuessWord(attemptedGuess, wordOfTheDay, 0);
-      allGuessedLetters.addAll(guessWord.guessLetters);
+      _tryUpdateGuessedLetters(guessWord, allGuessedLetters);
     }
 
     GuessWord? guessWordUnderEdit;
-    if (attemptedGuesses.isEmpty) {
-      guessWordUnderEdit = GuessWord.empty(index: 1);
+    if (attemptedGuessesToday.isEmpty) {
+      guessWordUnderEdit = GuessWord.empty(index: 0);
     } else {
-      var lastGuess = attemptedGuesses.last;
+      var lastGuess = attemptedGuessesToday.last;
       if (!lastGuess.isEqualTo(wordOfTheDay) &&
-          attemptedGuesses.length < WordleConstants.numberOfGuesses) {
-        guessWordUnderEdit = GuessWord.empty(index: attemptedGuesses.length);
+          attemptedGuessesToday.length < WordleConstants.numberOfGuesses) {
+        guessWordUnderEdit =
+            GuessWord.empty(index: attemptedGuessesToday.length);
       }
     }
 
-    return GameEngine._(attemptedGuesses, wordOfTheDay, allowedGuesses,
-        HashSet<GuessLetter>.from(allGuessedLetters), guessWordUnderEdit);
+    return GameEngine._(attemptedGuessesToday, wordOfTheDay, allowedGuesses,
+        allGuessedLetters, guessWordUnderEdit);
   }
-
-  GameEngine._(this._attemptedGuesses, this.wordOfTheDay, this._allowedGuesses,
-      this._allGuessedLetters, this.guessWordUnderEdit);
 
   @override
   bool isWordInDictionary(String guess) {
+    return true;
     return _allowedGuesses.any((element) => element.isEqualTo(guess));
   }
 
@@ -56,19 +54,21 @@ class GameEngine extends GameEngineDriver {
   String wordOfTheDay;
 
   @override
-  Iterable<GuessLetter> get allGuessedLetters => _allGuessedLetters;
-  final HashSet<GuessLetter> _allGuessedLetters;
+  Iterable<GuessLetter> get allGuessedLetters =>
+      _allGuessedLetters.entries.map((entry) => GuessLetter(
+          guessLetter: entry.key, letterMatchDescription: entry.value));
+  final Map<String, LetterMatchDescription> _allGuessedLetters;
 
   @override
   GuessWord? guessWordUnderEdit;
 
   @override
   GuessWord getAttemptedGuessWord(int guessIndex) {
-    if (guessIndex < 1 || guessIndex > WordleConstants.numberOfGuesses) {
+    if (guessIndex < 0 || guessIndex >= WordleConstants.numberOfGuesses) {
       throw Exception('Invalid guess index');
     } else {
-      if (guessIndex <= _attemptedGuesses.length) {
-        var attemptedGuess = _attemptedGuesses[guessIndex - 1];
+      if (guessIndex < _attemptedGuesses.length) {
+        var attemptedGuess = _attemptedGuesses[guessIndex];
         return _createGuessWord(attemptedGuess, wordOfTheDay, guessIndex);
       } else {
         return GuessWord.empty(index: guessIndex);
@@ -120,7 +120,8 @@ class GameEngine extends GameEngineDriver {
     if (!didCompleteGame() && canSubmitWord() && guessWordUnderEdit != null) {
       var guessedWord = guessWordUnderEdit!.word;
       _attemptedGuesses.add(guessedWord);
-      _tryAddGuessedLetters();
+      _tryUpdateGuessedLetters(
+          getAttemptedGuessWord(guessWordUnderEdit!.index), _allGuessedLetters);
       if (guessedWord.isEqualTo(wordOfTheDay)) {
         guessWordUnderEdit = null;
         return false;
@@ -190,12 +191,22 @@ class GameEngine extends GameEngineDriver {
     return GuessWord(index: guessIndex, guessLetters: guessLetters);
   }
 
-  void _tryAddGuessedLetters() {
-    for (var guessLetter in guessWordUnderEdit!.guessLetters) {
-      _allGuessedLetters.removeWhere(
-          (element) => element.guessLetter.isEqualTo(guessLetter.guessLetter));
+  static void _tryUpdateGuessedLetters(GuessWord guessWord,
+      Map<String, LetterMatchDescription> allGuessedLetters) {
+    for (var guessedWordLetter in guessWord.guessLetters) {
+      var matchingKey = allGuessedLetters.keys
+          .where((e) => e.isEqualTo(guessedWordLetter.guessLetter))
+          .firstOrNull;
+      if (matchingKey != null &&
+          allGuessedLetters[matchingKey] ==
+              LetterMatchDescription.inWordRightPosition) {
+        continue;
+      }
+      allGuessedLetters[guessedWordLetter.guessLetter] =
+          guessedWordLetter.letterMatchDescription;
     }
-    _allGuessedLetters
-        .addAll(getAttemptedGuessWord(guessWordUnderEdit!.index).guessLetters);
   }
+
+  GameEngine._(this._attemptedGuesses, this.wordOfTheDay, this._allowedGuesses,
+      this._allGuessedLetters, this.guessWordUnderEdit);
 }

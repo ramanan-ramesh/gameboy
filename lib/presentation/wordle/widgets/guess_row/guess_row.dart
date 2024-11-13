@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/wordle/constants.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
 import 'package:gameboy/data/wordle/models/guess_word.dart';
-import 'package:gameboy/presentation/extensions.dart';
-import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
+import 'package:gameboy/presentation/wordle/extensions.dart';
 import 'package:gameboy/presentation/wordle/widgets/extensions.dart';
 import 'package:gameboy/presentation/wordle/widgets/guess_row/dancing_guess_letter.dart';
 import 'package:gameboy/presentation/wordle/widgets/guess_row/flipped_guess_letter.dart';
@@ -16,8 +17,8 @@ class GuessRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<WordleGameBloc, WordleState>(
-      builder: (BuildContext context, WordleState state) {
+    return BlocConsumer<GameBloc, GameState>(
+      builder: (BuildContext context, GameState state) {
         var gameEngineData = context.getGameEngineData();
         GuessWord guessWord =
             gameEngineData.guessWordUnderEdit?.index == guessIndex
@@ -69,7 +70,7 @@ class GuessRow extends StatelessWidget {
         }
         return false;
       },
-      listener: (BuildContext context, WordleState state) {},
+      listener: (BuildContext context, GameState state) {},
     );
   }
 

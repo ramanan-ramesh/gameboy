@@ -6,8 +6,8 @@ import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_states.dart';
+import 'package:gameboy/presentation/app/pages/game_content_page/game_content_page.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/app_bar.dart';
-import 'package:gameboy/presentation/wordle/pages/game_provider.dart';
 
 class GamesListView extends StatefulWidget {
   const GamesListView({super.key});
@@ -42,10 +42,8 @@ class _GamesListViewState extends State<GamesListView> {
     return BlocListener<MasterPageBloc, MasterPageState>(
       listener: (context, state) {
         if (state is LoadedGame) {
-          if (state.game.name.toLowerCase() == 'wordle') {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => Wordle()));
-          }
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => GameContentPage(game: state.game)));
         }
       },
       child: Scaffold(
@@ -61,7 +59,10 @@ class _GamesListViewState extends State<GamesListView> {
 
               return Transform.scale(
                 scale: scaleFactor,
-                child: _GameCard(game: games.elementAt(index)),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: _GameCard(game: games.elementAt(index)),
+                ),
               );
             },
           ),
@@ -78,17 +79,17 @@ class _GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.green, width: 2),
+    return Ink(
+      decoration: const ShapeDecoration(
+        shape: CircleBorder(),
+        color: Colors.transparent,
       ),
-      child: Ink(
-        decoration: const ShapeDecoration(
-          shape: CircleBorder(),
-          color: Colors.transparent,
+      child: Container(
+        width: 300,
+        height: 300,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.green, width: 2),
         ),
         child: InkWell(
           splashColor: Colors.white60,
@@ -101,7 +102,7 @@ class _GameCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Image.asset(
-                  game.image,
+                  game.imageAsset,
                   height: 150,
                   width: 150,
                   fit: BoxFit.cover,

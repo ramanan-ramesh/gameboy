@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gameboy/data/wordle/models/stats.dart';
 
 class StatsSheet extends StatelessWidget {
-  static const _wordleLogoAsset = 'assets/images/wordle_logo.webp';
+  static const _wordleLogoAsset = 'assets/wordle/logo.webp';
   final Stats statsRepository;
   const StatsSheet({super.key, required this.statsRepository});
 
@@ -116,8 +116,9 @@ class StatsSheet extends StatelessWidget {
 
   Widget _createGuessDistributionForPosition(Stats statsRepository, int index) {
     var numberOfGamesWon = statsRepository.wonPositions.reduce((a, b) => a + b);
-    var winPercentageForPosition =
-        statsRepository.wonPositions.elementAt(index) / numberOfGamesWon;
+    var winPercentageForPosition = numberOfGamesWon == 0
+        ? 0.0
+        : statsRepository.wonPositions.elementAt(index) / numberOfGamesWon;
     var guessDistributionChildWidget = Container(
       color: Colors.white12,
       child: winPercentageForPosition == 0

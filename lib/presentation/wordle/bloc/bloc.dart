@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/wordle/constants.dart';
 import 'package:gameboy/data/wordle/models/extensions.dart';
 import 'package:gameboy/data/wordle/models/game_engine_driver.dart';
 import 'package:gameboy/data/wordle/models/stat_modifier.dart';
 import 'package:gameboy/data/wordle/models/stats.dart';
+import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 
 import 'events.dart';
 import 'states.dart';
@@ -14,44 +16,28 @@ class _LoadGame extends WordleEvent {
   _LoadGame(this.userId);
 }
 
-class WordleGameBloc extends Bloc<WordleEvent, WordleState> {
+class WordleGameBloc extends GameBloc<WordleEvent, WordleState> {
   GameEngineDriver? gameEngineDriver;
   static StatModifier? statsInstance;
 
-  WordleGameBloc(String userId) : super(GameLoading()) {
+  WordleGameBloc(String userId) : super(WordleLoading()) {
     on<_LoadGame>(_onLoadGame);
     on<SubmitLetter>(_onSubmitLetter);
-    add(_LoadGame(userId));
     on<RequestStats>(_onRequestStats);
     on<RemoveLetter>(_onRemoveLetter);
     on<SubmitWord>(_onSubmitWord);
+    add(_LoadGame(userId));
   }
 
   FutureOr<void> _onLoadGame(_LoadGame event, Emitter<WordleState> emit) async {
     var statsRepository = await Stats.createInstance(event.userId);
     statsInstance = statsRepository;
     gameEngineDriver = await GameEngineDriver.createEngine(
-        statsInstance!.lastGuessedWords.toList());
+        statsInstance!.lastGuessedWords.toList(), statsRepository.wordOfTheDay);
 
     emit(WordleLoaded(
-        wordleStats: statsInstance!, gameEngineData: gameEngineDriver!));
-    if (statsInstance!.lastCompletedMatchDay != null &&
-        _areOnSameDay(statsInstance!.lastCompletedMatchDay!, DateTime.now())) {
-      if (statsInstance!.lastGuessedWords.last
-          .isEqualTo(gameEngineDriver!.wordOfTheDay)) {
-        emit(GameWon(
-            guessedIndex: statsInstance!.lastGuessedWords.length - 1,
-            isStartup: true));
-        return;
-      }
-      emit(GameLost(isStartup: true));
-    }
-  }
-
-  static bool _areOnSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
+        statistics: statsInstance!, gameEngine: gameEngineDriver!));
+    _tryEmitGameResultOnStartup(emit);
   }
 
   FutureOr<void> _onSubmitLetter(
@@ -107,5 +93,32 @@ class WordleGameBloc extends Bloc<WordleEvent, WordleState> {
         }
       }
     }
+  }
+
+  void _tryEmitGameResultOnStartup(Emitter<WordleState> emit) {
+    if (statsInstance!.currentGuessEditingDay != null) {
+      if (_areOnSameDay(statsInstance!.currentGuessEditingDay!,
+          statsInstance!.initializedDateTime)) {
+        if (statsInstance!.lastGuessedWords.isNotEmpty) {
+          if (statsInstance!.lastGuessedWords.last
+              .isEqualTo(gameEngineDriver!.wordOfTheDay)) {
+            emit(GameWon(
+                guessedIndex: statsInstance!.lastGuessedWords.length - 1,
+                isStartup: true));
+            return;
+          } else if (statsInstance!.lastGuessedWords.length ==
+              WordleConstants.numberOfGuesses) {
+            emit(GameLost(isStartup: true));
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  static bool _areOnSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 }

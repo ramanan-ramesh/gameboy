@@ -9,17 +9,13 @@ import 'package:gameboy/data/wordle/models/guess_word.dart';
 import 'package:gameboy/data/wordle/models/letter_match_description.dart';
 
 class GameEngine extends GameEngineDriver {
-  static const _pathToWordleAnswers = 'assets/game_data/wordle_answers.txt';
-  static const _pathToDictionary = 'assets/game_data/5-letter-words.json';
+  static const _pathToDictionary = 'assets/wordle/5-letter-words.json';
 
-  static final _firstDay = DateTime(2021, 10, 12);
   List<String> _allowedGuesses;
   List<String> _attemptedGuesses;
 
   static Future<GameEngineDriver> createEngine(
-      List<String> attemptedGuessesToday) async {
-    var referenceDateTime = DateTime.now();
-    var wordOfTheDay = await _getWordOfTheDay(referenceDateTime);
+      List<String> attemptedGuessesToday, String wordOfTheDay) async {
     var allowedGuesses = await _getAllowedGuesses();
 
     var allGuessedLetters = <String, LetterMatchDescription>{};
@@ -46,7 +42,6 @@ class GameEngine extends GameEngineDriver {
 
   @override
   bool isWordInDictionary(String guess) {
-    return true;
     return _allowedGuesses.any((element) => element.isEqualTo(guess));
   }
 
@@ -148,15 +143,6 @@ class GameEngine extends GameEngineDriver {
     }
 
     return _attemptedGuesses.length == WordleConstants.numberOfGuesses;
-  }
-
-  static Future<String> _getWordOfTheDay(DateTime today) async {
-    final wordFile = await rootBundle.loadString(_pathToWordleAnswers);
-    var wordList = wordFile.split('\n').map((word) => word.trim()).toList();
-
-    final daysDifference = today.difference(_firstDay).inDays;
-
-    return wordList[daysDifference % wordList.length];
   }
 
   static Future<List<String>> _getAllowedGuesses() async {

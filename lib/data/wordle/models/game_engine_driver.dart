@@ -13,7 +13,7 @@ abstract class GameEngineDriver implements GameEngineData {
   bool didCompleteGame();
 
   static Future<GameEngineDriver> createEngine(
-      List<String> attemptedGuesses) async {
-    return await GameEngine.createEngine(attemptedGuesses);
+      List<String> attemptedGuesses, String wordOfTheDay) async {
+    return await GameEngine.createEngine(attemptedGuesses, wordOfTheDay);
   }
 }

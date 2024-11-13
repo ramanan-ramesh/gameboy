@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/wordle/models/extensions.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
-import 'package:gameboy/presentation/extensions.dart';
-import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/wordle/bloc/events.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
+import 'package:gameboy/presentation/wordle/extensions.dart';
 import 'package:gameboy/presentation/wordle/widgets/extensions.dart';
 
 class KeyboardLayout extends StatefulWidget {
@@ -21,16 +22,11 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   static const _secondRow = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'];
   static const _thirdRow = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'];
 
-  final FocusNode _focusNode = FocusNode();
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
   void _handleKeyEvent(KeyEvent keyEvent) {
-    if (context.getCurrentWordleState() is RequestStats) {
+    if (context.getCurrentWordleState() is ShowStats) {
+      return;
+    }
+    if (keyEvent is! KeyUpEvent) {
       return;
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
@@ -78,13 +74,12 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             context, Icons.backspace_rounded, 10, RemoveLetter()));
     thirdRowWidgets
         .add(_buildActionLetterKey(context, SubmitWord(), 'Enter', 20));
-    FocusScope.of(context).requestFocus(_focusNode);
     return KeyboardListener(
-      focusNode: _focusNode,
+      focusNode: FocusNode(),
       autofocus: true,
       onKeyEvent: _handleKeyEvent,
-      child: BlocListener<WordleGameBloc, WordleState>(
-        listener: (BuildContext context, WordleState state) {
+      child: BlocListener<GameBloc, GameState>(
+        listener: (BuildContext context, GameState state) {
           if (state is GuessWordSubmitted ||
               state is GameWon ||
               state is GameLost) {

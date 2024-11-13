@@ -70,13 +70,12 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/logo.png
-    - assets/images/wordle_logo.webp
     - assets/images/playing_games.jpg
     - assets/images/google_logo.png
-    - assets/images/flags/india.png
-    - assets/images/flags/britain.png
-    - assets/game_data/wordle_answers.txt
-    - assets/game_data/5-letter-words.json
+    - assets/wordle/logo.webp
+    - assets/wordle/5-letter-words.json
+    - assets/spelling_bee/logo.png
+    - assets/spelling_bee/word-list.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

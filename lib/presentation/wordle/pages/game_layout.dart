@@ -1,106 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/presentation/extensions.dart';
+import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
 import 'package:gameboy/presentation/wordle/bloc/events.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
-import 'package:gameboy/presentation/wordle/widgets/game_bar.dart';
+import 'package:gameboy/presentation/wordle/extensions.dart';
 import 'package:gameboy/presentation/wordle/widgets/guesses_layout.dart';
 import 'package:gameboy/presentation/wordle/widgets/keyboard_layout.dart';
 import 'package:gameboy/presentation/wordle/widgets/stats_sheet.dart';
 
-class GameLayout extends StatelessWidget {
-  static const _maxWidth = 700.0;
-  static const _minHeight = 500.0;
-
-  const GameLayout({super.key});
+class WordleLayout implements GameLayout {
+  @override
+  BoxConstraints get constraints => const BoxConstraints(
+      minWidth: 400.0, maxWidth: 700.0, minHeight: 550.0, maxHeight: 1000.0);
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        if (constraints.maxWidth > _maxWidth) {
-          if (constraints.maxHeight < _minHeight) {
-            return Scaffold(
-              appBar: GameBar(),
-              body: SingleChildScrollView(
-                child: Center(
-                  child: SizedBox(
-                    width: _maxWidth,
-                    height: _minHeight,
-                    child: _buildGameLayout(context, true),
-                  ),
-                ),
-              ),
-            );
-          } else {
-            return Scaffold(
-              appBar: GameBar(
-                contentWidth: _maxWidth,
-              ),
-              body: Center(
-                child: SizedBox(
-                  width: _maxWidth,
-                  height: constraints.maxHeight,
-                  child: _buildGameLayout(context, true),
-                ),
-              ),
-            );
-          }
-        } else {
-          if (constraints.maxHeight < _minHeight) {
-            return Scaffold(
-              appBar: GameBar(),
-              body: SingleChildScrollView(
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  height: _minHeight,
-                  child: _buildGameLayout(context, false),
-                ),
-              ),
-            );
-          } else {
-            return Scaffold(
-              appBar: GameBar(),
-              body: SizedBox(
-                width: constraints.maxWidth,
-                height: constraints.maxHeight,
-                child: _buildGameLayout(context, false),
-              ),
-            );
-          }
-        }
+  Widget buildActionButtonBar(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        context.addGameEvent(RequestStats());
       },
+      icon: Icon(Icons.query_stats_rounded),
     );
   }
 
-  Widget _buildGameLayout(BuildContext context, bool isConstrainedWidth) {
-    var initialBlocState = BlocProvider.of<WordleGameBloc>(context).state;
+  @override
+  Widget buildGameLayout(
+      BuildContext context, double layoutWidth, double layoutHeight) {
+    var initialBlocState = context.getCurrentWordleState();
     if (initialBlocState is GameWon && initialBlocState.isStartup) {
       _onGameWon(initialBlocState, context);
+    } else if (initialBlocState is GameLost && initialBlocState.isStartup) {
+      _onGameLost(initialBlocState, context);
     }
-    return BlocListener<WordleGameBloc, WordleState>(
-      listener: (BuildContext context, WordleState state) {
+    return BlocListener<GameBloc, GameState>(
+      listener: (BuildContext context, GameState state) {
         if (state is GameWon) {
           _onGameWon(state, context);
         } else if (state is GameLost) {
-          var wordOfTheDay =
-              context.getGameEngineData().wordOfTheDay.toUpperCase();
-          Future.delayed(Duration(seconds: 6), () {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('You lost! The word was $wordOfTheDay'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            }
-          });
-          Future.delayed(Duration(seconds: 7, milliseconds: 250), () {
-            if (context.mounted) {
-              context.read<WordleGameBloc>().add(RequestStats());
-            }
-          });
+          _onGameLost(state, context);
         } else if (state is ShowStats) {
           showModalBottomSheet(
               context: context,
@@ -129,21 +69,6 @@ class GameLayout extends StatelessWidget {
     );
   }
 
-  String _getWinMessage(int indexOfGameWon) {
-    if (indexOfGameWon == 0) {
-      return 'Genius';
-    } else if (indexOfGameWon == 1) {
-      return 'Magnificent';
-    } else if (indexOfGameWon == 2) {
-      return 'Impressive';
-    } else if (indexOfGameWon == 3) {
-      return 'Splendid';
-    } else if (indexOfGameWon == 4) {
-      return 'Great';
-    }
-    return 'Phew!';
-  }
-
   void _onGameWon(GameWon gameWon, BuildContext context) {
     Future.delayed(Duration(seconds: gameWon.isStartup ? 2 : 6), () {
       if (context.mounted) {
@@ -157,8 +82,44 @@ class GameLayout extends StatelessWidget {
     });
     Future.delayed(Duration(seconds: gameWon.isStartup ? 4 : 9), () {
       if (context.mounted) {
+        context.addGameEvent(RequestStats());
+      }
+    });
+  }
+
+  void _onGameLost(GameLost gameLost, BuildContext context) {
+    var wordOfTheDay = context.getGameEngineData().wordOfTheDay.toUpperCase();
+    Future.delayed(Duration(seconds: gameLost.isStartup ? 2 : 6), () {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('You lost! The word was $wordOfTheDay'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    });
+
+    Future.delayed(Duration(milliseconds: gameLost.isStartup ? 4000 : 7520),
+        () {
+      if (context.mounted) {
         context.read<WordleGameBloc>().add(RequestStats());
       }
     });
+  }
+
+  String _getWinMessage(int indexOfGameWon) {
+    if (indexOfGameWon == 0) {
+      return 'Genius';
+    } else if (indexOfGameWon == 1) {
+      return 'Magnificent';
+    } else if (indexOfGameWon == 2) {
+      return 'Impressive';
+    } else if (indexOfGameWon == 3) {
+      return 'Splendid';
+    } else if (indexOfGameWon == 4) {
+      return 'Great';
+    }
+    return 'Phew!';
   }
 }

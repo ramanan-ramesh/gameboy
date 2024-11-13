@@ -1,6 +1,6 @@
 class Game {
   final String name;
-  final String image;
+  final String imageAsset;
 
-  Game({required this.name, required this.image});
+  Game({required this.name, required this.imageAsset});
 }

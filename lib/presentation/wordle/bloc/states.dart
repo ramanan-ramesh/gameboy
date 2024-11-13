@@ -1,15 +1,19 @@
-import 'package:gameboy/data/wordle/models/game__engine_data.dart';
-import 'package:gameboy/data/wordle/models/stats.dart';
+import 'package:gameboy/data/app/models/game_engine.dart';
+import 'package:gameboy/data/app/models/stats.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
 
-abstract class WordleState {}
+abstract class WordleState extends GameState {}
 
-class GameLoading extends WordleState {}
+class WordleLoading extends GameLoading implements WordleState {}
 
-class WordleLoaded extends WordleState {
-  GameEngineData gameEngineData;
-  Stats wordleStats;
+class WordleLoaded extends WordleState implements GameLoaded {
+  @override
+  final Statistics statistics;
 
-  WordleLoaded({required this.wordleStats, required this.gameEngineData});
+  @override
+  final GameEngine gameEngine;
+
+  WordleLoaded({required this.statistics, required this.gameEngine});
 }
 
 class GuessEdited extends WordleState {}

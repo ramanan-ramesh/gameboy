@@ -7,7 +7,6 @@ import 'package:gameboy/data/app/implementations/user_management.dart';
 import 'package:gameboy/data/app/models/app_data_facade.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/data/app/models/language_metadata.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -15,16 +14,8 @@ class AppDataRepository extends AppDataModifier {
   static AppDataRepository? _appDataRepository;
   static const String _googleWebClientIdField = 'webClientId';
   static const String _platformDataBox = 'platformData';
-  static const String _language = "language";
-  static const String _defaultLanguage = "en";
   static const String _themeMode = "themeMode";
-  static const _hindiLanguage = 'हिंदी';
-  static const _englishLanguage = 'English';
-  static const _imageAssetsLocation = 'assets/images/flags/';
   static const _appConfigField = 'appConfig';
-
-  @override
-  String activeLanguage;
 
   @override
   ThemeMode activeThemeMode;
@@ -39,19 +30,14 @@ class AppDataRepository extends AppDataModifier {
   @override
   bool isBigLayout = false;
 
-  final List<LanguageMetadata> _languageMetadatas;
-  @override
-  Iterable<LanguageMetadata> get languageMetadatas => _languageMetadatas;
-
   AppDataRepository._({
     required this.googleWebClientId,
     required UserManagementImpl userManagement,
-    required this.activeLanguage,
     required this.activeThemeMode,
   })  : _userManagementImpl = userManagement,
-        _languageMetadatas = _createLanguageMetadatas(),
         _games = [
-          Game(name: 'Wordle', image: 'assets/images/wordle_logo.webp')
+          Game(name: 'Wordle', imageAsset: 'assets/wordle/logo.webp'),
+          Game(name: 'Spelling-Bee', imageAsset: 'assets/spelling_bee/logo.png')
         ];
 
   static Future<AppDataFacade> create() async {
@@ -69,7 +55,6 @@ class AppDataRepository extends AppDataModifier {
     await Hive.initFlutter();
     var userManagement = await UserManagementImpl.create();
     var platformDataBox = await Hive.openBox(_platformDataBox);
-    String language = await platformDataBox.get(_language) ?? _defaultLanguage;
     var themeModeValue = await platformDataBox.get(_themeMode);
     await platformDataBox.close();
     ThemeMode themeMode = themeModeValue is String
@@ -80,16 +65,7 @@ class AppDataRepository extends AppDataModifier {
     return AppDataRepository._(
         googleWebClientId: googleWebClientId,
         userManagement: userManagement,
-        activeLanguage: language,
         activeThemeMode: themeMode);
-  }
-
-  @override
-  Future updateActiveLanguage(String language) async {
-    var platformLocalBox = await Hive.openBox(_platformDataBox);
-    await _writeRecordToLocalStorage(platformLocalBox, _language, language);
-    await platformLocalBox.close();
-    activeLanguage = language;
   }
 
   @override
@@ -117,15 +93,6 @@ class AppDataRepository extends AppDataModifier {
   @override
   Iterable<Game> get games => _games;
   List<Game> _games;
-
-  static List<LanguageMetadata> _createLanguageMetadatas() {
-    return [
-      LanguageMetadata(
-          '${_imageAssetsLocation}india.png', 'hi', _hindiLanguage),
-      LanguageMetadata(
-          '${_imageAssetsLocation}britain.png', 'en', _englishLanguage)
-    ];
-  }
 
   Future _writeRecordToLocalStorage(
       Box hiveBox, String recordKey, String recordValue) async {

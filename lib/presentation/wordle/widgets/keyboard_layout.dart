@@ -21,11 +21,9 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   static const _firstRow = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
   static const _secondRow = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'];
   static const _thirdRow = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'];
+  final _focusNode = FocusNode();
 
   void _handleKeyEvent(KeyEvent keyEvent) {
-    if (context.getCurrentWordleState() is ShowStats) {
-      return;
-    }
     if (keyEvent is! KeyUpEvent) {
       return;
     }
@@ -74,8 +72,9 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             context, Icons.backspace_rounded, 10, RemoveLetter()));
     thirdRowWidgets
         .add(_buildActionLetterKey(context, SubmitWord(), 'Enter', 20));
+    _focusNode.requestFocus();
     return KeyboardListener(
-      focusNode: FocusNode(),
+      focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: _handleKeyEvent,
       child: BlocListener<GameBloc, GameState>(

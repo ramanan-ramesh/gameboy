@@ -4,6 +4,7 @@ import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 
 class ScoreBar extends StatelessWidget {
   static const _rankIndicatorRadius = 10.0;
+  static const _rankIndicatorDiameter = _rankIndicatorRadius * 2;
   const ScoreBar({super.key});
 
   @override
@@ -21,7 +22,7 @@ class ScoreBar extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Container(
               height: 100,
-              child: _buildRankIndicator(currentScore, context),
+              child: _buildRankIndicators(currentScore, context),
             ),
           ),
         ),
@@ -29,12 +30,16 @@ class ScoreBar extends StatelessWidget {
     );
   }
 
-  Widget _buildRankIndicator(Score score, BuildContext context) {
+  Widget _buildRankIndicators(Score score, BuildContext context) {
     var numberOfRanks = Score.allRanks.length;
     return LayoutBuilder(
       builder: (context, constraints) {
         double availableWidth = constraints.maxWidth;
-        double spacing = availableWidth / (numberOfRanks - 1);
+        var totalWidthOccupiedByRankIndicators =
+            _rankIndicatorDiameter * numberOfRanks;
+        var totalEmptySpace =
+            availableWidth - totalWidthOccupiedByRankIndicators;
+        var averageEmptySpacing = totalEmptySpace / (numberOfRanks - 1);
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -43,9 +48,9 @@ class ScoreBar extends StatelessWidget {
               color: Colors.white,
               width: availableWidth,
             ),
-            for (int i = 0; i < numberOfRanks - 1; i++)
+            for (int i = 0; i <= numberOfRanks; i++)
               Positioned(
-                left: spacing * i,
+                left: (_rankIndicatorDiameter + averageEmptySpacing) * i,
                 child: CircleAvatar(
                   radius: _rankIndicatorRadius,
                   backgroundColor: Colors.yellow,
@@ -57,19 +62,6 @@ class ScoreBar extends StatelessWidget {
                       : null,
                 ),
               ),
-            Positioned(
-              left: availableWidth - _rankIndicatorRadius * 2,
-              child: CircleAvatar(
-                radius: _rankIndicatorRadius,
-                backgroundColor: Colors.yellow,
-                child: (numberOfRanks - 1) == score.rankIndex
-                    ? Text(
-                        (score.score).toString(),
-                        style: TextStyle(color: Colors.black, fontSize: 12),
-                      )
-                    : null,
-              ),
-            )
           ],
         );
       },

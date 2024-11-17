@@ -79,47 +79,43 @@ class _GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Ink(
-      decoration: const ShapeDecoration(
-        shape: CircleBorder(),
-        color: Colors.transparent,
+    return Container(
+      width: 300,
+      height: 300,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.green, width: 2),
       ),
-      child: Container(
-        width: 300,
-        height: 300,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.green, width: 2),
-        ),
-        child: InkWell(
-          splashColor: Colors.white60,
-          onTap: () {
-            context.addMasterPageEvent(LoadGame(game));
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Image.asset(
-                  game.imageAsset,
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
+      child: InkResponse(
+        splashColor: Colors.white60,
+        containedInkWell: true,
+        customBorder: const CircleBorder(),
+        onTap: () {
+          context.addMasterPageEvent(LoadGame(game));
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: Image.asset(
+                game.imageAsset,
+                height: 150,
+                width: 150,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: Text(
+                game.name,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Text(
-                  game.name,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

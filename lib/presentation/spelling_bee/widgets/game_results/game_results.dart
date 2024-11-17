@@ -4,6 +4,7 @@ import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
 import 'package:gameboy/presentation/spelling_bee/extensions.dart';
+import 'package:gameboy/presentation/spelling_bee/widgets/game_results/guess_words_display.dart';
 import 'package:gameboy/presentation/spelling_bee/widgets/game_results/score_bar.dart';
 
 class MaximizedGameResults extends StatelessWidget {
@@ -57,14 +58,7 @@ class MaximizedGameResults extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              clipBehavior: Clip.hardEdge,
-              children: guessedWords
-                  .map((word) => Text(word, style: TextStyle(fontSize: 16)))
-                  .toList(),
-            ),
+            child: GuessWordsDisplay(guessWords: guessedWords),
           ),
         ],
       ),
@@ -87,27 +81,35 @@ class MinimizedGameResults extends StatefulWidget {
 class _MinimizedGameResultsState extends State<MinimizedGameResults> {
   @override
   Widget build(BuildContext context) {
-    if (!widget.isExpanded) {
-      return Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ScoreBar(),
-          ),
-          _createGuessWordsDisplay(),
-        ],
-      );
-    }
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ScoreBar(),
-        ),
-        Expanded(
-          child: _createGuessWordsDisplay(),
-        ),
-      ],
+    return BlocConsumer<GameBloc, GameState>(
+      builder: (BuildContext context, GameState state) {
+        if (!widget.isExpanded) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ScoreBar(),
+              ),
+              _createGuessWordsDisplay(),
+            ],
+          );
+        }
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ScoreBar(),
+            ),
+            Expanded(
+              child: _createGuessWordsDisplay(),
+            ),
+          ],
+        );
+      },
+      listener: (BuildContext context, GameState state) {},
+      buildWhen: (previous, current) {
+        return current is WordGuessed;
+      },
     );
   }
 
@@ -161,16 +163,7 @@ class _MinimizedGameResultsState extends State<MinimizedGameResults> {
               ],
             ),
             Expanded(
-              child: Wrap(
-                spacing: 8.0,
-                runSpacing: 4.0,
-                clipBehavior: Clip.hardEdge,
-                children: guessedWords
-                    .map((word) =>
-                        word[0].toUpperCase() + word.substring(1).toLowerCase())
-                    .map((word) => Text(word, style: TextStyle(fontSize: 16)))
-                    .toList(),
-              ),
+              child: GuessWordsDisplay(guessWords: guessedWords),
             ),
           ],
         ),

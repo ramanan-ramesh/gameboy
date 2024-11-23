@@ -6,22 +6,18 @@ import 'package:gameboy/data/app/models/user_management.dart';
 import 'package:hive/hive.dart';
 
 class UserManagementImpl extends UserManagementFacade {
-  static const String _userData = 'userData';
-
-  static const _userName = 'userName';
-  static const _userID = 'userID';
-  static const _displayName = 'displayName';
-  static const _isLoggedIn = 'isLoggedIn';
-  static const _photoUrl = 'photoUrl';
-
-  PlatformUserFacade? _activeUser;
+  static const _userDataField = 'userData';
+  static const _userNameField = 'userName';
+  static const _userIDField = 'userID';
+  static const _displayNameField = 'displayName';
+  static const _isLoggedInField = 'isLoggedIn';
+  static const _photoUrlField = 'photoUrl';
 
   @override
-  PlatformUserFacade? get activeUser {
-    return _activeUser;
-  }
+  PlatformUserFacade? get activeUser => _activeUser;
+  PlatformUserFacade? _activeUser;
 
-  static Future<UserManagementImpl> create() async {
+  static Future<UserManagementFacade> create() async {
     var userFromCache = await _getUserFromCache();
     return UserManagementImpl(initialUser: userFromCache);
   }
@@ -32,9 +28,10 @@ class UserManagementImpl extends UserManagementFacade {
   @override
   Future<bool> tryUpdateActiveUser({required User authProviderUser}) async {
     try {
-      var usersCollectionReference = FirebaseDatabase.instance.ref(_userData);
+      var usersCollectionReference =
+          FirebaseDatabase.instance.ref(_userDataField);
       var userQuery = usersCollectionReference
-          .orderByChild(_userName)
+          .orderByChild(_userNameField)
           .equalTo(authProviderUser.email);
       var queryResult = await userQuery.get();
       if (queryResult.exists &&
@@ -43,10 +40,10 @@ class UserManagementImpl extends UserManagementFacade {
         var userDocument = queryResult.children.first;
         var userDocumentData = userDocument.value as Map;
         _activeUser = PlatformUserImpl(
-            userName: userDocumentData[_userName],
+            userName: userDocumentData[_userNameField],
             userID: userDocument.key!,
-            photoUrl: userDocumentData[_photoUrl],
-            displayName: userDocumentData[_displayName]);
+            photoUrl: userDocumentData[_photoUrlField],
+            displayName: userDocumentData[_displayNameField]);
       } else {
         var platformUser = PlatformUserImpl(
             userName: authProviderUser.email!,
@@ -81,13 +78,13 @@ class UserManagementImpl extends UserManagementFacade {
 
   //TODO: Should ideally attach AuthProviderUser here(if it persists)?
   static Future<PlatformUserFacade?> _getUserFromCache() async {
-    var usersBox = await Hive.openBox(_userData);
-    var isLoggedInValue = usersBox.get(_isLoggedIn) ?? '';
+    var usersBox = await Hive.openBox(_userDataField);
+    var isLoggedInValue = usersBox.get(_isLoggedInField) ?? '';
     if (bool.tryParse(isLoggedInValue) == true) {
-      var userID = await usersBox.get(_userID) as String;
-      var userName = await usersBox.get(_userName) as String;
-      var photoUrl = await usersBox.get(_photoUrl) as String?;
-      var displayName = await usersBox.get(_displayName) as String?;
+      var userID = await usersBox.get(_userIDField) as String;
+      var userName = await usersBox.get(_userNameField) as String;
+      var photoUrl = await usersBox.get(_photoUrlField) as String?;
+      var displayName = await usersBox.get(_displayNameField) as String?;
       return PlatformUserFacade(
           userName: userName,
           userID: userID,
@@ -100,23 +97,27 @@ class UserManagementImpl extends UserManagementFacade {
   }
 
   Future _persistUser() async {
-    var usersBox = await Hive.openBox(_userData);
+    var usersBox = await Hive.openBox(_userDataField);
     if (activeUser != null) {
-      await _writeRecordToLocalStorage(usersBox, _userID, activeUser!.userID);
       await _writeRecordToLocalStorage(
-          usersBox, _userName, activeUser!.userName);
+          usersBox, _userIDField, activeUser!.userID);
+      await _writeRecordToLocalStorage(
+          usersBox, _userNameField, activeUser!.userName);
       var displayName = activeUser!.displayName;
       if (displayName != null && displayName.isNotEmpty) {
-        await _writeRecordToLocalStorage(usersBox, _displayName, displayName);
+        await _writeRecordToLocalStorage(
+            usersBox, _displayNameField, displayName);
       }
-      await _writeRecordToLocalStorage(usersBox, _isLoggedIn, true.toString());
+      await _writeRecordToLocalStorage(
+          usersBox, _isLoggedInField, true.toString());
       if (_activeUser!.photoUrl != null) {
         await _writeRecordToLocalStorage(
-            usersBox, _photoUrl, _activeUser!.photoUrl!);
+            usersBox, _photoUrlField, _activeUser!.photoUrl!);
       }
     } else {
       await usersBox.clear();
-      await _writeRecordToLocalStorage(usersBox, _isLoggedIn, false.toString());
+      await _writeRecordToLocalStorage(
+          usersBox, _isLoggedInField, false.toString());
     }
     await usersBox.close();
   }

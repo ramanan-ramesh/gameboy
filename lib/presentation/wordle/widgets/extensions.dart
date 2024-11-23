@@ -6,10 +6,10 @@ extension GuessLetterExt on GuessLetter {
   Color getTextColor() {
     switch (letterMatchDescription) {
       case LetterMatchDescription.notYetMatched:
-      case LetterMatchDescription.inWordRightPosition:
+      case LetterMatchDescription.rightPositionInWord:
       case LetterMatchDescription.notInWord:
         return Colors.white;
-      case LetterMatchDescription.inWordWrongPosition:
+      case LetterMatchDescription.wrongPositionInWord:
         return Colors.black;
     }
   }
@@ -19,9 +19,9 @@ extension GuessLetterExt on GuessLetter {
       case LetterMatchDescription.notYetMatched:
       case LetterMatchDescription.notInWord:
         return Colors.white12;
-      case LetterMatchDescription.inWordRightPosition:
+      case LetterMatchDescription.rightPositionInWord:
         return Colors.green;
-      case LetterMatchDescription.inWordWrongPosition:
+      case LetterMatchDescription.wrongPositionInWord:
         return Colors.yellow;
     }
   }
@@ -32,9 +32,9 @@ extension GuessLetterExt on GuessLetter {
         return Colors.white12;
       case LetterMatchDescription.notInWord:
         return Colors.black12;
-      case LetterMatchDescription.inWordRightPosition:
+      case LetterMatchDescription.rightPositionInWord:
         return Colors.green;
-      case LetterMatchDescription.inWordWrongPosition:
+      case LetterMatchDescription.wrongPositionInWord:
         return Colors.yellow;
     }
   }

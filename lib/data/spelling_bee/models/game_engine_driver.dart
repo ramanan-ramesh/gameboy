@@ -1,9 +1,9 @@
 import 'package:gameboy/data/spelling_bee/implementation/game_engine.dart';
 import 'package:gameboy/data/spelling_bee/models/game_engine.dart';
+import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 
 abstract class GameEngineDriver extends GameEngineData {
-  bool trySubmitWord(String word);
-  bool isValidWord(String word);
+  GuessedWordState trySubmitWord(String word);
 
   static Future<GameEngineDriver> createEngine(
       List<String> attemptedGuesses, String lettersOfTheDay) async {

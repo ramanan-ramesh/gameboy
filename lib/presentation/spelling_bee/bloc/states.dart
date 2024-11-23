@@ -1,4 +1,5 @@
 import 'package:gameboy/data/spelling_bee/models/game_engine.dart';
+import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/data/spelling_bee/models/stats.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 
@@ -15,8 +16,12 @@ class SpellingBeeLoaded extends SpellingBeeState implements GameLoaded {
   SpellingBeeLoaded({required this.statistics, required this.gameEngine});
 }
 
-class WordAlreadyGuessed extends SpellingBeeState {}
+class GuessedWordResult extends SpellingBeeState {
+  GuessedWordState guessedWordState;
+  GuessedWordResult(this.guessedWordState);
+}
 
-class WordNotInDictionary extends SpellingBeeState {}
-
-class WordGuessed extends SpellingBeeState {}
+class GuessWordAccepted extends GuessedWordResult {
+  int score;
+  GuessWordAccepted(super.guessedWordState, this.score);
+}

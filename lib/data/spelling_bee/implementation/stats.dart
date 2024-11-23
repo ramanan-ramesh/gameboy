@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/spelling_bee/implementation/game_engine.dart';
 import 'package:gameboy/data/spelling_bee/models/constants.dart';
 import 'package:gameboy/data/spelling_bee/models/stats_modifier.dart';
@@ -41,35 +42,35 @@ class StatsRepository extends StatsModifier {
               MapEntry(key.toString(), int.parse(value.toString())));
     }
 
-    List<String> wordsSubmittedToday = [];
-    DateTime? lastCompletedMatchDay;
+    List<String> lastSubmittedWords = [];
+    DateTime? lastPlayedMatchDay;
     if (userData.containsKey(_lastPlayedMatchDateField)) {
       var dateFieldValue = userData[_lastPlayedMatchDateField] as String;
-      lastCompletedMatchDay = _dateFormat.parse(dateFieldValue);
+      lastPlayedMatchDay = _dateFormat.parse(dateFieldValue);
 
       if (userData.containsKey(_wordsSubmittedTodayField)) {
         var wordsSubmittedTodayValue =
             userData[_wordsSubmittedTodayField] as List;
-        wordsSubmittedToday = List.from(wordsSubmittedTodayValue)
+        lastSubmittedWords = List.from(wordsSubmittedTodayValue)
             .map((e) => e as String)
             .toList();
       }
       final daysDifference =
-          _getNumberOfDaysInBetween(initializedDateTime, lastCompletedMatchDay);
+          initializedDateTime.numberOfDaysInBetween(lastPlayedMatchDay);
       if (daysDifference > 0) {
-        var rank = GameEngine.rankCalculator(wordsSubmittedToday);
+        var rank = GameEngine.rankCalculator(lastSubmittedWords);
         if (rankingsCount.containsKey(rank)) {
           rankingsCount[rank] = rankingsCount[rank]! + 1;
         } else {
           rankingsCount[rank] = 1;
         }
-        wordsSubmittedToday.clear();
-        lastCompletedMatchDay = null;
+        lastSubmittedWords.clear();
+        lastPlayedMatchDay = null;
         numberOfGamesPlayed++;
-        numberOfWordsSubmitted += wordsSubmittedToday.length;
-        for (var word in wordsSubmittedToday) {
-          if (word.length == Constants.numberOfLetters &&
-              word.split('').toSet().length == Constants.numberOfLetters) {
+        numberOfWordsSubmitted += lastSubmittedWords.length;
+        for (var word in lastSubmittedWords) {
+          if (word.split('').toSet().length ==
+              SpellingBeeConstants.numberOfLetters) {
             numberOfPangrams++;
           }
         }
@@ -89,9 +90,9 @@ class StatsRepository extends StatsModifier {
         numberOfWordsSubmitted: numberOfWordsSubmitted,
         numberOfPangrams: numberOfPangrams,
         lettersOfTheDay: lettersOfTheDay,
-        wordsSubmittedToday: wordsSubmittedToday,
+        wordsSubmittedToday: lastSubmittedWords,
         userId: userId,
-        lastCompletedMatchDay: lastCompletedMatchDay,
+        lastCompletedMatchDay: lastPlayedMatchDay,
         initializedDateTime: initializedDateTime);
   }
 
@@ -106,15 +107,15 @@ class StatsRepository extends StatsModifier {
 
   @override
   Future<bool> trySubmitWord(String word) async {
-    if (_doesWordListContainWord(_wordsSubmittedToday, word)) {
+    if (_doesWordListContainWord(wordsSubmittedToday, word)) {
       return false;
     }
     var didSubmitWord = false;
-    _wordsSubmittedToday.add(word);
-    _lastCompletedMatchDay ??= _initializedDateTime;
+    wordsSubmittedToday.add(word);
+    _lastCompletedMatchDay ??= initializedDateTime;
     await _userDataReference
         .update({
-          _wordsSubmittedTodayField: _wordsSubmittedToday,
+          _wordsSubmittedTodayField: wordsSubmittedToday,
           _lastPlayedMatchDateField:
               _dateFormat.format(_lastCompletedMatchDay!),
         })
@@ -122,7 +123,7 @@ class StatsRepository extends StatsModifier {
         .onError((_, __) => didSubmitWord = false);
 
     if (!didSubmitWord) {
-      _wordsSubmittedToday.remove(word);
+      wordsSubmittedToday.remove(word);
     }
     return didSubmitWord;
   }
@@ -135,14 +136,14 @@ class StatsRepository extends StatsModifier {
   final String lettersOfTheDay;
 
   @override
-  Iterable<String> get wordsSubmittedToday => _wordsSubmittedToday;
-  final List<String> _wordsSubmittedToday;
+  List<String> wordsSubmittedToday;
 
   final String _userId;
 
   DateTime? _lastCompletedMatchDay;
 
-  final DateTime _initializedDateTime;
+  @override
+  final DateTime initializedDateTime;
 
   static int _getIntegerStatistic(Map userData, String field) {
     return userData.containsKey(field)
@@ -175,25 +176,17 @@ class StatsRepository extends StatsModifier {
     return lettersOfTheDayDoc.value as String;
   }
 
-  static int _getNumberOfDaysInBetween(DateTime dateTime1, DateTime dateTime2) {
-    var day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
-    var day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
-    return day1.difference(day2).inDays;
-  }
-
   StatsRepository._(
       {required Map<String, int> rankingsCount,
       required this.numberOfGamesPlayed,
       required this.numberOfWordsSubmitted,
       required this.numberOfPangrams,
       required this.lettersOfTheDay,
-      required List<String> wordsSubmittedToday,
+      required this.wordsSubmittedToday,
       required String userId,
       required DateTime? lastCompletedMatchDay,
-      required DateTime initializedDateTime})
+      required this.initializedDateTime})
       : _rankingsCount = rankingsCount,
-        _wordsSubmittedToday = wordsSubmittedToday,
         _userId = userId,
-        _lastCompletedMatchDay = lastCompletedMatchDay,
-        _initializedDateTime = initializedDateTime;
+        _lastCompletedMatchDay = lastCompletedMatchDay;
 }

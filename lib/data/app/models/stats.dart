@@ -1,1 +1,3 @@
-abstract class Statistics {}
+abstract class Statistics {
+  DateTime get initializedDateTime;
+}

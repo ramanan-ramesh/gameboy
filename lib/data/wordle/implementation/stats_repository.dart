@@ -1,16 +1,17 @@
 import 'dart:math';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordle/constants.dart';
 import 'package:gameboy/data/wordle/models/stat_modifier.dart';
 import 'package:intl/intl.dart';
 
-class StatsRepository extends StatModifier {
+class StatsRepository extends WordleStatModifier {
   static const _wordleField = 'wordle';
   static const _userDataField = 'userData';
   static const _answersField = 'answers';
   static const _currentStreakField = 'currentStreak';
-  static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
+  static final _dateFormat = DateFormat('dd/MM/yyyy');
   static const _maxStreakField = 'maxStreak';
   static const _numberOfGamesPlayedField = 'numberOfGamesPlayed';
   static const _wonPositionsField = 'wonPositions';
@@ -59,10 +60,10 @@ class StatsRepository extends StatModifier {
       }
 
       if (currentlyEditingGuessDay != null &&
-          !_areDatesOnSameDay(currentlyEditingGuessDay, currentDay)) {
-        await userDataReference.child(_lastGuessedWordsField).remove();
+          !currentlyEditingGuessDay.isOnSameDayAs(currentDay)) {
+        await userDataReference
+            .update({_lastGuessedWordsField: null, _currentStreakField: 0});
         lastGuessedWords.clear();
-        await userDataReference.child(_currentStreakField).set(0);
         currentStreak = 0;
       }
     }
@@ -74,15 +75,11 @@ class StatsRepository extends StatModifier {
         wonPositions: wonPositions,
         lastGuessedWords: lastGuessedWords,
         userId: userId,
-        currentGuessEditingDay: currentlyEditingGuessDay,
         wordOfTheDay: wordOfTheDay,
         initializedDateTime: currentDay);
   }
 
   final String userId;
-
-  @override
-  DateTime? currentGuessEditingDay;
 
   @override
   int currentStreak;
@@ -94,8 +91,7 @@ class StatsRepository extends StatModifier {
   int numberOfGamesPlayed;
 
   @override
-  Iterable<int> get wonPositions => _wonPositions;
-  List<int> _wonPositions;
+  List<int> wonPositions;
 
   @override
   List<String> lastGuessedWords;
@@ -104,23 +100,21 @@ class StatsRepository extends StatModifier {
   final DateTime initializedDateTime;
 
   @override
+  String wordOfTheDay;
+
+  @override
   Future<bool> registerGuess(int index, String word) async {
     var didUpdateGuess = false;
-    await _wordleUserDataReference
-        .child(_lastGuessedWordsField)
-        .child(index.toString())
-        .set(word)
-        .then((_) => didUpdateGuess = true)
-        .onError((_, __) => didUpdateGuess = false);
-    if (didUpdateGuess) {
+    await _wordleUserDataReference.update({
+      '$_lastGuessedWordsField/$index': word,
+      _currentGuessEditingDayField: _dateFormat.format(initializedDateTime)
+    }).then((_) {
+      didUpdateGuess = true;
       lastGuessedWords.add(word);
-      await _wordleUserDataReference
-          .child(_currentGuessEditingDayField)
-          .set(_dateFormat.format(initializedDateTime))
-          .then((_) => didUpdateGuess = true)
-          .onError((_, __) => didUpdateGuess = false);
-      currentGuessEditingDay = initializedDateTime;
-    }
+    }).onError((_, __) {
+      didUpdateGuess = false;
+    });
+
     return didUpdateGuess;
   }
 
@@ -131,7 +125,6 @@ class StatsRepository extends StatModifier {
         .update({
           _currentStreakField: 0,
           _numberOfGamesPlayedField: numberOfGamesPlayed + 1,
-          _currentGuessEditingDayField: null,
         })
         .then((_) => didUpdateLoss = true)
         .onError((_, __) => didUpdateLoss = false);
@@ -145,9 +138,9 @@ class StatsRepository extends StatModifier {
   @override
   Future<bool> registerWin() async {
     var didUpdateWin = false;
-    var newWonPositions = _wonPositions.toList();
+    var newWonPositions = wonPositions.toList();
     var wonPosition = lastGuessedWords.length - 1;
-    newWonPositions[wonPosition] = newWonPositions[wonPosition] + 1;
+    newWonPositions[wonPosition]++;
     await _wordleUserDataReference
         .update({
           _currentStreakField: currentStreak + 1,
@@ -161,36 +154,9 @@ class StatsRepository extends StatModifier {
       ++currentStreak;
       maxStreak = max(maxStreak, currentStreak);
       numberOfGamesPlayed++;
-      _wonPositions[wonPosition]++;
+      wonPositions[wonPosition]++;
     }
     return didUpdateWin;
-  }
-
-  @override
-  String wordOfTheDay;
-
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {};
-    if (currentStreak != 0) {
-      json[_currentStreakField] = currentStreak;
-    }
-    if (maxStreak != 0) {
-      json[_maxStreakField] = maxStreak;
-    }
-    if (numberOfGamesPlayed != 0) {
-      json[_numberOfGamesPlayedField] = numberOfGamesPlayed;
-    }
-    if (wonPositions.isNotEmpty) {
-      json[_wonPositionsField] = _wonPositions;
-    }
-    if (lastGuessedWords.isNotEmpty) {
-      json[_lastGuessedWordsField] = lastGuessedWords;
-    }
-    if (currentGuessEditingDay != null) {
-      json[_currentGuessEditingDayField] =
-          _dateFormat.format(currentGuessEditingDay!);
-    }
-    return json;
   }
 
   DatabaseReference get _wordleUserDataReference => FirebaseDatabase.instance
@@ -199,8 +165,8 @@ class StatsRepository extends StatModifier {
       .child(_userDataField)
       .child(userId);
 
-  static Future<String> _getWordOfTheDay(DateTime today) async {
-    final daysDifference = _getNumberOfDaysInBetween(today, _firstDay);
+  static Future<String> _getWordOfTheDay(DateTime currentDay) async {
+    final daysDifference = currentDay.numberOfDaysInBetween(_firstDay);
 
     var wordOfTheDayDbRef = FirebaseDatabase.instance
         .ref()
@@ -211,27 +177,13 @@ class StatsRepository extends StatModifier {
     return wordOfTheDayDoc.value as String;
   }
 
-  static int _getNumberOfDaysInBetween(DateTime dateTime1, DateTime dateTime2) {
-    var day1 = DateTime(dateTime1.year, dateTime1.month, dateTime1.day);
-    var day2 = DateTime(dateTime2.year, dateTime2.month, dateTime2.day);
-    return day1.difference(day2).inDays;
-  }
-
-  static bool _areDatesOnSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
-  }
-
   StatsRepository._(
       {required this.currentStreak,
       required this.maxStreak,
       required this.numberOfGamesPlayed,
-      required List<int> wonPositions,
+      required this.wonPositions,
       required this.lastGuessedWords,
       required this.userId,
       required this.wordOfTheDay,
-      this.currentGuessEditingDay,
-      required this.initializedDateTime})
-      : _wonPositions = wonPositions;
+      required this.initializedDateTime});
 }

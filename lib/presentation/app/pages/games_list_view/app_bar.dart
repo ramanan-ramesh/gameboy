@@ -1,38 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
+import 'package:gameboy/presentation/app/extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const String _appLogoAsset = 'assets/images/logo.png';
-  final double? contentWidth;
+  static const String _appLogoAsset = 'assets/images/logo_without_phrase.png';
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(90);
 
-  const HomeAppBar({super.key, this.contentWidth});
+  const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      centerTitle: contentWidth != null,
-      title: SizedBox(
-        width: contentWidth,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Text(
-                'gameboy',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            _UserProfilePopupMenu()
-          ],
+      flexibleSpace: Center(
+        child: Image.asset(
+          _appLogoAsset,
+          width: 80,
+          height: 80,
+          fit: BoxFit.contain,
         ),
       ),
+      actions: [
+        _UserProfilePopupMenu(),
+      ],
     );
   }
 }
@@ -109,6 +101,20 @@ class _ProfileActionButtonState extends State<_ProfileActionButton> {
   //TODO: Clip the CircleAvatar to a circle, and splash too
   @override
   Widget build(BuildContext context) {
+    return !_isImageLoaded
+        ? const CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.black,
+            child: Icon(
+              Icons.account_circle_rounded,
+              color: Colors.green,
+            ),
+          )
+        : CircleAvatar(
+            radius: 30,
+            backgroundImage: _userProfileNetworkImage,
+            backgroundColor: Colors.black,
+          );
     return !_isImageLoaded
         ? const CircleAvatar(
             radius: 30,

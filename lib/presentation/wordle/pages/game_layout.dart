@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
-import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
 import 'package:gameboy/presentation/wordle/bloc/events.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';
@@ -28,12 +27,12 @@ class WordleLayout implements GameLayout {
 
   @override
   Widget buildGameLayout(
-      BuildContext context, double layoutWidth, double layoutHeight) {
-    var initialBlocState = context.getCurrentWordleState();
+      BuildContext widgetContext, double layoutWidth, double layoutHeight) {
+    var initialBlocState = widgetContext.getCurrentWordleState();
     if (initialBlocState is GameWon && initialBlocState.isStartup) {
-      _onGameWon(initialBlocState, context);
+      _onGameWon(initialBlocState, widgetContext);
     } else if (initialBlocState is GameLost && initialBlocState.isStartup) {
-      _onGameLost(initialBlocState, context);
+      _onGameLost(initialBlocState, widgetContext);
     }
     return BlocListener<GameBloc, GameState>(
       listener: (BuildContext context, GameState state) {
@@ -48,7 +47,7 @@ class WordleLayout implements GameLayout {
                 return FractionallySizedBox(
                   widthFactor: 0.75,
                   child: StatsSheet(
-                    statsRepository: context.getStatsRepository(),
+                    statsRepository: widgetContext.getStatsRepository(),
                   ),
                 );
               });
@@ -103,7 +102,7 @@ class WordleLayout implements GameLayout {
     Future.delayed(Duration(milliseconds: gameLost.isStartup ? 4000 : 7520),
         () {
       if (context.mounted) {
-        context.read<WordleGameBloc>().add(RequestStats());
+        context.addGameEvent(RequestStats());
       }
     });
   }

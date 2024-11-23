@@ -3,11 +3,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/implementations/firebase_options.dart';
-import 'package:gameboy/data/app/implementations/user_management.dart';
 import 'package:gameboy/data/app/models/app_data_facade.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
+import 'package:gameboy/data/app/models/user_management.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class AppDataRepository extends AppDataModifier {
@@ -21,20 +21,17 @@ class AppDataRepository extends AppDataModifier {
   ThemeMode activeThemeMode;
 
   @override
-  PlatformUserFacade? get activeUser => _userManagementImpl.activeUser;
-  final UserManagementImpl _userManagementImpl;
+  PlatformUserFacade? get activeUser => _userManagement.activeUser;
+  final UserManagementFacade _userManagement;
 
   @override
   String googleWebClientId;
 
-  @override
-  bool isBigLayout = false;
-
   AppDataRepository._({
     required this.googleWebClientId,
-    required UserManagementImpl userManagement,
+    required UserManagementFacade userManagement,
     required this.activeThemeMode,
-  })  : _userManagementImpl = userManagement,
+  })  : _userManagement = userManagement,
         _games = [
           Game(name: 'Wordle', imageAsset: 'assets/wordle/logo.webp'),
           Game(name: 'Spelling-Bee', imageAsset: 'assets/spelling_bee/logo.png')
@@ -53,7 +50,7 @@ class AppDataRepository extends AppDataModifier {
         await appConfigReference.child(_googleWebClientIdField).get();
     var googleWebClientId = googleWebClientIdField.value as String;
     await Hive.initFlutter();
-    var userManagement = await UserManagementImpl.create();
+    var userManagement = await UserManagementFacade.create();
     var platformDataBox = await Hive.openBox(_platformDataBox);
     var themeModeValue = await platformDataBox.get(_themeMode);
     await platformDataBox.close();
@@ -80,15 +77,11 @@ class AppDataRepository extends AppDataModifier {
   @override
   Future updateActiveUser(User? platformUser) async {
     if (platformUser != null) {
-      await _userManagementImpl.tryUpdateActiveUser(
-          authProviderUser: platformUser);
+      await _userManagement.tryUpdateActiveUser(authProviderUser: platformUser);
     } else {
-      await _userManagementImpl.trySignOut();
+      await _userManagement.trySignOut();
     }
   }
-
-  @override
-  void updateLayoutType(bool isBigLayout) {}
 
   @override
   Iterable<Game> get games => _games;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
@@ -11,6 +13,8 @@ import 'package:gameboy/presentation/spelling_bee/widgets/letter_input_layout.da
 
 class SpellingBeeLayout implements GameLayout {
   var guessWordNotifier = ValueNotifier('');
+  final _focusNode = FocusNode();
+  static const _cutOffWidth = 800.0;
 
   @override
   BoxConstraints get constraints => const BoxConstraints(
@@ -18,36 +22,58 @@ class SpellingBeeLayout implements GameLayout {
 
   @override
   Widget buildActionButtonBar(BuildContext context) {
-    return IconButton(onPressed: () {}, icon: Icon(Icons.query_stats_rounded));
+    return IconButton(
+      onPressed: () {},
+      icon: Icon(Icons.query_stats_rounded),
+    );
   }
 
   @override
   Widget buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
-    if (layoutWidth > 800) {
-      return Row(
-        children: [
-          Expanded(
-            child: _buildGameLayout(context, layoutWidth, layoutHeight),
-          ),
-          Expanded(
-            child: MaximizedGameResults(),
-          )
-        ],
-      );
-    }
-    var _gameLayoutVisibilityNotifier = ValueNotifier(true);
+    return KeyboardListener(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: (keyEvent) => _handleKeyEvent(context, keyEvent),
+      child: BlocListener<GameBloc, GameState>(
+        listener: (BuildContext context, GameState state) {},
+        child: layoutWidth > _cutOffWidth
+            ? _createSideBySideLayout(context, layoutWidth, layoutHeight)
+            : _createSinglePageLayout(context, layoutWidth, layoutHeight),
+      ),
+    );
+  }
+
+  Widget _createSideBySideLayout(
+      BuildContext context, double layoutWidth, double layoutHeight) {
+    _focusNode.requestFocus();
+    return Row(
+      children: [
+        Expanded(
+          child: _buildGameLayout(context, layoutWidth, layoutHeight),
+        ),
+        Expanded(
+          child: MaximizedGameResults(),
+        )
+      ],
+    );
+  }
+
+  Widget _createSinglePageLayout(
+      BuildContext context, double layoutWidth, double layoutHeight) {
+    var gameLayoutVisibilityNotifier = ValueNotifier(true);
     return ValueListenableBuilder(
-      valueListenable: _gameLayoutVisibilityNotifier,
+      valueListenable: gameLayoutVisibilityNotifier,
       builder: (BuildContext context, bool value, Widget? child) {
         var gameResults = MinimizedGameResults(
           onGameResultsSizeToggled: () {
-            _gameLayoutVisibilityNotifier.value =
-                !_gameLayoutVisibilityNotifier.value;
+            gameLayoutVisibilityNotifier.value =
+                !gameLayoutVisibilityNotifier.value;
           },
-          isExpanded: !_gameLayoutVisibilityNotifier.value,
+          isExpanded: !gameLayoutVisibilityNotifier.value,
         );
         if (value) {
+          _focusNode.requestFocus();
           return Column(
             children: [
               gameResults,
@@ -57,6 +83,7 @@ class SpellingBeeLayout implements GameLayout {
             ],
           );
         }
+        _focusNode.unfocus();
 
         return gameResults;
       },
@@ -66,10 +93,15 @@ class SpellingBeeLayout implements GameLayout {
   Widget _buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
     return FractionallySizedBox(
-      heightFactor: 0.75,
+      heightFactor: 0.8,
       child: SingleChildScrollView(
         child: Column(
           children: [
+            _AnimatedGuessedWordResult(
+              onAnimationComplete: () {
+                guessWordNotifier.value = '';
+              },
+            ),
             Align(
               alignment: Alignment.center,
               child: Padding(
@@ -78,7 +110,9 @@ class SpellingBeeLayout implements GameLayout {
               ),
             ),
             LetterInputLayout(
-              sizeOfCell: layoutWidth / 8,
+              sizeOfCell: layoutWidth > _cutOffWidth
+                  ? layoutWidth / 8
+                  : layoutWidth / 4,
               onLetterPressed: (letter) {
                 guessWordNotifier.value += letter;
               },
@@ -106,13 +140,9 @@ class SpellingBeeLayout implements GameLayout {
           },
         );
       },
-      listener: (BuildContext context, GameState state) {
-        if (state is WordGuessed) {
-          guessWordNotifier.value = '';
-        }
-      },
+      listener: (BuildContext context, GameState state) {},
       buildWhen: (previous, current) {
-        return current is WordGuessed;
+        return current is GuessedWordResult;
       },
     );
   }
@@ -145,6 +175,263 @@ class SpellingBeeLayout implements GameLayout {
           child: Icon(Icons.keyboard_return_rounded),
         ),
       ],
+    );
+  }
+
+  void _handleKeyEvent(BuildContext context, KeyEvent keyEvent) {
+    if (keyEvent is! KeyUpEvent) {
+      return;
+    }
+    if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
+        keyEvent.logicalKey.keyLabel.length == 1 &&
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+      guessWordNotifier.value += keyEvent.logicalKey.keyLabel;
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
+      if (guessWordNotifier.value.isNotEmpty) {
+        guessWordNotifier.value = guessWordNotifier.value
+            .substring(0, guessWordNotifier.value.length - 1);
+      }
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
+      context.addGameEvent(SubmitWord(guessWordNotifier.value));
+    }
+  }
+}
+
+// class _AnimatedGuessedWordResult extends StatefulWidget {
+//   final VoidCallback onAnimationComplete;
+//   const _AnimatedGuessedWordResult(
+//       {super.key, required this.onAnimationComplete});
+//
+//   @override
+//   State<_AnimatedGuessedWordResult> createState() =>
+//       _AnimatedGuessedWordResultState();
+// }
+//
+// class _AnimatedGuessedWordResultState
+//     extends State<_AnimatedGuessedWordResult> {
+//   var _animationComplete = true;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocConsumer<GameBloc, GameState>(
+//       builder: (BuildContext context, GameState state) {
+//         if (_animationComplete || state is! GuessedWordResult) {
+//           return Container(
+//             height: 100,
+//           );
+//         }
+//
+//         Future.delayed(Duration(seconds: 2, milliseconds: 100), () {
+//           setState(() {
+//             widget.onAnimationComplete();
+//             _animationComplete = true;
+//           });
+//         });
+//
+//         var guessedWordResult = state.guessedWordState;
+//         if (guessedWordResult == GuessedWordState.notInDictionary) {
+//           return AnimatedContainer(
+//             height: 100,
+//             color: Colors.white12,
+//             curve: Curves.elasticInOut,
+//             duration: Duration(seconds: 2),
+//             child: Center(
+//               child: Text(
+//                 'Not in dictionary!',
+//                 style: TextStyle(color: Colors.red),
+//               ),
+//             ),
+//           );
+//         } else if (guessedWordResult ==
+//             GuessedWordState.doesNotContainLettersOfTheDay) {
+//           return AnimatedContainer(
+//             height: 100,
+//             color: Colors.white12,
+//             curve: Curves.elasticInOut,
+//             duration: Duration(seconds: 2),
+//             child: Center(
+//               child: Text(
+//                 'Bad letters!',
+//                 style: TextStyle(color: Colors.red),
+//               ),
+//             ),
+//           );
+//         } else if (guessedWordResult ==
+//             GuessedWordState.doesNotContainCenterLetter) {
+//           return AnimatedContainer(
+//             height: 100,
+//             color: Colors.white12,
+//             curve: Curves.elasticInOut,
+//             duration: Duration(seconds: 2),
+//             child: Center(
+//               child: Text(
+//                 'Missing center letter!',
+//                 style: TextStyle(color: Colors.red),
+//               ),
+//             ),
+//           );
+//         } else if (state is GuessWordAccepted) {
+//           var currentRank = context.getGameEngineData().currentScore.rank;
+//           return AnimatedContainer(
+//             height: 100,
+//             color: Colors.white12,
+//             curve: Curves.bounceInOut,
+//             duration: Duration(seconds: 2),
+//             child: Center(
+//               child: Row(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   Padding(
+//                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
+//                     child: Text(
+//                       '$currentRank!',
+//                       style: TextStyle(color: Colors.black),
+//                     ),
+//                   ),
+//                   Text(
+//                     '+ ${state.score}',
+//                     style: TextStyle(color: Colors.green),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           );
+//         }
+//
+//         return Container(
+//           height: 100,
+//         );
+//       },
+//       listener: (BuildContext context, GameState state) {},
+//       buildWhen: (previous, current) {
+//         if (current is GuessedWordResult) {
+//           _animationComplete = false;
+//           return true;
+//         }
+//         return false;
+//       },
+//     );
+//   }
+// }
+
+class _AnimatedGuessedWordResult extends StatefulWidget {
+  final VoidCallback onAnimationComplete;
+  const _AnimatedGuessedWordResult(
+      {super.key, required this.onAnimationComplete});
+
+  @override
+  State<_AnimatedGuessedWordResult> createState() =>
+      _AnimatedGuessedWordResultState();
+}
+
+class _AnimatedGuessedWordResultState
+    extends State<_AnimatedGuessedWordResult> {
+  var _animationComplete = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<GameBloc, GameState>(
+      builder: (BuildContext context, GameState state) {
+        if (_animationComplete || state is! GuessedWordResult) {
+          return Container(
+            height: 100,
+          );
+        }
+
+        var guessedWordResult = state.guessedWordState;
+        _animationComplete = false;
+
+        Future.delayed(Duration(seconds: 2, milliseconds: 100), () {
+          if (mounted) {
+            setState(() {
+              widget.onAnimationComplete();
+              _animationComplete = true;
+            });
+          }
+        });
+
+        if (guessedWordResult == GuessedWordState.notInDictionary) {
+          return AnimatedContainer(
+            height: 100,
+            color: Colors.white12,
+            curve: Curves.elasticInOut,
+            duration: Duration(seconds: 2),
+            child: Center(
+              child: Text(
+                'Not in dictionary!',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        } else if (guessedWordResult ==
+            GuessedWordState.doesNotContainLettersOfTheDay) {
+          return AnimatedContainer(
+            height: 100,
+            color: Colors.white12,
+            curve: Curves.elasticInOut,
+            duration: Duration(seconds: 2),
+            child: Center(
+              child: Text(
+                'Bad letters!',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        } else if (guessedWordResult ==
+            GuessedWordState.doesNotContainCenterLetter) {
+          return AnimatedContainer(
+            height: 100,
+            color: Colors.white12,
+            curve: Curves.elasticInOut,
+            duration: Duration(seconds: 2),
+            child: Center(
+              child: Text(
+                'Missing center letter!',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        } else if (state is GuessWordAccepted) {
+          var currentRank = context.getGameEngineData().currentScore.rank;
+
+          return AnimatedContainer(
+            height: 100,
+            color: Colors.white12,
+            curve: Curves.bounceInOut,
+            duration: Duration(seconds: 2),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Text(
+                      '$currentRank!',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  Text(
+                    '+ ${state.score}',
+                    style: TextStyle(color: Colors.green),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          height: 100,
+        );
+      },
+      listener: (BuildContext context, GameState state) {},
+      buildWhen: (previous, current) {
+        if (current is GuessedWordResult) {
+          _animationComplete = false;
+          return true;
+        }
+        return false;
+      },
     );
   }
 }

@@ -1,6 +1,6 @@
 enum LetterMatchDescription {
   notInWord,
-  inWordWrongPosition,
-  inWordRightPosition,
+  wrongPositionInWord,
+  rightPositionInWord,
   notYetMatched
 }

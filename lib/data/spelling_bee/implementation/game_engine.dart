@@ -1,9 +1,13 @@
 import 'package:flutter/services.dart';
+import 'package:gameboy/data/spelling_bee/models/constants.dart';
 import 'package:gameboy/data/spelling_bee/models/game_engine_driver.dart';
+import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/data/spelling_bee/models/score.dart';
+import 'package:gameboy/data/wordle/models/extensions.dart';
 
 class GameEngine implements GameEngineDriver {
   static const _allowedGuessesPath = 'assets/spelling_bee/word-list.txt';
+  final List<String> _allowedGuesses;
 
   static Future<GameEngineDriver> createEngine(
       List<String> attemptedGuesses, String lettersOfTheDay) async {
@@ -11,82 +15,52 @@ class GameEngine implements GameEngineDriver {
     return GameEngine._(attemptedGuesses, lettersOfTheDay, allowedGuesses);
   }
 
+  @override
+  List<String> guessedWords;
+
+  @override
+  String lettersOfTheDay;
+
+  @override
+  Score get currentScore => Score(
+      score: _calculateScore(guessedWords), rank: rankCalculator(guessedWords));
+
+  @override
+  GuessedWordState trySubmitWord(String word) {
+    if (!_doesListContainWord(_allowedGuesses, word)) {
+      return GuessedWordState.notInDictionary;
+    }
+
+    if (_doesListContainWord(guessedWords, word)) {
+      return GuessedWordState.alreadyGuessed;
+    }
+
+    var uniqueLetters = word.split('').toSet();
+    if (uniqueLetters.any((element) => !lettersOfTheDay.doesContain(element))) {
+      return GuessedWordState.doesNotContainLettersOfTheDay;
+    }
+
+    if (uniqueLetters.any((element) => !lettersOfTheDay.doesContain(element)) ||
+        !word.doesContain(lettersOfTheDay[0])) {
+      return GuessedWordState.doesNotContainCenterLetter;
+    }
+
+    guessedWords.add(word);
+    return GuessedWordState.valid;
+  }
+
   static Future<List<String>> _getAllowedGuesses() async {
     final String fileContent = await rootBundle.loadString(_allowedGuessesPath);
     return fileContent.split('\n');
   }
 
-  @override
-  Iterable<String> get guessedWords => _guessedWords;
-  final List<String> _guessedWords;
-
-  @override
-  String get lettersOfTheDay => _lettersOfTheDay;
-  final String _lettersOfTheDay;
-
-  final List<String> _allowedGuesses;
-
-  @override
-  Score get currentScore => Score(
-      score: _calculateScore(_guessedWords),
-      rank: rankCalculator(_guessedWords));
-
-  @override
-  bool isValidWord(String word) {
-    return _doesListContainWord(_allowedGuesses, word);
-  }
-
-  @override
-  bool trySubmitWord(String word) {
-    if (!isValidWord(word)) {
-      return false;
-    }
-
-    if (_doesListContainWord(_guessedWords, word)) {
-      return false;
-    }
-
-    var uniqueLetters = word.split('').toSet();
-    if (uniqueLetters.any((element) =>
-            !_isCharacterPresentInWord(_lettersOfTheDay, element)) ||
-        !_isCharacterPresentInWord(_lettersOfTheDay, word[0])) {
-      return false;
-    }
-
-    _guessedWords.add(word);
-    return true;
-  }
-
-  bool _isCharacterPresentInWord(String word, String character) {
-    return word.toLowerCase().contains(character.toLowerCase());
-  }
-
-  bool _doesListContainWord(Iterable<String> allWords, String word) {
-    return allWords
-        .any((element) => element.toLowerCase() == word.toLowerCase());
+  static bool _doesListContainWord(Iterable<String> allWords, String word) {
+    return allWords.any((element) => element.isEqualTo(word));
   }
 
   static String rankCalculator(Iterable<String> guessedWords) {
     int score = _calculateScore(guessedWords);
-    if (score >= 105) {
-      return 'Genius';
-    } else if (score >= 75) {
-      return 'Amazing';
-    } else if (score >= 60) {
-      return 'Great';
-    } else if (score >= 38) {
-      return 'Nice';
-    } else if (score >= 23) {
-      return 'Solid';
-    } else if (score >= 12) {
-      return 'Good';
-    } else if (score >= 8) {
-      return 'Moving Up';
-    } else if (score >= 3) {
-      return 'Good Start';
-    } else {
-      return 'Beginner';
-    }
+    return SpellingBeeConstants.rankCalculator(score);
   }
 
   static int _calculateScore(Iterable<String> guessedWords) {
@@ -103,5 +77,5 @@ class GameEngine implements GameEngineDriver {
     return score;
   }
 
-  GameEngine._(this._guessedWords, this._lettersOfTheDay, this._allowedGuesses);
+  GameEngine._(this.guessedWords, this.lettersOfTheDay, this._allowedGuesses);
 }

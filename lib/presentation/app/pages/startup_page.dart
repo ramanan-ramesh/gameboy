@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/app/extensions.dart';
-import 'package:gameboy/data/app/models/app_data_modifier.dart';
 
 import 'login/login_page.dart';
 import 'onboarding_page.dart';
@@ -29,17 +27,14 @@ class _StartupPageState extends State<StartupPage> {
         double maxHeight = constraints.maxHeight < _cutOffSize
             ? _cutOffSize
             : constraints.maxHeight;
-        var appLevelData = context.getAppData() as AppDataModifier;
         if (constraints.minWidth > 1000) {
           constraintsToApply = BoxConstraints(
               minWidth: constraints.minWidth,
               maxWidth: constraints.maxWidth,
               minHeight: minHeight,
               maxHeight: maxHeight);
-          appLevelData.updateLayoutType(true);
           pageToRender = _getPageToRender(true);
         } else {
-          appLevelData.updateLayoutType(false);
           pageToRender = _getPageToRender(false);
           constraintsToApply = BoxConstraints(
               minWidth: _smallScreenSize,
@@ -60,7 +55,9 @@ class _StartupPageState extends State<StartupPage> {
       return Row(
         children: [
           Expanded(
-            child: OnBoardingPage(),
+            child: OnBoardingPage(
+              isBigLayout: isBigLayout,
+            ),
           ),
           Expanded(child: LoginPage())
         ],
@@ -70,6 +67,7 @@ class _StartupPageState extends State<StartupPage> {
     return _shouldNavigateToLoginScreen
         ? LoginPage()
         : OnBoardingPage(
+            isBigLayout: isBigLayout,
             onNavigateToNextPage: () {
               setState(() {
                 _shouldNavigateToLoginScreen = true;

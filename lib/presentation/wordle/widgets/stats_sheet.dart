@@ -3,7 +3,7 @@ import 'package:gameboy/data/wordle/models/stats.dart';
 
 class StatsSheet extends StatelessWidget {
   static const _wordleLogoAsset = 'assets/wordle/logo.webp';
-  final Stats statsRepository;
+  final WordleStats statsRepository;
   const StatsSheet({super.key, required this.statsRepository});
 
   @override
@@ -48,7 +48,7 @@ class StatsSheet extends StatelessWidget {
     );
   }
 
-  Widget _createStatsTiles(Stats statsRepository) {
+  Widget _createStatsTiles(WordleStats statsRepository) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -78,7 +78,7 @@ class StatsSheet extends StatelessWidget {
     );
   }
 
-  Widget _createGuessDistribution(Stats statsRepository) {
+  Widget _createGuessDistribution(WordleStats statsRepository) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -114,7 +114,8 @@ class StatsSheet extends StatelessWidget {
     );
   }
 
-  Widget _createGuessDistributionForPosition(Stats statsRepository, int index) {
+  Widget _createGuessDistributionForPosition(
+      WordleStats statsRepository, int index) {
     var numberOfGamesWon = statsRepository.wonPositions.reduce((a, b) => a + b);
     var winPercentageForPosition = numberOfGamesWon == 0
         ? 0.0

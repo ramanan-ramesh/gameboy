@@ -1,17 +1,8 @@
-class Score {
-  int score;
-  String rank;
-  int get rankIndex => allRanks.indexOf(rank);
-  Score({required this.score, required this.rank});
+import 'package:gameboy/data/spelling_bee/models/constants.dart';
 
-  static const allRanks = [
-    'Beginner',
-    'Good Start',
-    'Moving Up',
-    'Good',
-    'Solid',
-    'Nice',
-    'Great',
-    'Amazing'
-  ];
+class Score {
+  final int score;
+  final String rank;
+  int get rankIndex => SpellingBeeConstants.ranks.indexOf(rank);
+  const Score({required this.score, required this.rank});
 }

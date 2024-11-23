@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/data/spelling_bee/models/constants.dart';
 import 'package:gameboy/data/spelling_bee/models/score.dart';
 import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 
@@ -31,7 +32,7 @@ class ScoreBar extends StatelessWidget {
   }
 
   Widget _buildRankIndicators(Score score, BuildContext context) {
-    var numberOfRanks = Score.allRanks.length;
+    var numberOfRanks = SpellingBeeConstants.ranks.length;
     return LayoutBuilder(
       builder: (context, constraints) {
         double availableWidth = constraints.maxWidth;

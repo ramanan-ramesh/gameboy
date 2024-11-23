@@ -1,14 +1,37 @@
-class Constants {
+class SpellingBeeConstants {
   static const numberOfLetters = 7;
-  static const Map<String, int> cutOffScoreMapping = {
-    'Genius': 105,
-    'Amazing': 75,
-    'Great': 60,
-    'Nice': 38,
-    'Solid': 23,
-    'Good': 12,
-    'Moving Up': 8,
-    'Good Start': 3,
-    'Beginner': 0,
-  };
+
+  static String rankCalculator(int score) {
+    if (score >= 105) {
+      return 'Genius';
+    } else if (score >= 75) {
+      return 'Amazing';
+    } else if (score >= 60) {
+      return 'Great';
+    } else if (score >= 38) {
+      return 'Nice';
+    } else if (score >= 23) {
+      return 'Solid';
+    } else if (score >= 12) {
+      return 'Good';
+    } else if (score >= 8) {
+      return 'Moving Up';
+    } else if (score >= 3) {
+      return 'Good Start';
+    } else {
+      return 'Beginner';
+    }
+  }
+
+  static List<String> get ranks => [
+        'Beginner',
+        'Good Start',
+        'Moving Up',
+        'Good',
+        'Solid',
+        'Nice',
+        'Great',
+        'Amazing',
+        'Genius',
+      ];
 }

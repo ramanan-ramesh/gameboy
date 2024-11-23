@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/app/extensions.dart';
 
 class OnBoardingPage extends StatelessWidget {
   VoidCallback? onNavigateToNextPage;
-
-  OnBoardingPage({super.key, this.onNavigateToNextPage});
+  bool isBigLayout;
+  OnBoardingPage(
+      {super.key, this.onNavigateToNextPage, required this.isBigLayout});
 
   static const _onBoardingImageAsset = 'assets/images/playing_games.jpg';
 
   @override
   Widget build(BuildContext context) {
-    var isBigLayout = context.isBigLayout();
     return Stack(
       fit: StackFit.expand,
       alignment: Alignment.center,

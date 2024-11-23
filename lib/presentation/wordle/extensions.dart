@@ -19,8 +19,8 @@ extension BuildContextExt on BuildContext {
     return _getGameBloc().state;
   }
 
-  Stats getStatsRepository() {
-    return RepositoryProvider.of<Statistics>(this) as Stats;
+  WordleStats getStatsRepository() {
+    return RepositoryProvider.of<Statistics>(this) as WordleStats;
   }
 
   void addGameEvent(WordleEvent event) {

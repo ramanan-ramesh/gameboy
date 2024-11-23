@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
@@ -32,7 +33,8 @@ class MaximizedGameResults extends StatelessWidget {
       },
       listener: (BuildContext context, GameState state) {},
       buildWhen: (previous, current) {
-        return current is WordGuessed;
+        return current is GuessedWordResult &&
+            current.guessedWordState == GuessedWordState.valid;
       },
     );
   }
@@ -66,7 +68,7 @@ class MaximizedGameResults extends StatelessWidget {
   }
 }
 
-class MinimizedGameResults extends StatefulWidget {
+class MinimizedGameResults extends StatelessWidget {
   final VoidCallback onGameResultsSizeToggled;
   bool isExpanded;
   MinimizedGameResults(
@@ -75,22 +77,17 @@ class MinimizedGameResults extends StatefulWidget {
       this.isExpanded = false});
 
   @override
-  State<MinimizedGameResults> createState() => _MinimizedGameResultsState();
-}
-
-class _MinimizedGameResultsState extends State<MinimizedGameResults> {
-  @override
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, GameState>(
       builder: (BuildContext context, GameState state) {
-        if (!widget.isExpanded) {
+        if (!isExpanded) {
           return Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ScoreBar(),
               ),
-              _createGuessWordsDisplay(),
+              _createGuessWordsDisplay(context),
             ],
           );
         }
@@ -101,21 +98,25 @@ class _MinimizedGameResultsState extends State<MinimizedGameResults> {
               child: ScoreBar(),
             ),
             Expanded(
-              child: _createGuessWordsDisplay(),
+              child: _createGuessWordsDisplay(context),
             ),
           ],
         );
       },
       listener: (BuildContext context, GameState state) {},
       buildWhen: (previous, current) {
-        return current is WordGuessed;
+        return current is GuessedWordResult &&
+            current.guessedWordState == GuessedWordState.valid;
       },
     );
   }
 
-  Widget _createGuessWordsDisplay() {
+  Widget _createGuessWordsDisplay(BuildContext context) {
     var guessedWords = context.getGameEngineData().guessedWords;
-    if (!widget.isExpanded) {
+    if (!isExpanded) {
+      var textToDisplay = guessedWords.isEmpty
+          ? 'You have not guessed any word yet!'
+          : guessedWords.join(' ').toUpperCase();
       return Container(
         height: 100,
         padding: EdgeInsets.all(8.0),
@@ -126,14 +127,9 @@ class _MinimizedGameResultsState extends State<MinimizedGameResults> {
         child: Row(
           children: [
             Expanded(
-              child: Wrap(
-                spacing: 8.0,
-                runSpacing: 4.0,
-                clipBehavior: Clip.hardEdge,
-                children: guessedWords
-                    .map((word) => Text(word, style: TextStyle(fontSize: 16)))
-                    .toList(),
-              ),
+              child: Text(textToDisplay,
+                  style: TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis),
             ),
             _buildExpander(Icons.arrow_circle_down_rounded),
           ],
@@ -143,7 +139,6 @@ class _MinimizedGameResultsState extends State<MinimizedGameResults> {
       var numberOfFoundWordsMessage = guessedWords.isEmpty
           ? 'You have not guessed any word yet!'
           : 'You have guessed ${guessedWords.length} words!';
-      // convert each word's first letter to capital and the rest to lower case
       return Container(
         padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -174,10 +169,7 @@ class _MinimizedGameResultsState extends State<MinimizedGameResults> {
   Widget _buildExpander(IconData icon) {
     return IconButton(
       onPressed: () {
-        setState(() {
-          widget.isExpanded != widget.isExpanded;
-          widget.onGameResultsSizeToggled();
-        });
+        onGameResultsSizeToggled();
       },
       icon: Icon(icon),
     );

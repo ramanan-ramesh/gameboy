@@ -4,8 +4,6 @@ import 'package:gameboy/data/app/models/game.dart';
 
 abstract class MasterPageEvent {}
 
-class LoadApp extends MasterPageEvent {}
-
 class ChangeTheme extends MasterPageEvent {
   ThemeMode themeModeToChangeTo;
 

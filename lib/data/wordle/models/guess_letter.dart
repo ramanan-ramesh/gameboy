@@ -2,12 +2,13 @@ import 'package:equatable/equatable.dart';
 import 'package:gameboy/data/wordle/models/letter_match_description.dart';
 
 class GuessLetter extends Equatable {
-  String guessLetter;
-  LetterMatchDescription letterMatchDescription;
+  final String guessLetter;
+  final LetterMatchDescription letterMatchDescription;
 
-  GuessLetter(
+  const GuessLetter(
       {required this.guessLetter, required this.letterMatchDescription});
-  GuessLetter.notYetGuessed()
+
+  const GuessLetter.notYetGuessed()
       : guessLetter = '',
         letterMatchDescription = LetterMatchDescription.notYetMatched;
 

@@ -8,6 +8,4 @@ abstract class AppDataModifier extends AppDataFacade {
   Future updateActiveUser(User? platformUser);
 
   Future updateActiveThemeMode(ThemeMode themeMode);
-
-  void updateLayoutType(bool isBigLayout);
 }

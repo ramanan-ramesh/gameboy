@@ -3,7 +3,7 @@ import 'package:gameboy/data/app/models/stats.dart';
 
 abstract class GameState {}
 
-class GameLoading extends GameState {}
+abstract class GameLoading extends GameState {}
 
 class GameLoaded extends GameState {
   final GameEngine gameEngine;

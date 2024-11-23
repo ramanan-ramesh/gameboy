@@ -4,14 +4,13 @@ import 'package:gameboy/data/app/models/game.dart';
 class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? contentWidth;
   final Game game;
-  Widget? actionButtonBar;
+  final Widget? actionButtonBar;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
-  GameAppBar(
-      {Key? key, this.contentWidth, required this.game, this.actionButtonBar})
-      : super(key: key);
+  const GameAppBar(
+      {super.key, this.contentWidth, required this.game, this.actionButtonBar});
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +24,12 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                    top: 8.0, left: 8.0, bottom: 8.0, right: 15.0),
+                padding: const EdgeInsets.all(8.0),
                 child: IconButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(Icons.close_rounded),
+                  icon: const Icon(Icons.close_rounded),
                 ),
               ),
               Row(

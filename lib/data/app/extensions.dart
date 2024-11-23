@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/data/app/models/app_data_facade.dart';
-
-extension RepositoryExt on BuildContext {
-  AppDataFacade getAppData() {
-    return RepositoryProvider.of<AppDataFacade>(this);
+extension DateTimeExt on DateTime {
+  bool isOnSameDayAs(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
   }
 
-  bool isBigLayout() {
-    return getAppData().isBigLayout;
+  int numberOfDaysInBetween(DateTime other) {
+    var day1 = DateTime(year, month, day);
+    var day2 = DateTime(other.year, other.month, other.day);
+    return day1.difference(day2).inDays;
   }
 }

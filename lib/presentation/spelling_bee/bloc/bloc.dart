@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/spelling_bee/models/game_engine_driver.dart';
+import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/data/spelling_bee/models/stats_modifier.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/events.dart';
@@ -24,25 +25,16 @@ class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState> {
 
   FutureOr<void> _onSubmitWord(
       SubmitWord event, Emitter<SpellingBeeState> emit) async {
-    var isValidWord = gameEngineDriver!.isValidWord(event.word);
-    if (!isValidWord) {
-      emit(WordNotInDictionary());
+    var currentScore = gameEngineDriver!.currentScore;
+    var guessedWordState = gameEngineDriver!.trySubmitWord(event.word);
+    if (guessedWordState == GuessedWordState.valid) {
+      await statsInstance!.trySubmitWord(event.word);
+      var newScore = gameEngineDriver!.currentScore;
+      emit(GuessWordAccepted(
+          GuessedWordState.valid, newScore.score - currentScore.score));
       return;
     }
-
-    if (gameEngineDriver!.guessedWords
-        .any((e) => e.toLowerCase() == event.word.toLowerCase())) {
-      emit(WordAlreadyGuessed());
-      return;
-    }
-
-    var didSubmitWord = await statsInstance!.trySubmitWord(event.word);
-    if (didSubmitWord) {
-      var didGuessWord = gameEngineDriver!.trySubmitWord(event.word);
-      if (didGuessWord) {
-        emit(WordGuessed());
-      }
-    }
+    emit(GuessedWordResult(guessedWordState));
   }
 
   FutureOr<void> _onLoadGame(

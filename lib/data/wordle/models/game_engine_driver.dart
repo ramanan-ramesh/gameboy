@@ -10,7 +10,6 @@ abstract class GameEngineDriver implements GameEngineData {
   bool trySubmitWord();
   bool didSubmitLetter(String letter);
   bool didRemoveLetter();
-  bool didCompleteGame();
 
   static Future<GameEngineDriver> createEngine(
       List<String> attemptedGuesses, String wordOfTheDay) async {

@@ -13,7 +13,7 @@ import 'package:gameboy/presentation/wordle/widgets/stats_sheet.dart';
 class WordleLayout implements GameLayout {
   @override
   BoxConstraints get constraints => const BoxConstraints(
-      minWidth: 400.0, maxWidth: 700.0, minHeight: 550.0, maxHeight: 1000.0);
+      minWidth: 400.0, maxWidth: 700.0, minHeight: 500.0, maxHeight: 1000.0);
 
   @override
   Widget buildActionButtonBar(BuildContext context) {

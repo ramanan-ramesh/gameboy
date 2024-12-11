@@ -74,6 +74,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         .add(_buildActionLetterKey(context, SubmitWord(), 'Enter', 20));
     _focusNode.requestFocus();
     return KeyboardListener(
+      //TODO: Make this entire widget an independent BlocConsumer, and KeyBoardListener should be a child of the BlocConsumer. Child of BlocConsumer should not be a KeyBoardListener if game is lost or won, and should be a normal layout instead.
       focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: _handleKeyEvent,

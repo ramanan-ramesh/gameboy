@@ -9,3 +9,16 @@ extension DateTimeExt on DateTime {
     return day1.difference(day2).inDays;
   }
 }
+
+extension StringExt on String {
+  bool isEqualTo(String other) {
+    return toLowerCase() == other.toLowerCase();
+  }
+
+  int comparedTo(String other, bool isCaseSensitive) {
+    if (!isCaseSensitive) {
+      return toLowerCase().compareTo(other.toLowerCase());
+    }
+    return compareTo(other);
+  }
+}

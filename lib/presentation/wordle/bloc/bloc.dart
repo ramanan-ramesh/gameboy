@@ -17,8 +17,8 @@ class _LoadGame extends WordleEvent {
 }
 
 class WordleGameBloc extends GameBloc<WordleEvent, WordleState> {
-  GameEngineDriver? gameEngineDriver;
-  static WordleStatModifier? statsInstance;
+  late GameEngineDriver? gameEngineDriver;
+  static late WordleStatModifier statsInstance;
 
   WordleGameBloc(String userId) : super(WordleLoading()) {
     on<_LoadGame>(_onLoadGame);
@@ -33,9 +33,9 @@ class WordleGameBloc extends GameBloc<WordleEvent, WordleState> {
     var statsRepository = await WordleStats.createInstance(event.userId);
     statsInstance = statsRepository;
     gameEngineDriver = await GameEngineDriver.createEngine(
-        statsInstance!.lastGuessedWords.toList(), statsRepository.wordOfTheDay);
-    emit(WordleLoaded(
-        statistics: statsInstance!, gameEngine: gameEngineDriver!));
+        statsInstance.lastGuessedWords.toList(), statsRepository.wordOfTheDay);
+    emit(
+        WordleLoaded(statistics: statsInstance, gameEngine: gameEngineDriver!));
     _tryEmitGameResultOnStartup(emit);
   }
 
@@ -70,8 +70,8 @@ class WordleGameBloc extends GameBloc<WordleEvent, WordleState> {
       } else {
         var currentGuessIndex = gameEngineDriver!.guessWordUnderEdit!.index;
         var currentGuessWord = gameEngineDriver!.guessWordUnderEdit!.word;
-        var didRegisterGuess = await statsInstance!
-            .registerGuess(currentGuessIndex, currentGuessWord);
+        var didRegisterGuess = await statsInstance.registerGuess(
+            currentGuessIndex, currentGuessWord);
         if (didRegisterGuess) {
           var didSubmitWord = gameEngineDriver!.trySubmitWord();
           if (didSubmitWord) {
@@ -79,12 +79,12 @@ class WordleGameBloc extends GameBloc<WordleEvent, WordleState> {
               emit(GuessWordSubmitted(guessIndex: currentGuessIndex));
             } else {
               if (currentGuessWord.isEqualTo(gameEngineDriver!.wordOfTheDay)) {
-                var didRegisterWin = await statsInstance!.registerWin();
+                var didRegisterWin = await statsInstance.registerWin();
                 if (didRegisterWin) {
                   emit(GameWon(guessedIndex: currentGuessIndex));
                 }
               } else {
-                var didRegisterLoss = await statsInstance!.registerLoss();
+                var didRegisterLoss = await statsInstance.registerLoss();
                 if (didRegisterLoss) {
                   emit(GameLost());
                 }
@@ -97,27 +97,21 @@ class WordleGameBloc extends GameBloc<WordleEvent, WordleState> {
   }
 
   bool _tryEmitGameResultOnStartup(Emitter<WordleState> emit) {
-    if (statsInstance!.lastGuessedWords.isEmpty) {
+    if (statsInstance.lastGuessedWords.isEmpty) {
       return false;
     }
-    if (statsInstance!.lastGuessedWords.last
+    if (statsInstance.lastGuessedWords.last
         .isEqualTo(gameEngineDriver!.wordOfTheDay)) {
       emit(GameWon(
-          guessedIndex: statsInstance!.lastGuessedWords.length - 1,
+          guessedIndex: statsInstance.lastGuessedWords.length - 1,
           isStartup: true));
       return true;
-    } else if (statsInstance!.lastGuessedWords.length ==
+    } else if (statsInstance.lastGuessedWords.length ==
         WordleConstants.numberOfGuesses) {
       emit(GameLost(isStartup: true));
       return true;
     }
 
     return false;
-  }
-
-  static bool _areOnSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
   }
 }

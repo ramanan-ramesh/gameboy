@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'game_state.dart';
 
-abstract class GameBloc<Event, State extends GameState>
-    extends Bloc<Event, State> {
+abstract class GameBloc<TEvent, TState extends GameState>
+    extends Bloc<TEvent, TState> {
   GameBloc(super.initialState);
 }

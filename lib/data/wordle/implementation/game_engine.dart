@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
 import 'package:gameboy/data/wordle/constants.dart';
 import 'package:gameboy/data/wordle/models/extensions.dart';
@@ -9,7 +7,7 @@ import 'package:gameboy/data/wordle/models/guess_word.dart';
 import 'package:gameboy/data/wordle/models/letter_match_description.dart';
 
 class GameEngine extends GameEngineDriver {
-  static const _pathToDictionary = 'assets/wordle/5-letter-words.json';
+  static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
   final List<String> _attemptedGuesses;
 
@@ -140,9 +138,8 @@ class GameEngine extends GameEngineDriver {
   }
 
   static Future<List<String>> _getAllowedGuesses() async {
-    final String jsonString = await rootBundle.loadString(_pathToDictionary);
-    final List<dynamic> jsonResponse = jsonDecode(jsonString);
-    return jsonResponse.cast<String>();
+    final String fileContent = await rootBundle.loadString(_pathToDictionary);
+    return fileContent.split('\r\n');
   }
 
   static GuessWord _createGuessWord(

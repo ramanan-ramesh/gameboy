@@ -43,7 +43,7 @@ class _GamesListViewState extends State<GamesListView> {
       listener: (context, state) {
         if (state is LoadedGame) {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => GameContentPage(game: state.game)));
+              builder: (context) => GameContentPage(gameData: state.gameData)));
         }
       },
       child: Scaffold(

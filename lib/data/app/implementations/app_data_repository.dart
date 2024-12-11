@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:gameboy/data/app/constants.dart';
 import 'package:gameboy/data/app/implementations/firebase_options.dart';
 import 'package:gameboy/data/app/models/app_data_facade.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
@@ -33,8 +34,15 @@ class AppDataRepository extends AppDataModifier {
     required this.activeThemeMode,
   })  : _userManagement = userManagement,
         _games = [
-          Game(name: 'Wordle', imageAsset: 'assets/wordle/logo.webp'),
-          Game(name: 'Spelling-Bee', imageAsset: 'assets/spelling_bee/logo.png')
+          Game(
+              name: AppConstants.wordleGameIdentifier,
+              imageAsset: 'assets/wordle/logo.webp'),
+          Game(
+              name: AppConstants.spellingBeeGameIdentifier,
+              imageAsset: 'assets/spelling_bee/logo.png'),
+          Game(
+              name: AppConstants.alphaBoundGameIdentifier,
+              imageAsset: 'assets/alphaBound/logo.png'),
         ];
 
   static Future<AppDataFacade> create() async {

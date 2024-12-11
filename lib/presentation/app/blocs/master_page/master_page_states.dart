@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
+import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_data.dart';
 
 abstract class MasterPageState {}
 
@@ -24,8 +25,8 @@ class ActiveUserChanged extends MasterPageState {
   ActiveUserChanged({required this.user});
 }
 
-class LoadedGame extends MasterPageState {
-  Game game;
+class LoadedGame<TGameBloc extends GameBloc> extends MasterPageState {
+  GameData<TGameBloc> gameData;
 
-  LoadedGame({required this.game});
+  LoadedGame({required this.gameData});
 }

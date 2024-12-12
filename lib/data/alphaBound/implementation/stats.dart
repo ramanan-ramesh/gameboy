@@ -68,17 +68,29 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
         maximumStreak = int.parse(userData[_maximumStreakField].toString());
       }
 
-      if (lastPlayedDate != null &&
-          lastPlayedDate.numberOfDaysInBetween(initializedDateTime) > 0) {
-        todaysLowerBoundGuess = null;
-        todaysUpperBoundGuess = null;
-        middleGuessedWord = null;
-        await userDataReference.update({
+      if (lastPlayedDate != null) {
+        var numberOfDaysInBetween =
+            lastPlayedDate.numberOfDaysInBetween(initializedDateTime);
+        var jsonToUpdate = <String, Object?>{
           _middleGuessedWordField: null,
           _lowerBoundGuessField: null,
           _upperBoundGuessField: null,
-          _lastPlayedDateField: null,
-        });
+          _lastPlayedDateField: null
+        };
+        if (numberOfDaysInBetween >= 1) {
+          if (numberOfDaysInBetween > 1) {
+            jsonToUpdate[_currentStreakField] = 0;
+          }
+          await userDataReference.update(jsonToUpdate).then((_) {
+            todaysLowerBoundGuess = null;
+            todaysUpperBoundGuess = null;
+            middleGuessedWord = null;
+            lastPlayedDate = null;
+            if (numberOfDaysInBetween > 1) {
+              currentStreak = 0;
+            }
+          });
+        }
       }
     }
 

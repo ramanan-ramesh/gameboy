@@ -7,7 +7,7 @@ import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
 
-import 'animated_guess_letter_positioner.dart';
+import 'animated_guess_letters.dart';
 
 class GuessWordRangeLayout extends StatefulWidget {
   final double letterSize;
@@ -46,6 +46,10 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
             _handleLowerBoundChange(context);
           } else if (state.gameState is GuessMovesDown) {
             _handleUpperBoundChange(context);
+          } else if (state.gameState is GameWon) {
+            _handleGameResult(context, true);
+          } else if (state.gameState is GameLost) {
+            _handleGameResult(context, false);
           }
         }
       },
@@ -95,20 +99,27 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
 
   void _handleUpperBoundChange(BuildContext layoutContext) {
     var overlays = <OverlayEntry>[];
-    if (_upperBoundLetterSlotsKeys.every(
-            (e) => e.currentContext != null && e.currentContext!.mounted) &&
-        _guessRowLetterSlotsKeys.every(
-            (e) => e.currentContext != null && e.currentContext!.mounted)) {
-      for (int index = 0;
-          index < AlphaBoundConstants.numberOfLettersInGuess;
-          index++) {
-        var overlayEntry =
-            _createAndAnimateGuessedLetter(index, _upperBoundLetterSlotsKeys);
-        overlays.add(overlayEntry);
-        Overlay.of(layoutContext).insert(overlayEntry);
+    for (int index = 0;
+        index < AlphaBoundConstants.numberOfLettersInGuess;
+        index++) {
+      var upperBoundLetterSlotContext =
+          _upperBoundLetterSlotsKeys[index].currentContext;
+      var guessRowLetterSlotContext =
+          _guessRowLetterSlotsKeys[index].currentContext;
+      if (upperBoundLetterSlotContext == null ||
+          guessRowLetterSlotContext == null) {
+        continue;
       }
-      _onAnimationCompleted(overlays);
+      if (!upperBoundLetterSlotContext.mounted ||
+          !guessRowLetterSlotContext.mounted) {
+        continue;
+      }
+      var overlayEntry =
+          _animateGuessWordOnBoundsChange(index, _upperBoundLetterSlotsKeys);
+      overlays.add(overlayEntry);
+      Overlay.of(layoutContext).insert(overlayEntry);
     }
+    _onAnimationCompleted(overlays, true);
   }
 
   void _handleLowerBoundChange(BuildContext context) {
@@ -121,15 +132,31 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
           index < AlphaBoundConstants.numberOfLettersInGuess;
           index++) {
         var overlayEntry =
-            _createAndAnimateGuessedLetter(index, _lowerBoundLetterSlotsKeys);
+            _animateGuessWordOnBoundsChange(index, _lowerBoundLetterSlotsKeys);
         overlays.add(overlayEntry);
         Overlay.of(context).insert(overlayEntry);
       }
-      _onAnimationCompleted(overlays);
+      _onAnimationCompleted(overlays, true);
     }
   }
 
-  void _onAnimationCompleted(Iterable<OverlayEntry> overlays) {
+  void _handleGameResult(BuildContext context, bool didWin) {
+    var overlays = <OverlayEntry>[];
+    if (_guessRowLetterSlotsKeys
+        .every((e) => e.currentContext != null && e.currentContext!.mounted)) {
+      for (int index = 0;
+          index < AlphaBoundConstants.numberOfLettersInGuess;
+          index++) {
+        var overlayEntry = _animateGuessWordOnResult(index, didWin);
+        overlays.add(overlayEntry);
+        Overlay.of(context).insert(overlayEntry);
+      }
+      _onAnimationCompleted(overlays, false);
+    }
+  }
+
+  void _onAnimationCompleted(
+      Iterable<OverlayEntry> overlays, bool shouldResetGuess) {
     Future.delayed(
         Duration(
             milliseconds:
@@ -138,7 +165,9 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
         for (var overlayEntry in overlays) {
           overlayEntry.remove();
         }
-        widget.guessLetterValueNotifier.value = "";
+        if (shouldResetGuess) {
+          widget.guessLetterValueNotifier.value = "";
+        }
       });
     });
   }
@@ -224,9 +253,9 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     );
   }
 
-  OverlayEntry _createAndAnimateGuessedLetter(
+  OverlayEntry _animateGuessWordOnBoundsChange(
       int index, List<GlobalKey> destinationWidgetKeys) {
-    var guessedLetter =
+    var guessLetter =
         widget.guessLetterValueNotifier.value[index].toUpperCase();
     var middleRowGuessLetterSlotContext =
         _guessRowLetterSlotsKeys[index].currentContext!;
@@ -243,10 +272,37 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     var animatedGuessedLetterSlot = AnimatedGuessLetterPositioner(
       startPosition: middleRowGuessLetterSlotPosition,
       endPosition: destinationGuessLetterSlotPosition,
-      letter: guessedLetter,
+      letter: guessLetter,
       index: index,
       letterSize: widget.letterSize,
     );
     return OverlayEntry(builder: (context) => animatedGuessedLetterSlot);
+  }
+
+  OverlayEntry _animateGuessWordOnResult(int index, bool didWin) {
+    var guessLetter =
+        widget.guessLetterValueNotifier.value[index].toUpperCase();
+
+    Widget guessLetterWidget;
+    if (didWin) {
+      guessLetterWidget = AnimatedGuessLetterDancer(
+          letterSize: widget.letterSize, index: index, letter: guessLetter);
+    } else {
+      guessLetterWidget = AnimatedGuessLetterShaker(
+          letterSize: widget.letterSize, index: index, letter: guessLetter);
+    }
+    var middleRowGuessLetterSlotContext =
+        _guessRowLetterSlotsKeys[index].currentContext!;
+    var middleRowGuessLetterSlotRenderBox =
+        middleRowGuessLetterSlotContext.findRenderObject() as RenderBox;
+    var middleRowGuessLetterSlotPosition =
+        middleRowGuessLetterSlotRenderBox.localToGlobal(Offset.zero);
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        left: middleRowGuessLetterSlotPosition.dx,
+        top: middleRowGuessLetterSlotPosition.dy,
+        child: Material(child: guessLetterWidget),
+      ),
+    );
   }
 }

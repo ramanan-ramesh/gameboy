@@ -36,10 +36,49 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
       AlphaBoundConstants.numberOfLettersInGuess,
       (index) => GlobalKey(debugLabel: 'upperBoundLetterSlot$index'));
 
+  List<OverlayEntry> _overlayEntries = [];
+
   @override
   Widget build(BuildContext context) {
     var gameEngineData = context.getGameEngineData();
-    return BlocListener<GameBloc, appGameState.GameState>(
+    return BlocConsumer<GameBloc, appGameState.GameState>(
+      builder: (context, appGameState.GameState state) {
+        var lowerBoundGuessWord = _createBoundaryGuessWord(
+            gameEngineData.currentState.lowerBound, _lowerBoundLetterSlotsKeys);
+        var middleRowGuessWord =
+            _createMiddleGuessRow(gameEngineData.currentState is GameWon);
+        var upperBoundGuessWord = _createBoundaryGuessWord(
+            gameEngineData.currentState.upperBound, _upperBoundLetterSlotsKeys);
+        if (state is AlphaBoundGameState) {
+          if (state.isStartup) {
+            if (state.gameState is GameWon) {
+              widget.guessLetterValueNotifier.value =
+                  gameEngineData.wordOfTheDay;
+              _handleGameResult(context, true);
+            } else if (state.gameState is GameLost) {
+              widget.guessLetterValueNotifier.value =
+                  (state.gameState as GameLost).middleGuess;
+              _handleGameResult(context, false);
+            }
+          }
+        }
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(_rowPaddingOnEachSide),
+              child: lowerBoundGuessWord,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(_rowPaddingOnEachSide),
+              child: middleRowGuessWord,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(_rowPaddingOnEachSide),
+              child: upperBoundGuessWord,
+            ),
+          ],
+        );
+      },
       listener: (context, appGameState.GameState state) {
         if (state is AlphaBoundGameState) {
           if (state.gameState is GuessMovesUp) {
@@ -53,26 +92,10 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
           }
         }
       },
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(_rowPaddingOnEachSide),
-            child: _createBoundaryGuessWord(
-                gameEngineData.currentState.lowerBound,
-                _lowerBoundLetterSlotsKeys),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(_rowPaddingOnEachSide),
-            child: _createMiddleRowGuessLetters(),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(_rowPaddingOnEachSide),
-            child: _createBoundaryGuessWord(
-                gameEngineData.currentState.upperBound,
-                _upperBoundLetterSlotsKeys),
-          ),
-        ],
-      ),
+      buildWhen: (previousState, currentState) {
+        return currentState is AlphaBoundGameState &&
+            currentState.hasGameMovedAhead();
+      },
     );
   }
 
@@ -82,11 +105,14 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     for (var index = 0;
         index < AlphaBoundConstants.numberOfLettersInGuess;
         index++) {
+      var widgetKey = GlobalKey(
+          debugLabel: 'boundaryGuessLetter $index for word $boundaryGuessWord');
+      widgetContexts[index] = widgetKey;
       guessLetterSlots.add(
         Padding(
           padding: const EdgeInsets.all(3.0),
           child: _createBoundsLetterSlot(
-              index, boundaryGuessWord[index], widgetContexts[index]),
+              index, boundaryGuessWord[index], widgetKey),
         ),
       );
     }
@@ -98,7 +124,6 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
   }
 
   void _handleUpperBoundChange(BuildContext layoutContext) {
-    var overlays = <OverlayEntry>[];
     for (int index = 0;
         index < AlphaBoundConstants.numberOfLettersInGuess;
         index++) {
@@ -116,14 +141,12 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
       }
       var overlayEntry =
           _animateGuessWordOnBoundsChange(index, _upperBoundLetterSlotsKeys);
-      overlays.add(overlayEntry);
-      Overlay.of(layoutContext).insert(overlayEntry);
+      _insertOverlayEntry(overlayEntry);
     }
-    _onAnimationCompleted(overlays, true);
+    _onAnimationCompleted(true, true);
   }
 
   void _handleLowerBoundChange(BuildContext context) {
-    var overlays = <OverlayEntry>[];
     if (_upperBoundLetterSlotsKeys.every(
             (e) => e.currentContext != null && e.currentContext!.mounted) &&
         _guessRowLetterSlotsKeys.every(
@@ -133,46 +156,50 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
           index++) {
         var overlayEntry =
             _animateGuessWordOnBoundsChange(index, _lowerBoundLetterSlotsKeys);
-        overlays.add(overlayEntry);
-        Overlay.of(context).insert(overlayEntry);
+        _insertOverlayEntry(overlayEntry);
       }
-      _onAnimationCompleted(overlays, true);
+      _onAnimationCompleted(true, true);
     }
   }
 
   void _handleGameResult(BuildContext context, bool didWin) {
-    var overlays = <OverlayEntry>[];
-    if (_guessRowLetterSlotsKeys
-        .every((e) => e.currentContext != null && e.currentContext!.mounted)) {
-      for (int index = 0;
-          index < AlphaBoundConstants.numberOfLettersInGuess;
-          index++) {
-        var overlayEntry = _animateGuessWordOnResult(index, didWin);
-        overlays.add(overlayEntry);
-        Overlay.of(context).insert(overlayEntry);
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (_guessRowLetterSlotsKeys.every(
+          (e) => e.currentContext != null && e.currentContext!.mounted)) {
+        for (int index = 0;
+            index < AlphaBoundConstants.numberOfLettersInGuess;
+            index++) {
+          var overlayEntry =
+              _createAnimatedGuessLetterOnGameResult(index, didWin);
+          _insertOverlayEntry(overlayEntry);
+        }
+        _onAnimationCompleted(false, false);
       }
-      _onAnimationCompleted(overlays, false);
-    }
+    });
   }
 
-  void _onAnimationCompleted(
-      Iterable<OverlayEntry> overlays, bool shouldResetGuess) {
+  void _onAnimationCompleted(bool shouldResetGuess, bool shouldRebuild) {
     Future.delayed(
         Duration(
             milliseconds:
                 (AlphaBoundConstants.numberOfLettersInGuess * 250) + 750), () {
-      setState(() {
-        for (var overlayEntry in overlays) {
-          overlayEntry.remove();
-        }
+      if (shouldRebuild) {
+        setState(() {
+          _removeAllOverlays();
+          if (shouldResetGuess) {
+            widget.guessLetterValueNotifier.value = "";
+          }
+        });
+      } else {
+        _removeAllOverlays();
         if (shouldResetGuess) {
           widget.guessLetterValueNotifier.value = "";
         }
-      });
+      }
     });
   }
 
-  Widget _createMiddleRowGuessLetters() {
+  Widget _createMiddleGuessRow(bool didWinGame) {
     return ValueListenableBuilder<String>(
       valueListenable: widget.guessLetterValueNotifier,
       builder: (context, guessLetterValue, child) {
@@ -183,7 +210,7 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
           guessRowLetterSlots.add(
             Padding(
               padding: const EdgeInsets.all(3.0),
-              child: _createMiddleRowGuessLetterSlot(index),
+              child: _createMiddleRowGuessLetterSlot(index, didWinGame),
             ),
           );
         }
@@ -214,7 +241,7 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     );
   }
 
-  Widget _createMiddleRowGuessLetterSlot(int index) {
+  Widget _createMiddleRowGuessLetterSlot(int index, bool didWin) {
     Widget centerWidget;
     Color backgroundColor;
     var guessLetterValue = widget.guessLetterValueNotifier.value;
@@ -222,9 +249,11 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     if (index < guessLetterValueLength) {
       centerWidget = Text(
         guessLetterValue[index].toUpperCase(),
-        style: TextStyle(fontSize: widget.letterSize / 2, color: Colors.black),
+        style: TextStyle(
+            fontSize: widget.letterSize / 2,
+            color: didWin ? Colors.white : Colors.black),
       );
-      backgroundColor = Colors.orange;
+      backgroundColor = didWin ? Colors.green : Colors.orange;
     } else if (index == guessLetterValueLength) {
       centerWidget = Container(
         height: 15,
@@ -239,8 +268,10 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
       centerWidget = SizedBox.shrink();
       backgroundColor = Colors.white;
     }
+    var widgetKey = GlobalKey(debugLabel: 'guessRowLetterSlot$index');
+    _guessRowLetterSlotsKeys[index] = widgetKey;
     return Container(
-      key: _guessRowLetterSlotsKeys[index],
+      key: widgetKey,
       width: widget.letterSize,
       height: widget.letterSize,
       decoration: BoxDecoration(
@@ -279,7 +310,7 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     return OverlayEntry(builder: (context) => animatedGuessedLetterSlot);
   }
 
-  OverlayEntry _animateGuessWordOnResult(int index, bool didWin) {
+  OverlayEntry _createAnimatedGuessLetterOnGameResult(int index, bool didWin) {
     var guessLetter =
         widget.guessLetterValueNotifier.value[index].toUpperCase();
 
@@ -304,5 +335,28 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
         child: Material(child: guessLetterWidget),
       ),
     );
+  }
+
+  void _insertOverlayEntry(OverlayEntry overlayEntry) {
+    if (mounted) {
+      _overlayEntries.add(overlayEntry);
+      Overlay.of(context).insert(overlayEntry);
+    }
+  }
+
+  @override
+  void dispose() {
+    _removeAllOverlays();
+    super.dispose();
+  }
+
+  void _removeAllOverlays() {
+    if (mounted) {
+      for (var overlayEntry in _overlayEntries) {
+        if (overlayEntry.mounted) {
+          overlayEntry.remove();
+        }
+      }
+    }
   }
 }

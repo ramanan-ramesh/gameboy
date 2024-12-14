@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/alphaBound/models/game_engine.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
+import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/animated_linear_progress_indicator.dart';
+import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
 
 class GuessLetterRangeLayout extends StatelessWidget {
   final double _rangeLetterIndicatorSize;
@@ -12,15 +16,24 @@ class GuessLetterRangeLayout extends StatelessWidget {
     var gameEngineData = context.getGameEngineData();
     var firstPossibleStartLetter = gameEngineData.currentState.lowerBound[0];
     var lastPossibleStartLetter = gameEngineData.currentState.upperBound[0];
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _createFirstPossibleStartLetter(firstPossibleStartLetter),
-        Expanded(
-          child: _createDistanceIndicator(gameEngineData),
-        ),
-        _createLastPossibleStartLetter(lastPossibleStartLetter),
-      ],
+    return BlocConsumer<GameBloc, GameState>(
+      builder: (BuildContext context, GameState state) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _createFirstPossibleStartLetter(firstPossibleStartLetter),
+            Expanded(
+              child: AnimatedLinearProgressIndicator(),
+            ),
+            _createLastPossibleStartLetter(lastPossibleStartLetter),
+          ],
+        );
+      },
+      listener: (BuildContext context, GameState state) {},
+      buildWhen: (previousState, currentState) {
+        return (currentState is AlphaBoundGameState) &&
+            currentState.hasGameMovedAhead();
+      },
     );
   }
 
@@ -58,60 +71,6 @@ class GuessLetterRangeLayout extends StatelessWidget {
             height: 20,
           ),
         ),
-      ],
-    );
-  }
-
-  Stack _createDistanceIndicator(GameEngineData gameEngineData) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        RotatedBox(
-          quarterTurns: 1,
-          child: LinearProgressIndicator(
-            value: gameEngineData.distanceOfWordOfTheDayFromBounds,
-            backgroundColor: Colors.grey, // second half
-            color: Colors.green, // first half
-          ),
-        ),
-        if (gameEngineData.distanceOfWordOfTheDayFromBounds < 0.4)
-          Positioned(
-            top: 0,
-            right: -30,
-            child: Text(
-              gameEngineData.distanceOfWordOfTheDayFromBounds >= 0.1
-                  ? gameEngineData.distanceOfWordOfTheDayFromBounds
-                      .toStringAsFixed(1)
-                  : '0.1',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        if (gameEngineData.distanceOfWordOfTheDayFromBounds > 0.7)
-          Positioned(
-            bottom: 0,
-            right: -30,
-            child: Text(
-              gameEngineData.distanceOfWordOfTheDayFromBounds > 0.9
-                  ? '0.9'
-                  : gameEngineData.distanceOfWordOfTheDayFromBounds
-                      .toStringAsFixed(1),
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        if (gameEngineData.distanceOfWordOfTheDayFromBounds >= 0.4 &&
-            gameEngineData.distanceOfWordOfTheDayFromBounds <= 0.7)
-          Positioned(
-            top: 0,
-            bottom: 0,
-            right: -30,
-            child: Center(
-              child: Text(
-                gameEngineData.distanceOfWordOfTheDayFromBounds
-                    .toStringAsFixed(1),
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
       ],
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
+import 'package:gameboy/data/alphaBound/models/game_state.dart'
+    as alphaBoundState;
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
@@ -16,6 +18,7 @@ class ProgressTracker extends StatelessWidget {
     return BlocConsumer<GameBloc, gameAppState.GameState>(
       builder: (BuildContext context, gameAppState.GameState state) {
         var statistics = context.getStatsRepository();
+        var gameState = context.getCurrentAplhaBoundGameState();
         return Row(
           children: [
             Padding(
@@ -27,7 +30,7 @@ class ProgressTracker extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: _createNumberOfAttemptedGuessesTracker(
-                    statistics.numberOfWordsGuessed),
+                    statistics.numberOfWordsGuessed, gameState),
               ),
             ),
           ],
@@ -60,23 +63,34 @@ class ProgressTracker extends StatelessWidget {
     );
   }
 
-  Widget _createNumberOfAttemptedGuessesTracker(int numberOfGuesses) {
+  Widget _createNumberOfAttemptedGuessesTracker(
+      int numberOfGuesses, alphaBoundState.GameState gameState) {
     return Wrap(
       alignment: WrapAlignment.center,
       runAlignment: WrapAlignment.center,
       children: List.generate(
         AlphaBoundConstants.numberOfAllowedGuesses,
         (index) {
+          Color backgroundColor = Colors.grey;
+          if (index < numberOfGuesses) {
+            backgroundColor = Colors.red;
+            if (gameState is alphaBoundState.GameWon) {
+              if (index == (numberOfGuesses - 1)) {
+                backgroundColor = Colors.green;
+              }
+            }
+          } else if (index == numberOfGuesses) {
+            if (gameState is alphaBoundState.GuessMovesUp ||
+                gameState is alphaBoundState.GuessMovesDown) {
+              backgroundColor = Colors.green;
+            }
+          }
           return Container(
             margin: const EdgeInsets.all(4.0),
             width: 20.0,
             height: 20.0,
             decoration: BoxDecoration(
-              color: index < numberOfGuesses
-                  ? Colors.red
-                  : index == numberOfGuesses
-                      ? Colors.green
-                      : Colors.grey,
+              color: backgroundColor,
               shape: BoxShape.circle,
             ),
           );

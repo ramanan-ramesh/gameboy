@@ -11,7 +11,7 @@ class _GameStateInternal extends GameState {
 class AlphaBoundGameEngine extends GameEngineDriver {
   static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _sortedDictionary;
-  static final _firstDay = DateTime(2024, 26, 11);
+  static final _firstDay = DateTime(2024, 11, 26);
   static const _defaultLowerBoundGuess = 'AAAAA';
   static const _defaultUpperBoundGuess = 'ZZZZZ';
 

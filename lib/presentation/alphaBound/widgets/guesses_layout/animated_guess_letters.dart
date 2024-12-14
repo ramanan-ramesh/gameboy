@@ -169,8 +169,6 @@ class _AnimatedGuessLetterDancerState extends State<AnimatedGuessLetterDancer>
   }
 }
 
-//create an animated widget similar to the above that shakes the left from left to right
-
 class AnimatedGuessLetterShaker extends StatefulWidget {
   final double letterSize;
   final int index;

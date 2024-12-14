@@ -75,7 +75,8 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
           _middleGuessedWordField: null,
           _lowerBoundGuessField: null,
           _upperBoundGuessField: null,
-          _lastPlayedDateField: null
+          _lastPlayedDateField: null,
+          _numberOfWordsGuessedField: null,
         };
         if (numberOfDaysInBetween >= 1) {
           if (numberOfDaysInBetween > 1) {
@@ -86,6 +87,7 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
             todaysUpperBoundGuess = null;
             middleGuessedWord = null;
             lastPlayedDate = null;
+            numberOfWordsGuessed = 0;
             if (numberOfDaysInBetween > 1) {
               currentStreak = 0;
             }
@@ -161,6 +163,7 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
       _maximumStreakField: maximumStreak,
       _numberOfGamesPlayedField: numberOfGamesPlayed + 1,
     }, () {
+      numberOfWordsGuessed++;
       middleGuessedWord = guess;
       this.numberOfTimesWon = numberOfTimesWon;
       this.currentStreak = currentStreak;

@@ -51,9 +51,6 @@ class AlphaBoundBloc extends GameBloc<AlphaBoundEvent, AlphaBoundState> {
               gameEngineDriver!.currentState.lowerBound,
               gameEngineDriver!.currentState.upperBound);
         } else if (gameState is GameWon || gameState is GameLost) {
-          await alphaBoundStatsModifier.tryUpdateLowerAndUpperBoundGuess(
-              gameEngineDriver!.currentState.lowerBound,
-              gameEngineDriver!.currentState.upperBound);
           await alphaBoundStatsModifier.trySubmitGuessWordOnEndGame(
               event.guessWord, gameState is GameWon);
         }

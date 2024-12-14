@@ -6,7 +6,7 @@ extension DateTimeExt on DateTime {
   int numberOfDaysInBetween(DateTime other) {
     var day1 = DateTime(year, month, day);
     var day2 = DateTime(other.year, other.month, other.day);
-    return day1.difference(day2).inDays;
+    return day1.difference(day2).abs().inDays;
   }
 }
 

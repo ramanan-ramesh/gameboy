@@ -25,3 +25,5 @@ class GuessWordAccepted extends GuessedWordResult {
   int score;
   GuessWordAccepted(super.guessedWordState, this.score);
 }
+
+class ShowStats extends SpellingBeeState {}

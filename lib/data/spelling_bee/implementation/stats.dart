@@ -15,6 +15,7 @@ class StatsRepository extends StatsModifier {
   static const _rankingsCountField = 'rankingsCount';
   static const _lastPlayedMatchDateField = 'matchDate';
   static const _wordsSubmittedTodayField = 'wordsSubmittedToday';
+  static const _longestSubmittedGuessField = 'longestSubmittedGuess';
   static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   static final _firstDay = DateTime(2024, 11, 6);
 
@@ -40,6 +41,11 @@ class StatsRepository extends StatsModifier {
       rankingsCount = Map<String, int>.from(rankingsCountValue).map(
           (key, value) =>
               MapEntry(key.toString(), int.parse(value.toString())));
+    }
+
+    String? longestSubmittedGuess;
+    if (userData.containsKey(_longestSubmittedGuessField)) {
+      longestSubmittedGuess = userData[_longestSubmittedGuessField] as String;
     }
 
     List<String> lastSubmittedWords = [];
@@ -93,7 +99,8 @@ class StatsRepository extends StatsModifier {
         wordsSubmittedToday: lastSubmittedWords,
         userId: userId,
         lastCompletedMatchDay: lastPlayedMatchDay,
-        initializedDateTime: initializedDateTime);
+        initializedDateTime: initializedDateTime,
+        longestGuessWord: longestSubmittedGuess);
   }
 
   @override
@@ -111,20 +118,23 @@ class StatsRepository extends StatsModifier {
       return false;
     }
     var didSubmitWord = false;
-    wordsSubmittedToday.add(word);
-    _lastCompletedMatchDay ??= initializedDateTime;
-    await _userDataReference
-        .update({
-          _wordsSubmittedTodayField: wordsSubmittedToday,
-          _lastPlayedMatchDateField:
-              _dateFormat.format(_lastCompletedMatchDay!),
-        })
-        .then((_) => didSubmitWord = true)
-        .onError((_, __) => didSubmitWord = false);
+    var shouldUpdateLongestGuess =
+        word.length > (_longestGuessedWord?.length ?? 0);
+    await _userDataReference.update({
+      _wordsSubmittedTodayField: wordsSubmittedToday,
+      _lastPlayedMatchDateField: _dateFormat.format(initializedDateTime),
+      if (shouldUpdateLongestGuess) _longestSubmittedGuessField: word,
+    }).then((_) {
+      didSubmitWord = true;
+      wordsSubmittedToday.add(word);
+      _lastCompletedMatchDay ??= initializedDateTime;
+      if (shouldUpdateLongestGuess) {
+        _longestGuessedWord = word;
+      }
+    }).onError((_, __) {
+      didSubmitWord = false;
+    });
 
-    if (!didSubmitWord) {
-      wordsSubmittedToday.remove(word);
-    }
     return didSubmitWord;
   }
 
@@ -144,6 +154,10 @@ class StatsRepository extends StatsModifier {
 
   @override
   final DateTime initializedDateTime;
+
+  @override
+  String? get longestGuessedWord => _longestGuessedWord;
+  String? _longestGuessedWord;
 
   static int _getIntegerStatistic(Map userData, String field) {
     return userData.containsKey(field)
@@ -185,8 +199,10 @@ class StatsRepository extends StatsModifier {
       required this.wordsSubmittedToday,
       required String userId,
       required DateTime? lastCompletedMatchDay,
-      required this.initializedDateTime})
+      required this.initializedDateTime,
+      String? longestGuessWord})
       : _rankingsCount = rankingsCount,
         _userId = userId,
-        _lastCompletedMatchDay = lastCompletedMatchDay;
+        _lastCompletedMatchDay = lastCompletedMatchDay,
+        _longestGuessedWord = longestGuessWord;
 }

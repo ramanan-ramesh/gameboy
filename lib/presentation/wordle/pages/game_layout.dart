@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
@@ -48,6 +49,7 @@ class WordleLayout implements GameLayout {
                   widthFactor: 0.75,
                   child: StatsSheet(
                     statsRepository: widgetContext.getStatsRepository(),
+                    game: widgetContext.currentGameData.game,
                   ),
                 );
               });

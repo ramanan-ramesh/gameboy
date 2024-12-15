@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/wordle/models/stats.dart';
 
 class StatsSheet extends StatelessWidget {
-  static const _wordleLogoAsset = 'assets/wordle/logo.webp';
   final WordleStats statsRepository;
-  const StatsSheet({super.key, required this.statsRepository});
+  final Game game;
+  const StatsSheet(
+      {super.key, required this.statsRepository, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +41,11 @@ class StatsSheet extends StatelessWidget {
     return Column(
       children: [
         Image.asset(
-          _wordleLogoAsset,
+          game.imageAsset,
           width: 50,
           height: 50,
         ),
-        Text('Wordle')
+        Text(game.name.toUpperCase())
       ],
     );
   }

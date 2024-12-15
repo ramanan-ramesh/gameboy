@@ -20,6 +20,7 @@ class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState> {
   SpellingBeeBloc(String userId) : super(SpellingBeeLoading()) {
     on<SubmitWord>(_onSubmitWord);
     on<_LoadGame>(_onLoadGame);
+    on<RequestStats>(_onRequestStats);
     add(_LoadGame(userId));
   }
 
@@ -47,5 +48,10 @@ class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState> {
 
     emit(SpellingBeeLoaded(
         statistics: statsInstance!, gameEngine: gameEngineDriver!));
+  }
+
+  FutureOr<void> _onRequestStats(
+      RequestStats event, Emitter<SpellingBeeState> emit) {
+    emit(ShowStats());
   }
 }

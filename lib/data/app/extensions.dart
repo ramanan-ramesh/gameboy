@@ -21,4 +21,19 @@ extension StringExt on String {
     }
     return compareTo(other);
   }
+
+  String capitalizeFirstLettersOfWord() {
+    String result = '';
+    for (var word in split(' ')) {
+      if (word.isEmpty) {
+        continue;
+      }
+      if (word.length == 1) {
+        result += '${word.toUpperCase()} ';
+        continue;
+      }
+      result += '${word[0].toUpperCase()}${word.substring(1).toLowerCase()} ';
+    }
+    return result.trim();
+  }
 }

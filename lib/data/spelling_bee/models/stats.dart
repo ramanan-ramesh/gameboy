@@ -7,4 +7,5 @@ abstract class Stats extends Statistics {
   int get numberOfGamesPlayed;
   int get numberOfWordsSubmitted;
   int get numberOfPangrams;
+  String? get longestGuessedWord;
 }

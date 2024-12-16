@@ -6,6 +6,8 @@ import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/animated_
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 
+//TODO: If the first and last possible letters are the same, then first and last letters must denote the letters of lower/upper bound until the differentiating letter is found.
+//Ex: If lower bound - 'AAAAA' and upper bound - 'AMBER', then first and last letters must denote 'AA' and 'AM' respectively.
 class GuessLetterRangeLayout extends StatelessWidget {
   final double _rangeLetterIndicatorSize;
   const GuessLetterRangeLayout({super.key, required double letterSize})
@@ -13,11 +15,12 @@ class GuessLetterRangeLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var gameEngineData = context.getGameEngineData();
-    var firstPossibleStartLetter = gameEngineData.currentState.lowerBound[0];
-    var lastPossibleStartLetter = gameEngineData.currentState.upperBound[0];
     return BlocConsumer<GameBloc, GameState>(
       builder: (BuildContext context, GameState state) {
+        var gameEngineData = context.getGameEngineData();
+        var firstPossibleStartLetter =
+            gameEngineData.currentState.lowerBound[0];
+        var lastPossibleStartLetter = gameEngineData.currentState.upperBound[0];
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

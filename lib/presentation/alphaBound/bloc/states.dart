@@ -1,7 +1,5 @@
-import 'package:gameboy/data/alphaBound/models/game_engine.dart';
 import 'package:gameboy/data/alphaBound/models/game_state.dart'
     as alphaBoundState;
-import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 
 abstract class AlphaBoundState extends GameState {
@@ -17,23 +15,9 @@ abstract class AlphaBoundState extends GameState {
   }
 }
 
-class AlphaBoundLoading extends AlphaBoundState implements GameLoading {}
-
-class AlphaBoundLoaded extends AlphaBoundState implements GameLoaded {
-  @override
-  final AlphaBoundStats statistics;
-
-  @override
-  final GameEngineData gameEngine;
-
-  AlphaBoundLoaded({required this.statistics, required this.gameEngine});
-}
-
 class AlphaBoundGameState extends AlphaBoundState {
   final alphaBoundState.GameState gameState;
   final bool isStartup;
 
   AlphaBoundGameState({required this.gameState, this.isStartup = false});
 }
-
-class ShowStats extends AlphaBoundState {}

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
   static const _lastPlayedDateField = 'lastPlayedDate';
   static const _currentStreakField = 'currentStreak';
   static const _maximumStreakField = 'maximumStreak';
+  static const _wonPositionsField = 'wonPositions';
   static final _dateFormat = DateFormat('dd/MM/yyyy');
 
   static Future<AlphaBoundStatsModifier> create(String userId) async {
@@ -35,6 +37,8 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
         .child(_userDataField)
         .child(userId);
     var userDocumentData = await userDataReference.get();
+    List<int> wonPositions =
+        List.generate(AlphaBoundConstants.numberOfAllowedGuesses, (index) => 0);
     if (userDocumentData.exists) {
       var userData = userDocumentData.value as Map;
       if (userData.containsKey(_numberOfGamesPlayedField)) {
@@ -66,6 +70,15 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
       }
       if (userData.containsKey(_maximumStreakField)) {
         maximumStreak = int.parse(userData[_maximumStreakField].toString());
+      }
+      if (userData.containsKey(_wonPositionsField)) {
+        var wonPositionsData = userData[_wonPositionsField] as Map<String, int>;
+        for (var wonPositionWonData in wonPositionsData.entries) {
+          var positionName = wonPositionWonData.key;
+          var position = int.parse(positionName.substring(
+              3)); //'val0' to 'val${AlphaBoundConstants.numberOfAllowedGuesses}'
+          wonPositions[position] = wonPositionWonData.value;
+        }
       }
 
       if (lastPlayedDate != null) {
@@ -106,7 +119,8 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
         numberOfWordsGuessed: numberOfWordsGuessed,
         middleGuessedWord: middleGuessedWord,
         currentStreak: currentStreak,
-        maximumStreak: maximumStreak);
+        maximumStreak: maximumStreak,
+        wonPositions: wonPositions);
   }
 
   final String userId;
@@ -139,6 +153,10 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
   int maximumStreak;
 
   @override
+  Iterable<int> get wonPositions => _wonPositions;
+  List<int> _wonPositions;
+
+  @override
   Future<bool> tryUpdateLowerAndUpperBoundGuess(
       String lowerBoundGuess, String upperBoundGuess) {
     return _trySubmitGuessWord({
@@ -156,19 +174,36 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
         didWin ? this.numberOfTimesWon + 1 : this.numberOfTimesWon;
     var currentStreak = didWin ? this.currentStreak + 1 : 0;
     var maximumStreak = max(this.maximumStreak, currentStreak);
-    return _trySubmitGuessWord({
+
+    var jsonToUpdate = <String, Object?>{
       _middleGuessedWordField: guess,
       _numberOfTimesWonField: numberOfTimesWon,
       _currentStreakField: currentStreak,
       _maximumStreakField: maximumStreak,
       _numberOfGamesPlayedField: numberOfGamesPlayed + 1,
-    }, () {
+    };
+    if (didWin) {
+      var nonZeroWonPositions = Map.of(_wonPositions.asMap())
+        ..removeWhere((index, value) => value == 0);
+      var newWonPositionsValue = nonZeroWonPositions
+        ..map((index, value) {
+          if (didWin && index < (numberOfWordsGuessed - 1)) {
+            return MapEntry('val$index', (value + 1));
+          }
+          return MapEntry('val$index', value);
+        });
+      jsonToUpdate[_wonPositionsField] = newWonPositionsValue;
+    }
+    return _trySubmitGuessWord(jsonToUpdate, () {
       numberOfWordsGuessed++;
       middleGuessedWord = guess;
       this.numberOfTimesWon = numberOfTimesWon;
       this.currentStreak = currentStreak;
       this.maximumStreak = maximumStreak;
       numberOfGamesPlayed++;
+      if (didWin) {
+        _wonPositions[numberOfWordsGuessed - 1]++;
+      }
     });
   }
 
@@ -206,5 +241,7 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
       required this.numberOfWordsGuessed,
       required this.middleGuessedWord,
       required this.currentStreak,
-      required this.maximumStreak});
+      required this.maximumStreak,
+      required List<int> wonPositions})
+      : _wonPositions = wonPositions;
 }

@@ -1,4 +1,6 @@
-abstract class WordleEvent {}
+import 'package:gameboy/presentation/app/blocs/game_event.dart';
+
+abstract class WordleEvent extends GameEvent {}
 
 class SubmitLetter extends WordleEvent {
   final String letter;
@@ -8,5 +10,3 @@ class SubmitLetter extends WordleEvent {
 class RemoveLetter extends WordleEvent {}
 
 class SubmitWord extends WordleEvent {}
-
-class RequestStats extends WordleEvent {}

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_event.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
-import 'package:gameboy/presentation/wordle/bloc/events.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';
 import 'package:gameboy/presentation/wordle/widgets/guesses_layout.dart';
@@ -30,13 +31,15 @@ class WordleLayout implements GameLayout {
   Widget buildGameLayout(
       BuildContext widgetContext, double layoutWidth, double layoutHeight) {
     var initialBlocState = widgetContext.getCurrentWordleState();
-    if (initialBlocState is GameWon && initialBlocState.isStartup) {
-      _onGameWon(initialBlocState, widgetContext);
-    } else if (initialBlocState is GameLost && initialBlocState.isStartup) {
-      _onGameLost(initialBlocState, widgetContext);
+    if (initialBlocState is WordleState) {
+      if (initialBlocState is GameWon && initialBlocState.isStartup) {
+        _onGameWon(initialBlocState, widgetContext);
+      } else if (initialBlocState is GameLost && initialBlocState.isStartup) {
+        _onGameLost(initialBlocState, widgetContext);
+      }
     }
-    return BlocListener<GameBloc, GameState>(
-      listener: (BuildContext context, GameState state) {
+    return BlocListener<GameBloc, appGameState.GameState>(
+      listener: (BuildContext context, appGameState.GameState state) {
         if (state is GameWon) {
           _onGameWon(state, context);
         } else if (state is GameLost) {

@@ -5,53 +5,43 @@ import 'package:gameboy/data/spelling_bee/models/game_engine_driver.dart';
 import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/data/spelling_bee/models/stats_modifier.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/events.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
 
-class _LoadGame extends SpellingBeeEvent {
-  final String userId;
-  _LoadGame(this.userId);
-}
-
-class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState> {
-  GameEngineDriver? gameEngineDriver;
-  static StatsModifier? statsInstance;
-
-  SpellingBeeBloc(String userId) : super(SpellingBeeLoading()) {
+class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState,
+    StatsModifier, GameEngineDriver> {
+  SpellingBeeBloc(String userId) : super(userId: userId) {
     on<SubmitWord>(_onSubmitWord);
-    on<_LoadGame>(_onLoadGame);
-    on<RequestStats>(_onRequestStats);
-    add(_LoadGame(userId));
+  }
+
+  @override
+  Future<StatsModifier> statisticsCreator() async {
+    return await StatsModifier.createInstance(userId);
+  }
+
+  @override
+  Future<GameEngineDriver> gameEngineCreator(StatsModifier stats) async {
+    return await GameEngineDriver.createEngine(
+        stats.wordsSubmittedToday.toList(), stats.lettersOfTheDay);
+  }
+
+  @override
+  FutureOr<SpellingBeeState?> createGameResultOnStartup() {
+    return null;
   }
 
   FutureOr<void> _onSubmitWord(
-      SubmitWord event, Emitter<SpellingBeeState> emit) async {
-    var currentScore = gameEngineDriver!.currentScore;
-    var guessedWordState = gameEngineDriver!.trySubmitWord(event.word);
+      SubmitWord event, Emitter<GameState> emit) async {
+    var currentScore = gameEngine.currentScore;
+    var guessedWordState = gameEngine.trySubmitWord(event.word);
     if (guessedWordState == GuessedWordState.valid) {
-      await statsInstance!.trySubmitWord(event.word);
-      var newScore = gameEngineDriver!.currentScore;
+      await stats.trySubmitWord(event.word);
+      var newScore = gameEngine.currentScore;
       emit(GuessWordAccepted(
           GuessedWordState.valid, newScore.score - currentScore.score));
       return;
     }
     emit(GuessedWordResult(guessedWordState));
-  }
-
-  FutureOr<void> _onLoadGame(
-      _LoadGame event, Emitter<SpellingBeeState> emit) async {
-    var statsRepository = await StatsModifier.createInstance(event.userId);
-    statsInstance = statsRepository;
-    gameEngineDriver = await GameEngineDriver.createEngine(
-        statsInstance!.wordsSubmittedToday.toList(),
-        statsRepository.lettersOfTheDay);
-
-    emit(SpellingBeeLoaded(
-        statistics: statsInstance!, gameEngine: gameEngineDriver!));
-  }
-
-  FutureOr<void> _onRequestStats(
-      RequestStats event, Emitter<SpellingBeeState> emit) {
-    emit(ShowStats());
   }
 }

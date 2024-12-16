@@ -8,67 +8,56 @@ import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
 
-class _LoadGame extends AlphaBoundEvent {
-  final String userId;
-  _LoadGame(this.userId);
-}
-
-class AlphaBoundBloc extends GameBloc<AlphaBoundEvent, AlphaBoundState> {
-  static late AlphaBoundStatsModifier alphaBoundStatsModifier;
-  GameEngineDriver? gameEngineDriver;
-
-  AlphaBoundBloc(String userId) : super(AlphaBoundLoading()) {
-    on<_LoadGame>(_onLoadGame);
+class AlphaBoundBloc extends GameBloc<AlphaBoundEvent, AlphaBoundState,
+    AlphaBoundStatsModifier, GameEngineDriver> {
+  AlphaBoundBloc(String userId) : super(userId: userId) {
     on<SubmitGuessWord>(_onSubmitGuessWord);
-    on<RequestStats>(_onRequestStats);
-    add(_LoadGame(userId));
   }
 
-  FutureOr<void> _onLoadGame(
-      _LoadGame event, Emitter<AlphaBoundState> emitter) async {
-    alphaBoundStatsModifier =
-        await AlphaBoundStatsModifier.createInstance(event.userId);
-    gameEngineDriver = await GameEngineDriver.createInstance(
-        alphaBoundStatsModifier.todaysLowerBoundGuess,
-        alphaBoundStatsModifier.todaysUpperBoundGuess,
-        alphaBoundStatsModifier.numberOfWordsGuessed,
-        alphaBoundStatsModifier.middleGuessedWord);
-    emitter(AlphaBoundLoaded(
-        statistics: alphaBoundStatsModifier, gameEngine: gameEngineDriver!));
-    _tryEmitGameResultOnStartup(emitter);
+  @override
+  FutureOr<AlphaBoundState?> createGameResultOnStartup() {
+    if (gameEngine.currentState is GameWon ||
+        gameEngine.currentState is GameLost) {
+      return AlphaBoundGameState(
+          gameState: gameEngine.currentState, isStartup: true);
+    }
+    return null;
+  }
+
+  @override
+  Future<GameEngineDriver> gameEngineCreator(
+      AlphaBoundStatsModifier stats) async {
+    return await GameEngineDriver.createInstance(
+        stats.todaysLowerBoundGuess,
+        stats.todaysUpperBoundGuess,
+        stats.numberOfWordsGuessed,
+        stats.middleGuessedWord);
+  }
+
+  @override
+  Future<AlphaBoundStatsModifier> statisticsCreator() async {
+    return await AlphaBoundStatsModifier.createInstance(userId);
   }
 
   FutureOr<void> _onSubmitGuessWord(
-      SubmitGuessWord event, Emitter<AlphaBoundState> emit) async {
-    if (gameEngineDriver!.numberOfWordsGuessed !=
+      SubmitGuessWord event, Emitter<appGameState.GameState> emit) async {
+    if (gameEngine.numberOfWordsGuessed !=
         AlphaBoundConstants.numberOfAllowedGuesses) {
       if (event.guessWord.length ==
           AlphaBoundConstants.numberOfLettersInGuess) {
-        var gameState = gameEngineDriver!.trySubmitGuess(event.guessWord);
+        var gameState = gameEngine.trySubmitGuess(event.guessWord);
         if (gameState is GuessMovesUp || gameState is GuessMovesDown) {
-          await alphaBoundStatsModifier.tryUpdateLowerAndUpperBoundGuess(
-              gameEngineDriver!.currentState.lowerBound,
-              gameEngineDriver!.currentState.upperBound);
+          await stats.tryUpdateLowerAndUpperBoundGuess(
+              gameEngine.currentState.lowerBound,
+              gameEngine.currentState.upperBound);
         } else if (gameState is GameWon || gameState is GameLost) {
-          await alphaBoundStatsModifier.trySubmitGuessWordOnEndGame(
+          await stats.trySubmitGuessWordOnEndGame(
               event.guessWord, gameState is GameWon);
         }
         emit(AlphaBoundGameState(gameState: gameState));
       }
     }
-  }
-
-  void _tryEmitGameResultOnStartup(Emitter<AlphaBoundState> emitter) {
-    if (gameEngineDriver!.currentState is GameWon ||
-        gameEngineDriver!.currentState is GameLost) {
-      emitter(AlphaBoundGameState(
-          gameState: gameEngineDriver!.currentState, isStartup: true));
-    }
-  }
-
-  FutureOr<void> _onRequestStats(
-      RequestStats event, Emitter<AlphaBoundState> emit) {
-    emit(ShowStats());
   }
 }

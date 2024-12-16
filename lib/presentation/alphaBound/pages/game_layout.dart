@@ -5,6 +5,7 @@ import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/guesses_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/keyboard_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/progress_tracker.dart';
+import 'package:gameboy/presentation/app/blocs/game_event.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
 class AlphaBoundLayout extends GameLayout {

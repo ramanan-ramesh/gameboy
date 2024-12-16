@@ -6,8 +6,8 @@ import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/data/app/models/game_engine.dart';
 import 'package:gameboy/data/app/models/stats.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/bloc.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_event.dart';
 
 extension BuildContextExt on BuildContext {
   GameEngineData getGameEngineData() {
@@ -22,7 +22,7 @@ extension BuildContextExt on BuildContext {
     return RepositoryProvider.of<Statistics>(this) as AlphaBoundStats;
   }
 
-  void addGameEvent(AlphaBoundEvent event) {
+  void addGameEvent<TEvent extends GameEvent>(TEvent event) {
     _getGameBloc().add(event);
   }
 

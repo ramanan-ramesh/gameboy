@@ -5,8 +5,11 @@ import 'package:gameboy/data/alphaBound/models/game_state.dart'
     as alphaBoundState;
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
+import 'package:gameboy/presentation/alphaBound/widgets/stats_sheet.dart';
+import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart' as gameAppState;
+import 'package:gameboy/presentation/app/blocs/game_state.dart';
 
 //Expects fixed height and unbounded width.
 //TODO: Add expected layout constraints to other widgets doc like this as well.
@@ -40,7 +43,20 @@ class ProgressTracker extends StatelessWidget {
         return currentState is AlphaBoundGameState &&
             currentState.hasGameMovedAhead();
       },
-      listener: (BuildContext context, gameAppState.GameState state) {},
+      listener: (BuildContext context, gameAppState.GameState state) {
+        if (state is ShowStats) {
+          var stats = context.getStatsRepository();
+          var game = context.currentGameData.game;
+          showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return AlphaBoundStatsSheet(
+                  stats: stats,
+                  game: game,
+                );
+              });
+        }
+      },
     );
   }
 

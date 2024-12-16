@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_event.dart';
+import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
 import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/events.dart';
@@ -129,8 +131,8 @@ class SpellingBeeLayout implements GameLayout {
   }
 
   Widget _buildGuessWordDisplay() {
-    return BlocConsumer<GameBloc, GameState>(
-      builder: (BuildContext context, GameState state) {
+    return BlocConsumer<GameBloc, appGameState.GameState>(
+      builder: (BuildContext context, appGameState.GameState state) {
         return ValueListenableBuilder(
           valueListenable: guessWordNotifier,
           builder: (context, value, child) {
@@ -141,7 +143,7 @@ class SpellingBeeLayout implements GameLayout {
           },
         );
       },
-      listener: (BuildContext context, GameState state) {
+      listener: (BuildContext context, appGameState.GameState state) {
         if (state is ShowStats) {
           var spellingBeeStats = context.getStatsRepository();
           var spellingBeeGame = context.currentGameData.game;

@@ -10,6 +10,7 @@ abstract class AlphaBoundStats extends Statistics {
   String? get middleGuessedWord;
   String? get todaysUpperBoundGuess;
   String? get todaysLowerBoundGuess;
+  Iterable<int> get wonPositions;
 }
 
 abstract class AlphaBoundStatsModifier extends AlphaBoundStats {

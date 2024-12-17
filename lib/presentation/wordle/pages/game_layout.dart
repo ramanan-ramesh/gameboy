@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
+import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_event.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';
@@ -44,18 +43,6 @@ class WordleLayout implements GameLayout {
           _onGameWon(state, context);
         } else if (state is GameLost) {
           _onGameLost(state, context);
-        } else if (state is ShowStats) {
-          showModalBottomSheet(
-              context: context,
-              builder: (BuildContext statsSheet) {
-                return FractionallySizedBox(
-                  widthFactor: 0.75,
-                  child: StatsSheet(
-                    statsRepository: widgetContext.getStatsRepository(),
-                    game: widgetContext.currentGameData.game,
-                  ),
-                );
-              });
         }
       },
       child: Column(
@@ -70,6 +57,13 @@ class WordleLayout implements GameLayout {
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget createStatsSheet(BuildContext context, Game game) {
+    return StatsSheet(
+      game: game,
     );
   }
 

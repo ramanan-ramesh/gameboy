@@ -1,37 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/wordle/models/stats.dart';
+import 'package:gameboy/presentation/wordle/extensions.dart';
 
 class StatsSheet extends StatelessWidget {
-  final WordleStats statsRepository;
   final Game game;
-  const StatsSheet(
-      {super.key, required this.statsRepository, required this.game});
+  const StatsSheet({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    var statsRepository = context.getStatsRepository();
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: _createWordleLogo(),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: _createStatsTiles(statsRepository),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: _createGuessDistribution(statsRepository),
-              ),
-            ],
-          ),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: _createWordleLogo(),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: _createStatsTiles(statsRepository),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: _createGuessDistribution(statsRepository),
+            ),
+          ],
         ),
       ),
     );

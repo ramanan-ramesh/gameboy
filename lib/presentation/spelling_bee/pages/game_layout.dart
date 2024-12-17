@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
+import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_event.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/events.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
@@ -143,26 +142,10 @@ class SpellingBeeLayout implements GameLayout {
           },
         );
       },
-      listener: (BuildContext context, appGameState.GameState state) {
-        if (state is ShowStats) {
-          var spellingBeeStats = context.getStatsRepository();
-          var spellingBeeGame = context.currentGameData.game;
-          showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return FractionallySizedBox(
-                  heightFactor: 0.75,
-                  child: SpellingBeeStatsSheet(
-                    spellingBeeStats: spellingBeeStats,
-                    game: spellingBeeGame,
-                  ),
-                );
-              });
-        }
-      },
       buildWhen: (previous, current) {
         return current is GuessedWordResult;
       },
+      listener: (BuildContext context, appGameState.GameState state) {},
     );
   }
 
@@ -213,5 +196,12 @@ class SpellingBeeLayout implements GameLayout {
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
       context.addGameEvent(SubmitWord(guessWordNotifier.value));
     }
+  }
+
+  @override
+  Widget createStatsSheet(BuildContext context, Game game) {
+    return SpellingBeeStatsSheet(
+      game: game,
+    );
   }
 }

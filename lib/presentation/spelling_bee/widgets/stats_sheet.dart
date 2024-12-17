@@ -3,38 +3,36 @@ import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/spelling_bee/models/constants.dart';
 import 'package:gameboy/data/spelling_bee/models/stats.dart';
+import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 
 class SpellingBeeStatsSheet extends StatelessWidget {
-  final Stats spellingBeeStats;
   final Game game;
-  const SpellingBeeStatsSheet(
-      {super.key, required this.spellingBeeStats, required this.game});
+  const SpellingBeeStatsSheet({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    var statsRepository = context.getStatsRepository();
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: _createSpellingBeeLogo(),
-              ),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: _createSpellingBeeLogo(),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: _createStatsTiles(statsRepository),
+            ),
+            if (statsRepository.rankingsCount.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: _createStatsTiles(spellingBeeStats),
+                child: _createGuessDistribution(statsRepository),
               ),
-              if (spellingBeeStats.rankingsCount.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: _createGuessDistribution(spellingBeeStats),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

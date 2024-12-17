@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
+import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/guesses_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/keyboard_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/progress_tracker.dart';
+import 'package:gameboy/presentation/alphaBound/widgets/stats_sheet.dart';
 import 'package:gameboy/presentation/app/blocs/game_event.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
@@ -50,6 +52,11 @@ class AlphaBoundLayout extends GameLayout {
   @override
   BoxConstraints get constraints => const BoxConstraints(
       minWidth: 300.0, maxWidth: 500.0, minHeight: 500.0, maxHeight: 1000.0);
+
+  @override
+  Widget createStatsSheet(BuildContext context, Game game) {
+    return AlphaBoundStatsSheet();
+  }
 
   void _onLetterPressed(String letter) {
     if (_guessLetterValueNotifier.value.length <

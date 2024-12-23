@@ -4,6 +4,7 @@ abstract class WordleEvent extends GameEvent {}
 
 class SubmitLetter extends WordleEvent {
   final String letter;
+
   SubmitLetter({required this.letter});
 }
 

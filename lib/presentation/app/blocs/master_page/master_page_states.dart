@@ -20,7 +20,7 @@ class ActiveThemeModeChanged extends MasterPageState {
 }
 
 class ActiveUserChanged extends MasterPageState {
-  PlatformUserFacade? user;
+  PlatformUser? user;
 
   ActiveUserChanged({required this.user});
 }

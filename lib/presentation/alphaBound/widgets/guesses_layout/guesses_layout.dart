@@ -6,6 +6,7 @@ class GuessesLayout extends StatelessWidget {
   final double _letterSize;
   final ValueNotifier<String> guessLetterValueNotifier;
   final double layoutWidth;
+
   const GuessesLayout(
       {super.key,
       required this.guessLetterValueNotifier,

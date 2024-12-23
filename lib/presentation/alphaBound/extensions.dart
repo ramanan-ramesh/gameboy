@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/alphaBound/models/game_engine.dart';
-import 'package:gameboy/data/alphaBound/models/game_state.dart';
+import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/data/app/models/game_engine.dart';
 import 'package:gameboy/data/app/models/stats.dart';
@@ -10,16 +10,16 @@ import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_event.dart';
 
 extension BuildContextExt on BuildContext {
-  GameEngineData getGameEngineData() {
-    return RepositoryProvider.of<GameEngine>(this) as GameEngineData;
+  AlphaBoundGameEngine getGameEngineData() {
+    return RepositoryProvider.of<GameEngine>(this) as AlphaBoundGameEngine;
   }
 
-  GameState getCurrentAplhaBoundGameState() {
+  AlphaBoundGameStatus getCurrentAlphaBoundGameStatus() {
     return getGameEngineData().currentState;
   }
 
-  AlphaBoundStats getStatsRepository() {
-    return RepositoryProvider.of<Statistics>(this) as AlphaBoundStats;
+  AlphaBoundStatistics getStatsRepository() {
+    return RepositoryProvider.of<Statistics>(this) as AlphaBoundStatistics;
   }
 
   void addGameEvent<TEvent extends GameEvent>(TEvent event) {

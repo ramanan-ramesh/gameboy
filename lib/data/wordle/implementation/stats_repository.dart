@@ -13,10 +13,10 @@ class StatsRepository extends WordleStatModifier {
   static const _currentStreakField = 'currentStreak';
   static final _dateFormat = DateFormat('dd/MM/yyyy');
   static const _maxStreakField = 'maxStreak';
-  static const _numberOfGamesPlayedField = 'numberOfGamesPlayed';
-  static const _wonPositionsField = 'wonPositions';
+  static const _numberOfGamesPlayedField = 'played';
+  static const _winCountsInPositionsField = 'winCounts';
   static const _lastGuessedWordsField = 'lastGuessedWords';
-  static const _currentGuessEditingDayField = 'currentGuessEditingDay';
+  static const _lastPlayedDayField = 'lastPlayedDay';
   static final _firstDay = DateTime(2024, 11, 6);
 
   static Future<StatsRepository> createInstance(String userId) async {
@@ -29,7 +29,7 @@ class StatsRepository extends WordleStatModifier {
     int currentStreak = 0, maxStreak = 0, numberOfGamesPlayed = 0;
     var wonPositions =
         List.generate(WordleConstants.numberOfGuesses, (index) => 0);
-    DateTime? currentlyEditingGuessDay;
+    DateTime? lastPlayedDay;
     var currentDay = DateTime.now();
     List<String> lastGuessedWords = [];
     if (userDocumentData.exists) {
@@ -44,8 +44,8 @@ class StatsRepository extends WordleStatModifier {
         numberOfGamesPlayed =
             int.parse(userData[_numberOfGamesPlayedField].toString());
       }
-      if (userData.containsKey(_wonPositionsField)) {
-        wonPositions = List.from(userData[_wonPositionsField])
+      if (userData.containsKey(_winCountsInPositionsField)) {
+        wonPositions = List.from(userData[_winCountsInPositionsField])
             .map((e) => int.parse(e.toString()))
             .toList();
       }
@@ -54,17 +54,9 @@ class StatsRepository extends WordleStatModifier {
             .map((e) => e.toString())
             .toList();
       }
-      if (userData.containsKey(_currentGuessEditingDayField)) {
-        var dateFieldValue = userData[_currentGuessEditingDayField] as String;
-        currentlyEditingGuessDay = _dateFormat.parse(dateFieldValue);
-      }
-
-      if (currentlyEditingGuessDay != null &&
-          !currentlyEditingGuessDay.isOnSameDayAs(currentDay)) {
-        await userDataReference
-            .update({_lastGuessedWordsField: null, _currentStreakField: 0});
-        lastGuessedWords.clear();
-        currentStreak = 0;
+      if (userData.containsKey(_lastPlayedDayField)) {
+        var dateFieldValue = userData[_lastPlayedDayField] as String;
+        lastPlayedDay = _dateFormat.parse(dateFieldValue);
       }
     }
     var wordOfTheDay = await _getWordOfTheDay(currentDay);
@@ -72,12 +64,41 @@ class StatsRepository extends WordleStatModifier {
         currentStreak: currentStreak,
         maxStreak: maxStreak,
         numberOfGamesPlayed: numberOfGamesPlayed,
-        wonPositions: wonPositions,
+        winCountsInPositions: wonPositions,
         lastGuessedWords: lastGuessedWords,
         userId: userId,
         wordOfTheDay: wordOfTheDay,
-        initializedDateTime: currentDay);
+        initializedDateTime: currentDay,
+        lastPlayedDate: lastPlayedDay);
   }
+
+  @override
+  Future reCalculate() async {
+    if (_lastPlayedDate != null &&
+        _lastPlayedDate!.numberOfDaysInBetween(initializedDateTime) > 0) {
+      var jsonToUpdate = <String, Object?>{
+        _lastGuessedWordsField: null,
+        _lastPlayedDayField: null
+      };
+      if (_lastPlayedDate!.numberOfDaysInBetween(initializedDateTime) > 1) {
+        jsonToUpdate[_currentStreakField] = 0;
+      }
+      var shouldResetStreak =
+          _lastPlayedDate!.numberOfDaysInBetween(initializedDateTime) > 1;
+      await _wordleUserDataReference.update({
+        _lastGuessedWordsField: null,
+        _lastPlayedDayField: null,
+        if (shouldResetStreak) _currentStreakField: 0
+      });
+      lastGuessedWords.clear();
+      _lastPlayedDate = null;
+      if (shouldResetStreak) {
+        currentStreak = 0;
+      }
+    }
+  }
+
+  DateTime? _lastPlayedDate;
 
   final String userId;
 
@@ -91,7 +112,7 @@ class StatsRepository extends WordleStatModifier {
   int numberOfGamesPlayed;
 
   @override
-  List<int> wonPositions;
+  List<int> winCountsInPositions;
 
   @override
   List<String> lastGuessedWords;
@@ -107,7 +128,7 @@ class StatsRepository extends WordleStatModifier {
     var didUpdateGuess = false;
     await _wordleUserDataReference.update({
       '$_lastGuessedWordsField/$index': word,
-      _currentGuessEditingDayField: _dateFormat.format(initializedDateTime)
+      _lastPlayedDayField: _dateFormat.format(initializedDateTime)
     }).then((_) {
       didUpdateGuess = true;
       lastGuessedWords.add(word);
@@ -138,7 +159,7 @@ class StatsRepository extends WordleStatModifier {
   @override
   Future<bool> registerWin() async {
     var didUpdateWin = false;
-    var newWonPositions = wonPositions.toList();
+    var newWonPositions = winCountsInPositions.toList();
     var wonPosition = lastGuessedWords.length - 1;
     newWonPositions[wonPosition]++;
     await _wordleUserDataReference
@@ -146,7 +167,7 @@ class StatsRepository extends WordleStatModifier {
           _currentStreakField: currentStreak + 1,
           _maxStreakField: max(maxStreak, currentStreak + 1),
           _numberOfGamesPlayedField: numberOfGamesPlayed + 1,
-          _wonPositionsField: newWonPositions
+          _winCountsInPositionsField: newWonPositions
         })
         .then((_) => didUpdateWin = true)
         .onError((_, __) => didUpdateWin = false);
@@ -154,7 +175,7 @@ class StatsRepository extends WordleStatModifier {
       ++currentStreak;
       maxStreak = max(maxStreak, currentStreak);
       numberOfGamesPlayed++;
-      wonPositions[wonPosition]++;
+      winCountsInPositions[wonPosition]++;
     }
     return didUpdateWin;
   }
@@ -181,9 +202,11 @@ class StatsRepository extends WordleStatModifier {
       {required this.currentStreak,
       required this.maxStreak,
       required this.numberOfGamesPlayed,
-      required this.wonPositions,
+      required this.winCountsInPositions,
       required this.lastGuessedWords,
       required this.userId,
       required this.wordOfTheDay,
-      required this.initializedDateTime});
+      required this.initializedDateTime,
+      DateTime? lastPlayedDate})
+      : _lastPlayedDate = lastPlayedDate;
 }

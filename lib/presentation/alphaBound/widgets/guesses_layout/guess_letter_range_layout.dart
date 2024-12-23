@@ -10,6 +10,7 @@ import 'package:gameboy/presentation/app/blocs/game_state.dart';
 //Ex: If lower bound - 'AAAAA' and upper bound - 'AMBER', then first and last letters must denote 'AA' and 'AM' respectively.
 class GuessLetterRangeLayout extends StatelessWidget {
   final double _rangeLetterIndicatorSize;
+
   const GuessLetterRangeLayout({super.key, required double letterSize})
       : _rangeLetterIndicatorSize = letterSize * 0.8;
 

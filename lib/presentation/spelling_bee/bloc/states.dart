@@ -5,10 +5,12 @@ abstract class SpellingBeeState extends GameState {}
 
 class GuessedWordResult extends SpellingBeeState {
   GuessedWordState guessedWordState;
+
   GuessedWordResult(this.guessedWordState);
 }
 
 class GuessWordAccepted extends GuessedWordResult {
   int score;
+
   GuessWordAccepted(super.guessedWordState, this.score);
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/data/alphaBound/models/game_state.dart';
+import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
@@ -12,6 +12,7 @@ class KeyboardLayout extends StatefulWidget {
   final Function(String letter)? onLetterPressed;
   final VoidCallback? onBackspacePressed;
   final VoidCallback? onEnterPressed;
+
   const KeyboardLayout(
       {super.key,
       required this.onLetterPressed,
@@ -47,7 +48,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, gameAppState.GameState>(
       builder: (BuildContext context, gameAppState.GameState state) {
-        var currentState = context.getCurrentAplhaBoundGameState();
+        var currentState = context.getCurrentAlphaBoundGameStatus();
         if (currentState is GameWon || currentState is GameLost) {
           return _createKeyBoardLayout(
               currentState.lowerBound, currentState.upperBound);
@@ -65,8 +66,8 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
       listener: (BuildContext context, gameAppState.GameState state) {},
       buildWhen: (previousState, currentState) {
         return currentState is AlphaBoundGameState &&
-            (currentState.gameState is GameWon ||
-                currentState.gameState is GameLost);
+            (currentState.gameStatus is GameWon ||
+                currentState.gameStatus is GameLost);
       },
     );
   }

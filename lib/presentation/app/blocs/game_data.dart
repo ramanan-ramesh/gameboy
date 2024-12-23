@@ -7,6 +7,7 @@ class GameData<TGameBloc extends GameBloc> {
   TGameBloc gameBloc;
   GameLayout gameLayout;
   Game game;
+
   GameData(
       {required this.gameBloc, required this.gameLayout, required this.game});
 }

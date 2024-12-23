@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/constants.dart';
-import 'package:gameboy/data/app/models/app_data_facade.dart';
+import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/bloc.dart';
@@ -19,7 +19,8 @@ import 'master_page_states.dart';
 
 class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   final AppDataModifier _appDataRepository;
-  String get userId => _appDataRepository.activeUser!.userID;
+
+  String get userId => _appDataRepository.activeUser!.id;
 
   MasterPageBloc({required AppDataFacade appDataFacade})
       : _appDataRepository = appDataFacade as AppDataModifier,

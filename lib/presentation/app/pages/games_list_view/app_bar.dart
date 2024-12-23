@@ -4,7 +4,8 @@ import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.da
 import 'package:gameboy/presentation/app/extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const String _appLogoAsset = 'assets/images/logo_without_phrase.png';
+  static const String _appLogoAsset =
+      'assets/logos/app_logo_without_phrase.webp';
 
   @override
   Size get preferredSize => const Size.fromHeight(90);
@@ -101,20 +102,6 @@ class _ProfileActionButtonState extends State<_ProfileActionButton> {
   //TODO: Clip the CircleAvatar to a circle, and splash too
   @override
   Widget build(BuildContext context) {
-    return !_isImageLoaded
-        ? const CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.black,
-            child: Icon(
-              Icons.account_circle_rounded,
-              color: Colors.green,
-            ),
-          )
-        : CircleAvatar(
-            radius: 30,
-            backgroundImage: _userProfileNetworkImage,
-            backgroundColor: Colors.black,
-          );
     return !_isImageLoaded
         ? const CircleAvatar(
             radius: 30,

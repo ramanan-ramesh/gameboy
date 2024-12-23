@@ -8,6 +8,7 @@ import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 
 class AnimatedGuessedWordResult extends StatefulWidget {
   final VoidCallback onAnimationComplete;
+
   const AnimatedGuessedWordResult(
       {super.key, required this.onAnimationComplete});
 
@@ -50,6 +51,19 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
             child: Center(
               child: Text(
                 'Not in dictionary!',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        } else if (guessedWordResult == GuessedWordState.tooShort) {
+          return AnimatedContainer(
+            height: 100,
+            color: Colors.white12,
+            curve: Curves.elasticInOut,
+            duration: Duration(seconds: 2),
+            child: Center(
+              child: Text(
+                'Too Short',
                 style: TextStyle(color: Colors.red),
               ),
             ),

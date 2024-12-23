@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:gameboy/data/app/implementations/platform_user.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 import 'package:gameboy/data/app/models/user_management.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class UserManagementImpl extends UserManagementFacade {
   static const _userDataField = 'userData';
@@ -14,16 +13,15 @@ class UserManagementImpl extends UserManagementFacade {
   static const _photoUrlField = 'photoUrl';
 
   @override
-  PlatformUserFacade? get activeUser => _activeUser;
-  PlatformUserFacade? _activeUser;
+  PlatformUser? get activeUser => _activeUser;
+  PlatformUser? _activeUser;
 
   static Future<UserManagementFacade> create() async {
     var userFromCache = await _getUserFromCache();
     return UserManagementImpl(initialUser: userFromCache);
   }
 
-  UserManagementImpl({PlatformUserFacade? initialUser})
-      : _activeUser = initialUser;
+  UserManagementImpl({PlatformUser? initialUser}) : _activeUser = initialUser;
 
   @override
   Future<bool> tryUpdateActiveUser({required User authProviderUser}) async {
@@ -39,22 +37,23 @@ class UserManagementImpl extends UserManagementFacade {
           queryResult.children.isNotEmpty) {
         var userDocument = queryResult.children.first;
         var userDocumentData = userDocument.value as Map;
-        _activeUser = PlatformUserImpl(
+        _activeUser = PlatformUser(
             userName: userDocumentData[_userNameField],
-            userID: userDocument.key!,
+            id: userDocument.key!,
             photoUrl: userDocumentData[_photoUrlField],
             displayName: userDocumentData[_displayNameField]);
       } else {
-        var platformUser = PlatformUserImpl(
-            userName: authProviderUser.email!,
-            userID: '',
-            photoUrl: authProviderUser.photoURL,
-            displayName: authProviderUser.displayName);
         var addedUserDocument = usersCollectionReference.push();
-        await addedUserDocument.set(platformUser.toJson());
-        _activeUser = PlatformUserImpl(
+        await addedUserDocument.set({
+          _userNameField: authProviderUser.email!,
+          if (authProviderUser.photoURL != null)
+            _photoUrlField: authProviderUser.photoURL,
+          if (authProviderUser.displayName != null)
+            _displayNameField: authProviderUser.displayName,
+        });
+        _activeUser = PlatformUser(
             userName: authProviderUser.email!,
-            userID: addedUserDocument.key!,
+            id: addedUserDocument.key!,
             photoUrl: authProviderUser.photoURL,
             displayName: authProviderUser.displayName);
       }
@@ -77,7 +76,7 @@ class UserManagementImpl extends UserManagementFacade {
   }
 
   //TODO: Should ideally attach AuthProviderUser here(if it persists)?
-  static Future<PlatformUserFacade?> _getUserFromCache() async {
+  static Future<PlatformUser?> _getUserFromCache() async {
     var usersBox = await Hive.openBox(_userDataField);
     var isLoggedInValue = usersBox.get(_isLoggedInField) ?? '';
     if (bool.tryParse(isLoggedInValue) == true) {
@@ -85,9 +84,9 @@ class UserManagementImpl extends UserManagementFacade {
       var userName = await usersBox.get(_userNameField) as String;
       var photoUrl = await usersBox.get(_photoUrlField) as String?;
       var displayName = await usersBox.get(_displayNameField) as String?;
-      return PlatformUserFacade(
+      return PlatformUser(
           userName: userName,
-          userID: userID,
+          id: userID,
           photoUrl: photoUrl,
           displayName: displayName);
     }
@@ -99,31 +98,20 @@ class UserManagementImpl extends UserManagementFacade {
   Future _persistUser() async {
     var usersBox = await Hive.openBox(_userDataField);
     if (activeUser != null) {
-      await _writeRecordToLocalStorage(
-          usersBox, _userIDField, activeUser!.userID);
-      await _writeRecordToLocalStorage(
-          usersBox, _userNameField, activeUser!.userName);
+      await usersBox.put(_userIDField, activeUser!.id);
+      await usersBox.put(_userNameField, activeUser!.userName);
       var displayName = activeUser!.displayName;
       if (displayName != null && displayName.isNotEmpty) {
-        await _writeRecordToLocalStorage(
-            usersBox, _displayNameField, displayName);
+        await usersBox.put(_displayNameField, displayName);
       }
-      await _writeRecordToLocalStorage(
-          usersBox, _isLoggedInField, true.toString());
+      await usersBox.put(_isLoggedInField, true.toString());
       if (_activeUser!.photoUrl != null) {
-        await _writeRecordToLocalStorage(
-            usersBox, _photoUrlField, _activeUser!.photoUrl!);
+        await usersBox.put(_photoUrlField, activeUser!.photoUrl);
       }
     } else {
       await usersBox.clear();
-      await _writeRecordToLocalStorage(
-          usersBox, _isLoggedInField, false.toString());
+      await usersBox.put(_isLoggedInField, false.toString());
     }
     await usersBox.close();
-  }
-
-  Future _writeRecordToLocalStorage(
-      Box hiveBox, String recordKey, String recordValue) async {
-    await hiveBox.put(recordKey, recordValue);
   }
 }

@@ -7,6 +7,7 @@ class UsernameEditField extends StatelessWidget {
 
   static const double _formElementSize = 15;
   static final _emailRegExValidator = RegExp('.*@.*.com');
+
   UsernameEditField(
       {super.key,
       required this.controller,

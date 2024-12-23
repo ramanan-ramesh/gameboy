@@ -5,6 +5,7 @@ import 'package:gameboy/presentation/wordle/extensions.dart';
 
 class StatsSheet extends StatelessWidget {
   final Game game;
+
   const StatsSheet({super.key, required this.game});
 
   @override
@@ -17,13 +18,9 @@ class StatsSheet extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-              alignment: Alignment.center,
-              child: _createWordleLogo(),
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: _createStatsTiles(statsRepository),
+              child: _createStatsTiles(statsRepository, context),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -35,45 +32,37 @@ class StatsSheet extends StatelessWidget {
     );
   }
 
-  Widget _createWordleLogo() {
-    return Column(
-      children: [
-        Image.asset(
-          game.imageAsset,
-          width: 50,
-          height: 50,
-        ),
-        Text(game.name.toUpperCase())
-      ],
-    );
-  }
-
-  Widget _createStatsTiles(WordleStats statsRepository) {
+  Widget _createStatsTiles(WordleStats statsRepository, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.0),
-          child: Text('Statistics'),
-        ),
+        Divider(),
         Row(
           children: [
             Expanded(
               child: _createStatsTile(
-                  statsRepository.numberOfGamesPlayed, 'Played'),
-            ),
-            Expanded(
-              child: _createStatsTile(statsRepository.winPercentage, 'Win %'),
+                  statsRepository.numberOfGamesPlayed, 'Played', context),
             ),
             Expanded(
               child: _createStatsTile(
-                  statsRepository.currentStreak, 'Current Streak'),
-            ),
-            Expanded(
-              child: _createStatsTile(statsRepository.maxStreak, 'Max Streak'),
+                  statsRepository.winPercentage, 'Win %', context),
             ),
           ],
         ),
+        Divider(),
+        Row(
+          children: [
+            Expanded(
+              child: _createStatsTile(
+                  statsRepository.currentStreak, 'Current Streak', context),
+            ),
+            Expanded(
+              child: _createStatsTile(
+                  statsRepository.maxStreak, 'Max Streak', context),
+            ),
+          ],
+        ),
+        Divider(),
       ],
     );
   }
@@ -116,62 +105,51 @@ class StatsSheet extends StatelessWidget {
 
   Widget _createGuessDistributionForPosition(
       WordleStats statsRepository, int index) {
-    var numberOfGamesWon = statsRepository.wonPositions.reduce((a, b) => a + b);
+    var numberOfGamesWon =
+        statsRepository.winCountsInPositions.reduce((a, b) => a + b);
     var winPercentageForPosition = numberOfGamesWon == 0
         ? 0.0
-        : statsRepository.wonPositions.elementAt(index) / numberOfGamesWon;
-    var guessDistributionChildWidget = Container(
-      color: Colors.white12,
-      child: winPercentageForPosition == 0
-          ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text('0'),
-            )
-          : FractionallySizedBox(
-              widthFactor: winPercentageForPosition,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  statsRepository.wonPositions.elementAt(index).toString(),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ),
-    );
-    var guessDistributionWidget = winPercentageForPosition == 0
-        ? Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3.0),
-            child: guessDistributionChildWidget,
-          )
-        : Flexible(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3.0),
-              child: guessDistributionChildWidget,
-            ),
-          );
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-          child: Text((index + 1).toString()),
-        ),
-        guessDistributionWidget,
-      ],
-    );
+        : statsRepository.winCountsInPositions.elementAt(index) /
+            numberOfGamesWon;
+    return _WinDistribution(
+        index: index, winPercentage: winPercentageForPosition);
   }
 
-  Widget _createStatsTile(int number, String subtitle) {
+  Widget _createStatsTile(int number, String subtitle, BuildContext context) {
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
-          child: Text(number.toString()),
+          child: Text(number.toString(),
+              style: Theme.of(context).textTheme.displayLarge),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
           child: Text(subtitle),
         ),
       ],
+    );
+  }
+}
+
+class _WinDistribution extends StatelessWidget {
+  final int index;
+  final double winPercentage;
+
+  const _WinDistribution(
+      {super.key, required this.index, required this.winPercentage});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Text('$index', style: Theme.of(context).textTheme.titleLarge!),
+      title: winPercentage == 0
+          ? SizedBox.shrink()
+          : LinearProgressIndicator(
+              value: winPercentage,
+              backgroundColor: Colors.white12,
+              minHeight: 8,
+            ),
     );
   }
 }

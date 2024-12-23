@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
-import 'package:gameboy/data/alphaBound/models/game_state.dart'
+import 'package:gameboy/data/alphaBound/models/game_status.dart'
     as alphaBoundState;
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
@@ -18,19 +18,19 @@ class ProgressTracker extends StatelessWidget {
     return BlocConsumer<GameBloc, gameAppState.GameState>(
       builder: (BuildContext context, gameAppState.GameState state) {
         var statistics = context.getStatsRepository();
-        var gameState = context.getCurrentAplhaBoundGameState();
+        var gameState = context.getCurrentAlphaBoundGameStatus();
         return Row(
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: _createNumberOfAttemptedGuessesWidget(
-                  statistics.numberOfWordsGuessed),
+                  statistics.numberOfWordsGuessedToday),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: _createNumberOfAttemptedGuessesTracker(
-                    statistics.numberOfWordsGuessed, gameState),
+                    statistics.numberOfWordsGuessedToday, gameState),
               ),
             ),
           ],
@@ -64,7 +64,7 @@ class ProgressTracker extends StatelessWidget {
   }
 
   Widget _createNumberOfAttemptedGuessesTracker(
-      int numberOfGuesses, alphaBoundState.GameState gameState) {
+      int numberOfGuesses, alphaBoundState.AlphaBoundGameStatus gameState) {
     return Wrap(
       alignment: WrapAlignment.center,
       runAlignment: WrapAlignment.center,
@@ -80,8 +80,8 @@ class ProgressTracker extends StatelessWidget {
               }
             }
           } else if (index == numberOfGuesses) {
-            if (gameState is alphaBoundState.GuessMovesUp ||
-                gameState is alphaBoundState.GuessMovesDown) {
+            if (!(gameState is alphaBoundState.GameWon ||
+                gameState is alphaBoundState.GameLost)) {
               backgroundColor = Colors.green;
             }
           }

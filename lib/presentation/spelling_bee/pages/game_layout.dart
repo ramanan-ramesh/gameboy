@@ -9,10 +9,10 @@ import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dar
 import 'package:gameboy/presentation/spelling_bee/bloc/events.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
 import 'package:gameboy/presentation/spelling_bee/extensions.dart';
+import 'package:gameboy/presentation/spelling_bee/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/spelling_bee/widgets/game_results/animated_guess_result.dart';
 import 'package:gameboy/presentation/spelling_bee/widgets/game_results/game_results.dart';
 import 'package:gameboy/presentation/spelling_bee/widgets/letter_input_layout.dart';
-import 'package:gameboy/presentation/spelling_bee/widgets/stats_sheet.dart';
 
 class SpellingBeeLayout implements GameLayout {
   var guessWordNotifier = ValueNotifier('');

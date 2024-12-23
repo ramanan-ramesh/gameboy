@@ -11,6 +11,7 @@ import 'package:gameboy/presentation/app/pages/game_content_page/game_app_bar.da
 
 class GameContentPage extends StatelessWidget {
   final GameData gameData;
+
   const GameContentPage({super.key, required this.gameData});
 
   @override
@@ -65,9 +66,9 @@ class GameContentPage extends StatelessWidget {
     double layoutHeight;
     if (incomingHeight > gameData.gameLayout.constraints.maxHeight) {
       layoutHeight = gameData.gameLayout.constraints.maxHeight;
-      layoutHeight -= kToolbarHeight;
+      layoutHeight -= _appBarHeight;
     } else {
-      layoutHeight = max(incomingHeight - kToolbarHeight,
+      layoutHeight = max(incomingHeight - _appBarHeight,
           gameData.gameLayout.constraints.minHeight);
     }
 
@@ -75,9 +76,12 @@ class GameContentPage extends StatelessWidget {
   }
 }
 
+const _appBarHeight = 80.0;
+
 class _GameLayout extends StatelessWidget {
   final GameData gameData;
   (double layoutWidth, double layoutHeight, double? appBarWidth) layoutSizes;
+
   _GameLayout({super.key, required this.gameData, required this.layoutSizes});
 
   @override
@@ -94,6 +98,7 @@ class _GameLayout extends StatelessWidget {
           game: gameData.game,
           actionButtonBar: gameData.gameLayout.buildActionButtonBar(context),
           contentWidth: appBarWidth,
+          height: _appBarHeight,
         ),
         body: SingleChildScrollView(
           child: Center(
@@ -113,7 +118,7 @@ class _GameLayout extends StatelessWidget {
     showModalBottomSheet(
         context: layoutContext,
         enableDrag: true,
-        showDragHandle: true,
+        // showDragHandle: true,
         isScrollControlled: true,
         builder: (BuildContext context) {
           var layoutConstraints = gameData.gameLayout.constraints;
@@ -127,19 +132,65 @@ class _GameLayout extends StatelessWidget {
                   create: (context) =>
                       RepositoryProvider.of<GameEngine>(layoutContext)),
             ],
-            child: Container(
-              constraints: BoxConstraints(
-                minWidth: layoutConstraints.minWidth,
-                maxWidth: layoutConstraints.maxWidth * 0.75,
-                minHeight: layoutHeight * 0.5,
-                maxHeight: layoutHeight * 0.75,
-              ),
-              child: SingleChildScrollView(
-                child: gameData.gameLayout
-                    .createStatsSheet(context, gameData.game),
-              ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                    minWidth: layoutConstraints.minWidth,
+                    maxWidth: layoutConstraints.maxWidth * 0.75,
+                    minHeight: layoutHeight * 0.5,
+                    maxHeight: layoutHeight * 0.75,
+                  ),
+                  child: SingleChildScrollView(
+                    child: _createStatsSheet(context),
+                  ),
+                ),
+                Positioned(
+                  top: -_appBarHeight / 2,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    width: _appBarHeight,
+                    height: _appBarHeight,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: AssetImage(
+                          gameData.game.imageAsset,
+                          // fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         });
+  }
+
+  Widget _createStatsSheet(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          SizedBox.fromSize(
+            size: Size.fromHeight(_appBarHeight / 2),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3.0),
+            child: Text(
+              'STATS',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3.0),
+            child: gameData.gameLayout.createStatsSheet(context, gameData.game),
+          ),
+        ],
+      ),
+    );
   }
 }

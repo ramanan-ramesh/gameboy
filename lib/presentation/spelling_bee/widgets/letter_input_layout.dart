@@ -6,6 +6,7 @@ import 'polygon_border.dart';
 class LetterInputLayout extends StatefulWidget {
   Function(String letter) onLetterPressed;
   final double sizeOfCell;
+
   LetterInputLayout(
       {super.key, required this.onLetterPressed, required this.sizeOfCell});
 
@@ -76,6 +77,7 @@ class _LetterKey extends StatefulWidget {
   bool isCentered;
   double size;
   VoidCallback onLetterPressed;
+
   _LetterKey(
       {super.key,
       required this.letter,

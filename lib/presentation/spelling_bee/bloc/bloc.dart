@@ -27,7 +27,7 @@ class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState,
   }
 
   @override
-  FutureOr<SpellingBeeState?> createGameResultOnStartup() {
+  FutureOr<SpellingBeeState?> getGameStateOnStartup() {
     return null;
   }
 

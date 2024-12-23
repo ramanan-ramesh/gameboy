@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
-import 'package:gameboy/data/alphaBound/models/game_state.dart';
+import 'package:gameboy/data/alphaBound/models/game_status.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game_event.dart';
 import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
 
 import 'animated_guess_letters.dart';
@@ -46,18 +48,18 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
         var lowerBoundGuessWord = _createBoundaryGuessWord(
             gameEngineData.currentState.lowerBound, _lowerBoundLetterSlotsKeys);
         var middleRowGuessWord =
-            _createMiddleGuessRow(gameEngineData.currentState is GameWon);
+            _createMiddleGuessRow(gameEngineData.currentState);
         var upperBoundGuessWord = _createBoundaryGuessWord(
             gameEngineData.currentState.upperBound, _upperBoundLetterSlotsKeys);
         if (state is AlphaBoundGameState) {
           if (state.isStartup) {
-            if (state.gameState is GameWon) {
+            if (state.gameStatus is GameWon) {
               widget.guessLetterValueNotifier.value =
                   gameEngineData.wordOfTheDay;
               _handleGameResult(context, true);
-            } else if (state.gameState is GameLost) {
+            } else if (state.gameStatus is GameLost) {
               widget.guessLetterValueNotifier.value =
-                  (state.gameState as GameLost).middleGuess;
+                  (state.gameStatus as GameLost).finalGuess;
               _handleGameResult(context, false);
             }
           }
@@ -81,20 +83,22 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
       },
       listener: (context, appGameState.GameState state) {
         if (state is AlphaBoundGameState) {
-          if (state.gameState is GuessMovesUp) {
+          if (state.gameStatus is GuessMovesUp) {
             _handleLowerBoundChange(context);
-          } else if (state.gameState is GuessMovesDown) {
+          } else if (state.gameStatus is GuessMovesDown) {
             _handleUpperBoundChange(context);
-          } else if (state.gameState is GameWon) {
+          } else if (state.gameStatus is GuessNotInDictionary) {
+          } else if (state.gameStatus is GameWon) {
             _handleGameResult(context, true);
-          } else if (state.gameState is GameLost) {
+          } else if (state.gameStatus is GameLost) {
             _handleGameResult(context, false);
           }
         }
       },
       buildWhen: (previousState, currentState) {
         return currentState is AlphaBoundGameState &&
-            currentState.hasGameMovedAhead();
+            (currentState.hasGameMovedAhead() ||
+                currentState.gameStatus is GuessNotInDictionary);
       },
     );
   }
@@ -176,6 +180,11 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
         _onAnimationCompleted(false, false);
       }
     });
+    Future.delayed(Duration(milliseconds: 3000), () {
+      if (context.mounted) {
+        context.addGameEvent(RequestStats());
+      }
+    });
   }
 
   void _onAnimationCompleted(bool shouldResetGuess, bool shouldRebuild) {
@@ -199,7 +208,7 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     });
   }
 
-  Widget _createMiddleGuessRow(bool didWinGame) {
+  Widget _createMiddleGuessRow(AlphaBoundGameStatus gameStatus) {
     return ValueListenableBuilder<String>(
       valueListenable: widget.guessLetterValueNotifier,
       builder: (context, guessLetterValue, child) {
@@ -210,7 +219,7 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
           guessRowLetterSlots.add(
             Padding(
               padding: const EdgeInsets.all(3.0),
-              child: _createMiddleRowGuessLetterSlot(index, didWinGame),
+              child: _createMiddleRowGuessLetterSlot(index, gameStatus),
             ),
           );
         }
@@ -241,19 +250,29 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
     );
   }
 
-  Widget _createMiddleRowGuessLetterSlot(int index, bool didWin) {
+  Widget _createMiddleRowGuessLetterSlot(
+      int index, AlphaBoundGameStatus gameStatus) {
     Widget centerWidget;
     Color backgroundColor;
     var guessLetterValue = widget.guessLetterValueNotifier.value;
     var guessLetterValueLength = guessLetterValue.length;
+    var didWinGame = gameStatus is GameWon;
+    var widgetKey = GlobalKey(debugLabel: 'guessRowLetterSlot$index');
+    _guessRowLetterSlotsKeys[index] = widgetKey;
+    if (gameStatus is GuessNotInDictionary &&
+        gameStatus.guess.isEqualTo(guessLetterValue)) {
+      return ShakingGuessLetter(
+          letter: guessLetterValue[index].toUpperCase(),
+          letterSize: widget.letterSize);
+    }
     if (index < guessLetterValueLength) {
       centerWidget = Text(
         guessLetterValue[index].toUpperCase(),
         style: TextStyle(
             fontSize: widget.letterSize / 2,
-            color: didWin ? Colors.white : Colors.black),
+            color: didWinGame ? Colors.white : Colors.black),
       );
-      backgroundColor = didWin ? Colors.green : Colors.orange;
+      backgroundColor = didWinGame ? Colors.green : Colors.orange;
     } else if (index == guessLetterValueLength) {
       centerWidget = Container(
         height: 15,
@@ -268,8 +287,6 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
       centerWidget = SizedBox.shrink();
       backgroundColor = Colors.white;
     }
-    var widgetKey = GlobalKey(debugLabel: 'guessRowLetterSlot$index');
-    _guessRowLetterSlotsKeys[index] = widgetKey;
     return Container(
       key: widgetKey,
       width: widget.letterSize,

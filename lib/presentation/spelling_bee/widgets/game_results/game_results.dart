@@ -71,6 +71,7 @@ class MaximizedGameResults extends StatelessWidget {
 class MinimizedGameResults extends StatelessWidget {
   final VoidCallback onGameResultsSizeToggled;
   bool isExpanded;
+
   MinimizedGameResults(
       {super.key,
       required this.onGameResultsSizeToggled,

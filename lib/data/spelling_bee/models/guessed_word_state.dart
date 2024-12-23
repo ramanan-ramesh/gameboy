@@ -3,5 +3,6 @@ enum GuessedWordState {
   alreadyGuessed,
   doesNotContainLettersOfTheDay,
   doesNotContainCenterLetter,
+  tooShort,
   valid,
 }

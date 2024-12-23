@@ -7,29 +7,27 @@ import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:intl/intl.dart';
 
-class AlphaBoundStatistics extends AlphaBoundStatsModifier {
+class AlphaBoundStatisticsImpl extends AlphaBoundStatsModifier {
   static const _alphaBoundField = 'alphaBound';
   static const _userDataField = 'userData';
-  static const _lowerBoundGuessField = 'lowerBoundGuess';
-  static const _upperBoundGuessField = 'upperBoundGuess';
-  static const _numberOfGamesPlayedField = 'numberOfGamesPlayed';
-  static const _numberOfTimesWonField = 'numberOfTimesWon';
-  static const _numberOfWordsGuessedField = 'numberOfWordsGuessed';
-  static const _middleGuessedWordField = 'middleGuessedWord';
-  static const _lastPlayedDateField = 'lastPlayedDate';
-  static const _currentStreakField = 'currentStreak';
-  static const _maximumStreakField = 'maximumStreak';
-  static const _wonPositionsField = 'wonPositions';
+  static const _lowerBoundField = 'lowerBound';
+  static const _upperBoundField = 'upperBound';
+  static const _numberOfGamesPlayedField = 'played';
+  static const _numberOfWordsGuessedTodayField = 'guessCountToday';
+  static const _finalGuessWordField = 'finalGuessWord';
+  static const _lastPlayedAtField = 'lastPlayedAt';
+  static const _currentStreakField = 'streak';
+  static const _maximumStreakField = 'maxStreak';
+  static const _winCountsInPositionsField = 'winCounts';
   static final _dateFormat = DateFormat('dd/MM/yyyy');
 
   static Future<AlphaBoundStatsModifier> create(String userId) async {
     var initializedDateTime = DateTime.now();
     int numberOfGamesPlayed = 0,
-        numberOfTimesWon = 0,
-        numberOfWordsGuessed = 0,
+        numberOfWordsGuessedToday = 0,
         currentStreak = 0,
         maximumStreak = 0;
-    String? todaysLowerBoundGuess, todaysUpperBoundGuess, middleGuessedWord;
+    String? lowerBound, upperBound, finalGuessWord;
     DateTime? lastPlayedDate;
     var userDataReference = FirebaseDatabase.instance
         .ref()
@@ -37,7 +35,7 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
         .child(_userDataField)
         .child(userId);
     var userDocumentData = await userDataReference.get();
-    List<int> wonPositions =
+    List<int> winCountsInPositions =
         List.generate(AlphaBoundConstants.numberOfAllowedGuesses, (index) => 0);
     if (userDocumentData.exists) {
       var userData = userDocumentData.value as Map;
@@ -45,25 +43,21 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
         numberOfGamesPlayed =
             int.parse(userData[_numberOfGamesPlayedField].toString());
       }
-      if (userData.containsKey(_numberOfTimesWonField)) {
-        numberOfTimesWon =
-            int.parse(userData[_numberOfTimesWonField].toString());
+      if (userData.containsKey(_numberOfWordsGuessedTodayField)) {
+        numberOfWordsGuessedToday =
+            int.parse(userData[_numberOfWordsGuessedTodayField].toString());
       }
-      if (userData.containsKey(_numberOfWordsGuessedField)) {
-        numberOfWordsGuessed =
-            int.parse(userData[_numberOfWordsGuessedField].toString());
+      if (userData.containsKey(_lowerBoundField)) {
+        lowerBound = userData[_lowerBoundField];
       }
-      if (userData.containsKey(_lowerBoundGuessField)) {
-        todaysLowerBoundGuess = userData[_lowerBoundGuessField];
+      if (userData.containsKey(_upperBoundField)) {
+        upperBound = userData[_upperBoundField];
       }
-      if (userData.containsKey(_upperBoundGuessField)) {
-        todaysUpperBoundGuess = userData[_upperBoundGuessField];
+      if (userData.containsKey(_finalGuessWordField)) {
+        finalGuessWord = userData[_finalGuessWordField];
       }
-      if (userData.containsKey(_middleGuessedWordField)) {
-        middleGuessedWord = userData[_middleGuessedWordField];
-      }
-      if (userData.containsKey(_lastPlayedDateField)) {
-        lastPlayedDate = _dateFormat.parse(userData[_lastPlayedDateField]);
+      if (userData.containsKey(_lastPlayedAtField)) {
+        lastPlayedDate = _dateFormat.parse(userData[_lastPlayedAtField]);
       }
       if (userData.containsKey(_currentStreakField)) {
         currentStreak = int.parse(userData[_currentStreakField].toString());
@@ -71,59 +65,74 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
       if (userData.containsKey(_maximumStreakField)) {
         maximumStreak = int.parse(userData[_maximumStreakField].toString());
       }
-      if (userData.containsKey(_wonPositionsField)) {
-        var wonPositionsData = userData[_wonPositionsField] as Map<String, int>;
-        for (var wonPositionWonData in wonPositionsData.entries) {
-          var positionName = wonPositionWonData.key;
-          var position = int.parse(positionName.substring(
-              3)); //'val0' to 'val${AlphaBoundConstants.numberOfAllowedGuesses}'
-          wonPositions[position] = wonPositionWonData.value;
-        }
-      }
-
-      if (lastPlayedDate != null) {
-        var numberOfDaysInBetween =
-            lastPlayedDate.numberOfDaysInBetween(initializedDateTime);
-        var jsonToUpdate = <String, Object?>{
-          _middleGuessedWordField: null,
-          _lowerBoundGuessField: null,
-          _upperBoundGuessField: null,
-          _lastPlayedDateField: null,
-          _numberOfWordsGuessedField: null,
-        };
-        if (numberOfDaysInBetween >= 1) {
-          if (numberOfDaysInBetween > 1) {
-            jsonToUpdate[_currentStreakField] = 0;
-          }
-          await userDataReference.update(jsonToUpdate).then((_) {
-            todaysLowerBoundGuess = null;
-            todaysUpperBoundGuess = null;
-            middleGuessedWord = null;
-            lastPlayedDate = null;
-            numberOfWordsGuessed = 0;
-            if (numberOfDaysInBetween > 1) {
-              currentStreak = 0;
-            }
-          });
+      if (userData.containsKey(_winCountsInPositionsField)) {
+        var winCountsData = userData[_winCountsInPositionsField] as Map;
+        for (var winCountInPosition in winCountsData.entries) {
+          var positionName = winCountInPosition.key.toString();
+          var position =
+              int.parse(positionName.substring(3)); //'val10', 'val3' etc.
+          winCountsInPositions[position] =
+              int.parse(winCountInPosition.value.toString());
         }
       }
     }
 
-    return AlphaBoundStatistics._(
+    return AlphaBoundStatisticsImpl._(
         initializedDateTime: initializedDateTime,
         numberOfGamesPlayed: numberOfGamesPlayed,
-        numberOfTimesWon: numberOfTimesWon,
-        todaysLowerBoundGuess: todaysLowerBoundGuess,
-        todaysUpperBoundGuess: todaysUpperBoundGuess,
+        lowerBound: lowerBound,
+        upperBound: upperBound,
         userId: userId,
-        numberOfWordsGuessed: numberOfWordsGuessed,
-        middleGuessedWord: middleGuessedWord,
+        numberOfWordsGuessedToday: numberOfWordsGuessedToday,
+        finalGuessWord: finalGuessWord,
         currentStreak: currentStreak,
         maximumStreak: maximumStreak,
-        wonPositions: wonPositions);
+        winCountsInPositions: winCountsInPositions,
+        lastPlayedDate: lastPlayedDate);
+  }
+
+  @override
+  Future reCalculate() async {
+    var shouldResetLastPlayedGameData = false;
+    var shouldResetStreak = false;
+    if (_lastPlayedDate != null) {
+      var numberOfDaysInBetween =
+          _lastPlayedDate!.numberOfDaysInBetween(initializedDateTime);
+      if (numberOfDaysInBetween >= 1) {
+        shouldResetLastPlayedGameData = true;
+        if (numberOfDaysInBetween > 1) {
+          shouldResetStreak = true;
+        }
+      }
+    } else {
+      shouldResetLastPlayedGameData = true;
+      shouldResetStreak = true;
+    }
+    if (shouldResetLastPlayedGameData) {
+      var jsonToUpdate = <String, Object?>{
+        _finalGuessWordField: null,
+        _lowerBoundField: null,
+        _upperBoundField: null,
+        _lastPlayedAtField: null,
+        _numberOfWordsGuessedTodayField: null,
+        if (shouldResetStreak) _currentStreakField: 0
+      };
+      await _userDataReference.update(jsonToUpdate).then((_) {
+        lowerBound = null;
+        upperBound = null;
+        finalGuessWord = null;
+        _lastPlayedDate = null;
+        numberOfWordsGuessedToday = 0;
+        if (shouldResetStreak) {
+          currentStreak = 0;
+        }
+      });
+    }
   }
 
   final String userId;
+
+  DateTime? _lastPlayedDate;
 
   @override
   final DateTime initializedDateTime;
@@ -132,19 +141,16 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
   int numberOfGamesPlayed;
 
   @override
-  int numberOfTimesWon;
+  String? lowerBound;
 
   @override
-  String? todaysLowerBoundGuess;
+  String? upperBound;
 
   @override
-  String? todaysUpperBoundGuess;
+  int numberOfWordsGuessedToday;
 
   @override
-  int numberOfWordsGuessed;
-
-  @override
-  String? middleGuessedWord;
+  String? finalGuessWord;
 
   @override
   int currentStreak;
@@ -153,56 +159,50 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
   int maximumStreak;
 
   @override
-  Iterable<int> get wonPositions => _wonPositions;
-  List<int> _wonPositions;
+  Iterable<int> get winCountsInPositions => _winCountsInPositions;
+  final List<int> _winCountsInPositions;
 
   @override
-  Future<bool> tryUpdateLowerAndUpperBoundGuess(
+  Future<bool> updateLowerAndUpperBound(
       String lowerBoundGuess, String upperBoundGuess) {
-    return _trySubmitGuessWord({
-      _lowerBoundGuessField: lowerBoundGuess,
-      _upperBoundGuessField: upperBoundGuess
-    }, () {
-      todaysLowerBoundGuess = lowerBoundGuess;
-      todaysUpperBoundGuess = upperBoundGuess;
+    return _trySubmitGuessWord(
+        {_lowerBoundField: lowerBoundGuess, _upperBoundField: upperBoundGuess},
+        () {
+      lowerBound = lowerBoundGuess;
+      upperBound = upperBoundGuess;
     });
   }
 
   @override
-  Future<bool> trySubmitGuessWordOnEndGame(String guess, bool didWin) async {
-    var numberOfTimesWon =
-        didWin ? this.numberOfTimesWon + 1 : this.numberOfTimesWon;
+  Future<bool> submitGuessOnEndGame(String guess, bool didWin) async {
     var currentStreak = didWin ? this.currentStreak + 1 : 0;
     var maximumStreak = max(this.maximumStreak, currentStreak);
 
     var jsonToUpdate = <String, Object?>{
-      _middleGuessedWordField: guess,
-      _numberOfTimesWonField: numberOfTimesWon,
+      _finalGuessWordField: guess,
       _currentStreakField: currentStreak,
       _maximumStreakField: maximumStreak,
       _numberOfGamesPlayedField: numberOfGamesPlayed + 1,
     };
     if (didWin) {
-      var nonZeroWonPositions = Map.of(_wonPositions.asMap())
-        ..removeWhere((index, value) => value == 0);
-      var newWonPositionsValue = nonZeroWonPositions
-        ..map((index, value) {
-          if (didWin && index < (numberOfWordsGuessed - 1)) {
-            return MapEntry('val$index', (value + 1));
-          }
-          return MapEntry('val$index', value);
-        });
-      jsonToUpdate[_wonPositionsField] = newWonPositionsValue;
+      var newWonPositionsValue = <String, int>{};
+      for (var index = 0; index < _winCountsInPositions.length; index++) {
+        var winCount = _winCountsInPositions[index];
+        if (didWin && (index == numberOfWordsGuessedToday - 1)) {
+          newWonPositionsValue['val$index'] = winCount + 1;
+        } else if (winCount > 0) {
+          newWonPositionsValue['val$index'] = winCount;
+        }
+      }
+      jsonToUpdate[_winCountsInPositionsField] = newWonPositionsValue;
     }
-    return _trySubmitGuessWord(jsonToUpdate, () {
-      numberOfWordsGuessed++;
-      middleGuessedWord = guess;
-      this.numberOfTimesWon = numberOfTimesWon;
+    return await _trySubmitGuessWord(jsonToUpdate, () {
+      finalGuessWord = guess;
       this.currentStreak = currentStreak;
       this.maximumStreak = maximumStreak;
       numberOfGamesPlayed++;
       if (didWin) {
-        _wonPositions[numberOfWordsGuessed - 1]++;
+        _winCountsInPositions[numberOfWordsGuessedToday - 1]++;
       }
     });
   }
@@ -212,12 +212,13 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
     var didUpdate = false;
     await _userDataReference
         .update({
-      _lastPlayedDateField: _dateFormat.format(initializedDateTime),
-      _numberOfWordsGuessedField: numberOfWordsGuessed + 1
+      if (!map.containsKey(_lastPlayedAtField))
+        _lastPlayedAtField: _dateFormat.format(initializedDateTime),
+      _numberOfWordsGuessedTodayField: numberOfWordsGuessedToday + 1
     }..addAll(map))
         .then((_) {
+      numberOfWordsGuessedToday++;
       successCallback();
-      numberOfWordsGuessed++;
       didUpdate = true;
     }).onError((error, stackTrace) {
       didUpdate = false;
@@ -231,17 +232,18 @@ class AlphaBoundStatistics extends AlphaBoundStatsModifier {
       .child(_userDataField)
       .child(userId);
 
-  AlphaBoundStatistics._(
+  AlphaBoundStatisticsImpl._(
       {required this.initializedDateTime,
       required this.numberOfGamesPlayed,
-      required this.numberOfTimesWon,
-      required this.todaysLowerBoundGuess,
-      required this.todaysUpperBoundGuess,
+      required this.lowerBound,
+      required this.upperBound,
       required this.userId,
-      required this.numberOfWordsGuessed,
-      required this.middleGuessedWord,
+      required this.numberOfWordsGuessedToday,
+      required this.finalGuessWord,
       required this.currentStreak,
       required this.maximumStreak,
-      required List<int> wonPositions})
-      : _wonPositions = wonPositions;
+      required List<int> winCountsInPositions,
+      required DateTime? lastPlayedDate})
+      : _winCountsInPositions = winCountsInPositions,
+        _lastPlayedDate = lastPlayedDate;
 }

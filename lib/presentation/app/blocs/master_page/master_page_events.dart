@@ -24,5 +24,6 @@ class Logout extends MasterPageEvent {
 
 class LoadGame extends MasterPageEvent {
   Game game;
+
   LoadGame(this.game);
 }

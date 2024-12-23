@@ -32,7 +32,7 @@ class WordleGameBloc extends GameBloc<WordleEvent, WordleState,
   }
 
   @override
-  FutureOr<WordleState?> createGameResultOnStartup() {
+  FutureOr<WordleState?> getGameStateOnStartup() {
     if (stats.lastGuessedWords.isEmpty) {
       return null;
     }

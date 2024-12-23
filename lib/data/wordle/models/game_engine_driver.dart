@@ -10,7 +10,9 @@ abstract class GameEngineDriver extends appGameEngine.GameEngine
   bool canSubmitWord();
 
   bool trySubmitWord();
+
   bool didSubmitLetter(String letter);
+
   bool didRemoveLetter();
 
   static Future<GameEngineDriver> createEngine(

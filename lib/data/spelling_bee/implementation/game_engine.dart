@@ -6,7 +6,8 @@ import 'package:gameboy/data/spelling_bee/models/score.dart';
 import 'package:gameboy/data/wordle/models/extensions.dart';
 
 class GameEngine implements GameEngineDriver {
-  static const _allowedGuessesPath = 'assets/spelling_bee/word-list.txt';
+  static const _allowedGuessesPath =
+      'assets/atleastFourLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
 
   static Future<GameEngineDriver> createEngine(
@@ -27,6 +28,9 @@ class GameEngine implements GameEngineDriver {
 
   @override
   GuessedWordState trySubmitWord(String word) {
+    if (word.length <= 3) {
+      return GuessedWordState.tooShort;
+    }
     if (!_doesListContainWord(_allowedGuesses, word)) {
       return GuessedWordState.notInDictionary;
     }

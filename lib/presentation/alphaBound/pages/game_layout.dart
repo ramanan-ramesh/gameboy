@@ -3,10 +3,10 @@ import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
+import 'package:gameboy/presentation/alphaBound/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/guesses_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/keyboard_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/progress_tracker.dart';
-import 'package:gameboy/presentation/alphaBound/widgets/stats_sheet.dart';
 import 'package:gameboy/presentation/app/blocs/game_event.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
@@ -55,7 +55,9 @@ class AlphaBoundLayout extends GameLayout {
 
   @override
   Widget createStatsSheet(BuildContext context, Game game) {
-    return AlphaBoundStatsSheet();
+    return AlphaBoundStatsSheet(
+      game: game,
+    );
   }
 
   void _onLetterPressed(String letter) {

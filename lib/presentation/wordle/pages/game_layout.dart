@@ -7,9 +7,9 @@ import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';
+import 'package:gameboy/presentation/wordle/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/wordle/widgets/guesses_layout.dart';
 import 'package:gameboy/presentation/wordle/widgets/keyboard_layout.dart';
-import 'package:gameboy/presentation/wordle/widgets/stats_sheet.dart';
 
 class WordleLayout implements GameLayout {
   @override

@@ -7,6 +7,7 @@ import 'package:gameboy/presentation/wordle/widgets/extensions.dart';
 class FlippedGuessLetter extends StatefulWidget {
   final GuessLetter guessLetter;
   final int indexOfGuessLetter;
+
   const FlippedGuessLetter(
       {super.key, required this.guessLetter, required this.indexOfGuessLetter});
 

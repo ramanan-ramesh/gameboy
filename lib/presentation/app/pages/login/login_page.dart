@@ -58,7 +58,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   TabController? _tabController;
-  static const String _googleLogoAsset = 'assets/images/google_logo.png';
+  static const String _googleLogoAsset = 'assets/logos/google.webp';
   static const double _roundedCornerRadius = 25.0;
 
   @override

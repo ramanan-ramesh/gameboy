@@ -6,6 +6,7 @@ import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 class ScoreBar extends StatelessWidget {
   static const _rankIndicatorRadius = 10.0;
   static const _rankIndicatorDiameter = _rankIndicatorRadius * 2;
+
   const ScoreBar({super.key});
 
   @override

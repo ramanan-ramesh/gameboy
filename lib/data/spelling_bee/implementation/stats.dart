@@ -9,13 +9,13 @@ class StatsRepository extends StatsModifier {
   static const _spellingBeeRootField = 'spelling-bee';
   static const _lettersOfTheDayField = 'lettersOfTheDay';
   static const _userDataField = 'userData';
-  static const _numberOfGamesPlayedField = 'numberOfGamesPlayed';
-  static const _numberOfPangramsField = 'numberOfPangrams';
-  static const _numberOfWordsSubmittedField = 'numberOfWordsSubmitted';
+  static const _numberOfGamesPlayedField = 'played';
+  static const _numberOfPangramsField = 'pangramCount';
+  static const _numberOfWordsSubmittedField = 'guessWordsCount';
   static const _rankingsCountField = 'rankingsCount';
-  static const _lastPlayedMatchDateField = 'matchDate';
-  static const _wordsSubmittedTodayField = 'wordsSubmittedToday';
-  static const _longestSubmittedGuessField = 'longestSubmittedGuess';
+  static const _lastPlayedMatchDateField = 'lastPlayedDate';
+  static const _wordsSubmittedTodayField = 'lastGuessedWords';
+  static const _longestSubmittedWordField = 'longestWord';
   static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   static final _firstDay = DateTime(2024, 11, 6);
 
@@ -44,8 +44,8 @@ class StatsRepository extends StatsModifier {
     }
 
     String? longestSubmittedGuess;
-    if (userData.containsKey(_longestSubmittedGuessField)) {
-      longestSubmittedGuess = userData[_longestSubmittedGuessField] as String;
+    if (userData.containsKey(_longestSubmittedWordField)) {
+      longestSubmittedGuess = userData[_longestSubmittedWordField] as String;
     }
 
     List<String> lastSubmittedWords = [];
@@ -60,34 +60,6 @@ class StatsRepository extends StatsModifier {
         lastSubmittedWords = List.from(wordsSubmittedTodayValue)
             .map((e) => e as String)
             .toList();
-      }
-      final daysDifference =
-          initializedDateTime.numberOfDaysInBetween(lastPlayedMatchDay);
-      if (daysDifference > 0) {
-        var rank = GameEngine.rankCalculator(lastSubmittedWords);
-        if (rankingsCount.containsKey(rank)) {
-          rankingsCount[rank] = rankingsCount[rank]! + 1;
-        } else {
-          rankingsCount[rank] = 1;
-        }
-        lastSubmittedWords.clear();
-        lastPlayedMatchDay = null;
-        numberOfGamesPlayed++;
-        numberOfWordsSubmitted += lastSubmittedWords.length;
-        for (var word in lastSubmittedWords) {
-          if (word.split('').toSet().length ==
-              SpellingBeeConstants.numberOfLetters) {
-            numberOfPangrams++;
-          }
-        }
-        await userDataDbRef.update({
-          _rankingsCountField: rankingsCount,
-          _lastPlayedMatchDateField: null,
-          _wordsSubmittedTodayField: null,
-          _numberOfWordsSubmittedField: numberOfWordsSubmitted,
-          _numberOfGamesPlayedField: numberOfGamesPlayed,
-          _numberOfPangramsField: numberOfPangrams,
-        });
       }
     }
     return StatsRepository._(
@@ -104,13 +76,47 @@ class StatsRepository extends StatsModifier {
   }
 
   @override
-  final int numberOfGamesPlayed;
+  Future reCalculate() async {
+    if (_lastCompletedMatchDay != null) {
+      final daysDifference =
+          initializedDateTime.numberOfDaysInBetween(_lastCompletedMatchDay!);
+      if (daysDifference > 0) {
+        var rank = GameEngine.rankCalculator(wordsSubmittedToday);
+        if (_rankingsCount.containsKey(rank)) {
+          _rankingsCount[rank] = _rankingsCount[rank]! + 1;
+        } else {
+          _rankingsCount[rank] = 1;
+        }
+        wordsSubmittedToday.clear();
+        _lastCompletedMatchDay = null;
+        numberOfGamesPlayed++;
+        numberOfWordsSubmitted += wordsSubmittedToday.length;
+        for (var word in wordsSubmittedToday) {
+          if (word.split('').toSet().length ==
+              SpellingBeeConstants.numberOfLetters) {
+            numberOfPangrams++;
+          }
+        }
+        await _userDataReference.update({
+          _rankingsCountField: rankingsCount,
+          _lastPlayedMatchDateField: null,
+          _wordsSubmittedTodayField: null,
+          _numberOfWordsSubmittedField: numberOfWordsSubmitted,
+          _numberOfGamesPlayedField: numberOfGamesPlayed,
+          _numberOfPangramsField: numberOfPangrams,
+        });
+      }
+    }
+  }
 
   @override
-  final int numberOfPangrams;
+  int numberOfGamesPlayed;
 
   @override
-  final int numberOfWordsSubmitted;
+  int numberOfPangrams;
+
+  @override
+  int numberOfWordsSubmitted;
 
   @override
   Future<bool> trySubmitWord(String word) async {
@@ -120,16 +126,24 @@ class StatsRepository extends StatsModifier {
     var didSubmitWord = false;
     var shouldUpdateLongestGuess =
         word.length > (_longestGuessedWord?.length ?? 0);
+    var isPangram =
+        word.split('').toSet().length == SpellingBeeConstants.numberOfLetters;
     await _userDataReference.update({
       _wordsSubmittedTodayField: wordsSubmittedToday,
       _lastPlayedMatchDateField: _dateFormat.format(initializedDateTime),
-      if (shouldUpdateLongestGuess) _longestSubmittedGuessField: word,
+      if (shouldUpdateLongestGuess) _longestSubmittedWordField: word,
+      _numberOfWordsSubmittedField: numberOfWordsSubmitted + 1,
+      if (isPangram) _numberOfPangramsField: numberOfPangrams + 1,
     }).then((_) {
       didSubmitWord = true;
+      numberOfWordsSubmitted++;
       wordsSubmittedToday.add(word);
       _lastCompletedMatchDay ??= initializedDateTime;
       if (shouldUpdateLongestGuess) {
         _longestGuessedWord = word;
+      }
+      if (isPangram) {
+        numberOfPangrams++;
       }
     }).onError((_, __) {
       didSubmitWord = false;
@@ -156,7 +170,7 @@ class StatsRepository extends StatsModifier {
   final DateTime initializedDateTime;
 
   @override
-  String? get longestGuessedWord => _longestGuessedWord;
+  String? get longestSubmittedWord => _longestGuessedWord;
   String? _longestGuessedWord;
 
   static int _getIntegerStatistic(Map userData, String field) {

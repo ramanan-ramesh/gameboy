@@ -1,19 +1,13 @@
-class PlatformUserFacade {
+class PlatformUser {
   final String userName;
-  final String userID;
+  final String id;
   final String? displayName;
   final String? photoUrl;
 
-  PlatformUserFacade({
+  PlatformUser({
     required this.userName,
-    required this.userID,
+    required this.id,
     this.photoUrl,
     this.displayName,
   });
-}
-
-abstract class PlatformUserDBRef extends PlatformUserFacade {
-  PlatformUserDBRef({required super.userName, required super.userID});
-
-  Map<String, dynamic> toJson();
 }

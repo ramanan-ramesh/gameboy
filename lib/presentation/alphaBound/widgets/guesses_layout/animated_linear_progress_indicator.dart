@@ -9,12 +9,13 @@ class AnimatedLinearProgressIndicator extends StatelessWidget {
     var gameEngineData = context.getGameEngineData();
     return _LinearProgressIndicator(
         distanceOfWordOfTheDayFromBounds:
-            gameEngineData.distanceOfWordOfTheDayFromBounds);
+            gameEngineData.distanceRatioOfWordOfTheDayFromLowerBound);
   }
 }
 
 class _LinearProgressIndicator extends StatefulWidget {
   final double distanceOfWordOfTheDayFromBounds;
+
   const _LinearProgressIndicator(
       {Key? key, required this.distanceOfWordOfTheDayFromBounds})
       : super(key: key);

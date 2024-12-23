@@ -5,12 +5,17 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? contentWidth;
   final Game game;
   final Widget? actionButtonBar;
+  final double height;
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  Size get preferredSize => Size.fromHeight(height);
 
   const GameAppBar(
-      {super.key, this.contentWidth, required this.game, this.actionButtonBar});
+      {super.key,
+      this.contentWidth,
+      required this.game,
+      this.actionButtonBar,
+      required this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +25,7 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
       flexibleSpace: Center(
         child: SizedBox(
           width: contentWidth,
+          height: height,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -32,70 +38,33 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: const Icon(Icons.close_rounded),
                 ),
               ),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(
-                      game.imageAsset,
-                      width: 40,
-                      height: 40,
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Image.asset(
+                        game.imageAsset,
+                        width: 40,
+                        height: 40,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      game.name.toUpperCase(),
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  )
-                ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        game.name.toUpperCase(),
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    )
+                  ],
+                ),
               ),
               if (actionButtonBar != null) actionButtonBar!,
             ],
           ),
         ),
       ),
-      // title: Center(
-      //   child: SizedBox(
-      //     height: 80,
-      //     width: contentWidth,
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //       children: [
-      //         Padding(
-      //           padding: const EdgeInsets.all(8.0),
-      //           child: IconButton(
-      //             onPressed: () {
-      //               Navigator.pop(context);
-      //             },
-      //             icon: const Icon(Icons.close_rounded),
-      //           ),
-      //         ),
-      //         Row(
-      //           children: [
-      //             Padding(
-      //               padding: const EdgeInsets.all(8.0),
-      //               child: Image.asset(
-      //                 game.imageAsset,
-      //                 width: 40,
-      //                 height: 40,
-      //               ),
-      //             ),
-      //             Padding(
-      //               padding: const EdgeInsets.all(8.0),
-      //               child: Text(
-      //                 game.name.toUpperCase(),
-      //                 style: TextStyle(fontSize: 20),
-      //               ),
-      //             )
-      //           ],
-      //         ),
-      //         if (actionButtonBar != null) actionButtonBar!,
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

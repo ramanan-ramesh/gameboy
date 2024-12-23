@@ -4,5 +4,6 @@ abstract class SpellingBeeEvent extends GameEvent {}
 
 class SubmitWord extends SpellingBeeEvent {
   String word;
+
   SubmitWord(this.word);
 }

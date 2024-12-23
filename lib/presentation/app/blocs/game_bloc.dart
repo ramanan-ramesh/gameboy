@@ -9,6 +9,7 @@ import 'game_state.dart';
 
 class _LoadGame extends GameEvent {
   final String userId;
+
   _LoadGame(this.userId);
 }
 
@@ -22,8 +23,10 @@ abstract class GameBloc<
   late TStats stats;
 
   Future<TStats> statisticsCreator();
+
   Future<TGameEngine> gameEngineCreator(TStats stats);
-  FutureOr<TState?> createGameResultOnStartup();
+
+  FutureOr<TState?> getGameStateOnStartup();
 
   GameBloc({required this.userId}) : super(GameLoading()) {
     on<_LoadGame>(_onLoadGame);
@@ -37,9 +40,10 @@ abstract class GameBloc<
 
   FutureOr<void> _onLoadGame(_LoadGame event, Emitter<GameState> emit) async {
     stats = await statisticsCreator();
+    await stats.reCalculate();
     gameEngine = await gameEngineCreator(stats);
     emit(GameLoaded<TGameEngine, TStats>(gameEngine, stats));
-    var gameResultOnStartup = await createGameResultOnStartup();
+    var gameResultOnStartup = await getGameStateOnStartup();
     if (gameResultOnStartup != null) {
       emit(gameResultOnStartup);
     }

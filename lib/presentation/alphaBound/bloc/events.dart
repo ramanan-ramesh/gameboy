@@ -1,8 +1,7 @@
 import 'package:gameboy/presentation/app/blocs/game_event.dart';
 
-abstract class AlphaBoundEvent extends GameEvent {}
-
-class SubmitGuessWord extends AlphaBoundEvent {
+class SubmitGuessWord extends GameEvent {
   String guessWord;
+
   SubmitGuessWord(this.guessWord);
 }

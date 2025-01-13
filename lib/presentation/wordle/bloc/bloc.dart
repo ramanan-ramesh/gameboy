@@ -1,19 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordle/constants.dart';
-import 'package:gameboy/data/wordle/models/extensions.dart';
+import 'package:gameboy/data/wordle/implementation/stats_repository.dart';
 import 'package:gameboy/data/wordle/models/game_engine_driver.dart';
 import 'package:gameboy/data/wordle/models/stat_modifier.dart';
-import 'package:gameboy/data/wordle/models/stats.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 import 'events.dart';
 import 'states.dart';
 
 class WordleGameBloc extends GameBloc<WordleEvent, WordleState,
-    WordleStatModifier, GameEngineDriver> {
+    WordleStatsModifier, WordleGameEngineDriver> {
   WordleGameBloc(String userId) : super(userId: userId) {
     on<SubmitLetter>(_onSubmitLetter);
     on<RemoveLetter>(_onRemoveLetter);
@@ -21,13 +21,14 @@ class WordleGameBloc extends GameBloc<WordleEvent, WordleState,
   }
 
   @override
-  Future<WordleStatModifier> statisticsCreator() async {
-    return await WordleStats.createInstance(userId);
+  Future<WordleStatsModifier> statisticsCreator() async {
+    return await WordleStatsRepo.createInstance(userId);
   }
 
   @override
-  Future<GameEngineDriver> gameEngineCreator(WordleStatModifier stats) async {
-    return await GameEngineDriver.createEngine(
+  Future<WordleGameEngineDriver> gameEngineCreator(
+      WordleStatsModifier stats) async {
+    return await WordleGameEngineDriver.createEngine(
         stats.lastGuessedWords.toList(), stats.wordOfTheDay);
   }
 

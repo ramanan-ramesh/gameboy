@@ -1,17 +1,17 @@
 import 'package:flutter/services.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordle/constants.dart';
-import 'package:gameboy/data/wordle/models/extensions.dart';
 import 'package:gameboy/data/wordle/models/game_engine_driver.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
 import 'package:gameboy/data/wordle/models/guess_word.dart';
 import 'package:gameboy/data/wordle/models/letter_match_description.dart';
 
-class GameEngine extends GameEngineDriver {
+class WordleGameEngineImpl extends WordleGameEngineDriver {
   static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
   final List<String> _attemptedGuesses;
 
-  static Future<GameEngineDriver> createEngine(
+  static Future<WordleGameEngineDriver> createEngine(
       List<String> attemptedGuessesToday, String wordOfTheDay) async {
     var allowedGuesses = await _getAllowedGuesses();
 
@@ -33,8 +33,8 @@ class GameEngine extends GameEngineDriver {
       }
     }
 
-    return GameEngine._(attemptedGuessesToday, wordOfTheDay, allowedGuesses,
-        allGuessedLetters, guessWordUnderEdit);
+    return WordleGameEngineImpl._(attemptedGuessesToday, wordOfTheDay,
+        allowedGuesses, allGuessedLetters, guessWordUnderEdit);
   }
 
   @override
@@ -184,7 +184,11 @@ class GameEngine extends GameEngineDriver {
     }
   }
 
-  GameEngine._(this._attemptedGuesses, this.wordOfTheDay, this._allowedGuesses,
-      this._allGuessedLetters, GuessWord? guessWordUnderEdit)
+  WordleGameEngineImpl._(
+      this._attemptedGuesses,
+      this.wordOfTheDay,
+      this._allowedGuesses,
+      this._allGuessedLetters,
+      GuessWord? guessWordUnderEdit)
       : _guessWordUnderEdit = guessWordUnderEdit;
 }

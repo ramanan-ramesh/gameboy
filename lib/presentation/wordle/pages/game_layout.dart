@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_event.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/events.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart'
+    as appGameState;
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';
@@ -17,25 +18,19 @@ class WordleLayout implements GameLayout {
       minWidth: 400.0, maxWidth: 700.0, minHeight: 500.0, maxHeight: 1000.0);
 
   @override
-  Widget buildActionButtonBar(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        context.addGameEvent(RequestStats());
-      },
-      icon: Icon(Icons.query_stats_rounded),
-    );
-  }
-
-  @override
   Widget buildGameLayout(
-      BuildContext widgetContext, double layoutWidth, double layoutHeight) {
-    var initialBlocState = widgetContext.getCurrentWordleState();
+      BuildContext layoutContext, double layoutWidth, double layoutHeight) {
+    var initialBlocState = layoutContext.getCurrentWordleState();
     if (initialBlocState is WordleState) {
       if (initialBlocState is GameWon && initialBlocState.isStartup) {
-        _onGameWon(initialBlocState, widgetContext);
+        _onGameWon(initialBlocState, layoutContext);
       } else if (initialBlocState is GameLost && initialBlocState.isStartup) {
-        _onGameLost(initialBlocState, widgetContext);
+        _onGameLost(initialBlocState, layoutContext);
       }
+    }
+    var widthFactor = 0.7;
+    if (layoutWidth < 450) {
+      widthFactor = 0.9;
     }
     return BlocListener<GameBloc, appGameState.GameState>(
       listener: (BuildContext context, appGameState.GameState state) {
@@ -49,7 +44,9 @@ class WordleLayout implements GameLayout {
         children: [
           Expanded(
             flex: 7,
-            child: GuessesLayout(),
+            child: GuessesLayout(
+              widthFactor: widthFactor,
+            ),
           ),
           Expanded(
             flex: 3,
@@ -61,7 +58,7 @@ class WordleLayout implements GameLayout {
   }
 
   @override
-  Widget createStatsSheet(BuildContext context, Game game) {
+  Widget buildStatsSheet(BuildContext context, Game game) {
     return StatsSheet(
       game: game,
     );

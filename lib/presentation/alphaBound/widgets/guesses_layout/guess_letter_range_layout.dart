@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/animated_linear_progress_indicator.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 //TODO: If the first and last possible letters are the same, then first and last letters must denote the letters of lower/upper bound until the differentiating letter is found.
 //Ex: If lower bound - 'AAAAA' and upper bound - 'AMBER', then first and last letters must denote 'AA' and 'AM' respectively.

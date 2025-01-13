@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_event.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/events.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
@@ -16,7 +15,7 @@ import 'package:gameboy/presentation/spelling_bee/widgets/letter_input_layout.da
 
 class SpellingBeeLayout implements GameLayout {
   var guessWordNotifier = ValueNotifier('');
-  final _focusNode = FocusNode();
+  final _keyBoardFocusNode = FocusNode();
   static const _cutOffWidth = 800.0;
 
   @override
@@ -24,31 +23,46 @@ class SpellingBeeLayout implements GameLayout {
       minWidth: 400.0, maxWidth: 1000.0, minHeight: 500.0, maxHeight: 1000.0);
 
   @override
-  Widget buildActionButtonBar(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        context.addGameEvent(RequestStats());
-      },
-      icon: Icon(Icons.query_stats_rounded),
-    );
-  }
-
-  @override
   Widget buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
     return KeyboardListener(
-      focusNode: _focusNode,
+      focusNode: _keyBoardFocusNode,
       autofocus: true,
       onKeyEvent: (keyEvent) => _handleKeyEvent(context, keyEvent),
       child: layoutWidth > _cutOffWidth
           ? _createSideBySideLayout(context, layoutWidth, layoutHeight)
-          : _createSinglePageLayout(context, layoutWidth, layoutHeight),
+          : _createSinglePageLayout(layoutWidth, layoutHeight),
     );
+  }
+
+  @override
+  Widget buildStatsSheet(BuildContext context, Game game) {
+    return SpellingBeeStatsSheet(
+      game: game,
+    );
+  }
+
+  void _handleKeyEvent(BuildContext context, KeyEvent keyEvent) {
+    if (keyEvent is! KeyUpEvent) {
+      return;
+    }
+    if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
+        keyEvent.logicalKey.keyLabel.length == 1 &&
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+      guessWordNotifier.value += keyEvent.logicalKey.keyLabel;
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
+      if (guessWordNotifier.value.isNotEmpty) {
+        guessWordNotifier.value = guessWordNotifier.value
+            .substring(0, guessWordNotifier.value.length - 1);
+      }
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
+      context.addGameEvent(SubmitWord(guessWordNotifier.value));
+    }
   }
 
   Widget _createSideBySideLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
-    _focusNode.requestFocus();
+    _keyBoardFocusNode.requestFocus();
     return Row(
       children: [
         Expanded(
@@ -61,31 +75,36 @@ class SpellingBeeLayout implements GameLayout {
     );
   }
 
-  Widget _createSinglePageLayout(
-      BuildContext context, double layoutWidth, double layoutHeight) {
+  Widget _createSinglePageLayout(double layoutWidth, double layoutHeight) {
     var gameLayoutVisibilityNotifier = ValueNotifier(true);
     return ValueListenableBuilder(
       valueListenable: gameLayoutVisibilityNotifier,
-      builder: (BuildContext context, bool value, Widget? child) {
+      builder: (BuildContext context, bool isGameLayoutVisible, Widget? child) {
         var gameResults = MinimizedGameResults(
           onGameResultsSizeToggled: () {
             gameLayoutVisibilityNotifier.value =
                 !gameLayoutVisibilityNotifier.value;
           },
-          isExpanded: !gameLayoutVisibilityNotifier.value,
+          isExpandedInitially: !gameLayoutVisibilityNotifier.value,
         );
-        if (value) {
-          _focusNode.requestFocus();
+        if (isGameLayoutVisible) {
+          _keyBoardFocusNode.requestFocus();
           return Column(
             children: [
-              gameResults,
+              MinimizedGameResults(
+                onGameResultsSizeToggled: () {
+                  gameLayoutVisibilityNotifier.value =
+                      !gameLayoutVisibilityNotifier.value;
+                },
+                isExpandedInitially: !gameLayoutVisibilityNotifier.value,
+              ),
               Expanded(
                 child: _buildGameLayout(context, layoutWidth, layoutHeight),
               ),
             ],
           );
         }
-        _focusNode.unfocus();
+        _keyBoardFocusNode.unfocus();
 
         return gameResults;
       },
@@ -94,44 +113,40 @@ class SpellingBeeLayout implements GameLayout {
 
   Widget _buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
-    return FractionallySizedBox(
-      heightFactor: 0.8,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            AnimatedGuessedWordResult(
-              onAnimationComplete: () {
-                guessWordNotifier.value = '';
-              },
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _buildGuessWordDisplay(),
-              ),
-            ),
-            LetterInputLayout(
-              sizeOfCell: layoutWidth > _cutOffWidth
-                  ? layoutWidth / 8
-                  : layoutWidth / 4,
-              onLetterPressed: (letter) {
-                guessWordNotifier.value += letter;
-              },
-            ),
-            Padding(
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          AnimatedGuessedWordResult(
+            onAnimationComplete: () {
+              guessWordNotifier.value = '';
+            },
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: _buildButtonBar(context),
+              child: _buildGuessWordDisplay(),
             ),
-          ],
-        ),
+          ),
+          LetterInputLayout(
+            sizeOfCell:
+                layoutWidth > _cutOffWidth ? layoutWidth / 8 : layoutWidth / 4,
+            onLetterPressed: (letter) {
+              guessWordNotifier.value += letter;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildButtonBar(context),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildGuessWordDisplay() {
-    return BlocConsumer<GameBloc, appGameState.GameState>(
-      builder: (BuildContext context, appGameState.GameState state) {
+    return BlocConsumer<GameBloc, GameState>(
+      builder: (BuildContext context, GameState state) {
         return ValueListenableBuilder(
           valueListenable: guessWordNotifier,
           builder: (context, value, child) {
@@ -145,7 +160,7 @@ class SpellingBeeLayout implements GameLayout {
       buildWhen: (previous, current) {
         return current is GuessedWordResult;
       },
-      listener: (BuildContext context, appGameState.GameState state) {},
+      listener: (BuildContext context, GameState state) {},
     );
   }
 
@@ -177,31 +192,6 @@ class SpellingBeeLayout implements GameLayout {
           child: Icon(Icons.keyboard_return_rounded),
         ),
       ],
-    );
-  }
-
-  void _handleKeyEvent(BuildContext context, KeyEvent keyEvent) {
-    if (keyEvent is! KeyUpEvent) {
-      return;
-    }
-    if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
-        keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
-      guessWordNotifier.value += keyEvent.logicalKey.keyLabel;
-    } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
-      if (guessWordNotifier.value.isNotEmpty) {
-        guessWordNotifier.value = guessWordNotifier.value
-            .substring(0, guessWordNotifier.value.length - 1);
-      }
-    } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
-      context.addGameEvent(SubmitWord(guessWordNotifier.value));
-    }
-  }
-
-  @override
-  Widget createStatsSheet(BuildContext context, Game game) {
-    return SpellingBeeStatsSheet(
-      game: game,
     );
   }
 }

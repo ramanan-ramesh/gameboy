@@ -9,13 +9,19 @@ class Game extends Equatable {
       : imageAsset =
             '$_logoAssetPath/${_convertGameNameToAssetName(name)}.webp';
 
-  static String _convertGameNameToAssetName(String gameName) {
-    return gameName
-        .split(RegExp(r'[-\s]'))
-        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
-        .join()
-        .replaceFirstMapped(
-            RegExp(r'^[A-Z]'), (match) => match.group(0)!.toLowerCase());
+  static String _convertGameNameToAssetName(String input) {
+    final words = input.split(RegExp(r'[^a-zA-Z0-9]+'));
+
+    return words.asMap().entries.map((entry) {
+      final index = entry.key;
+      final word = entry.value;
+
+      if (index == 0) {
+        return word[0].toLowerCase() + word.substring(1);
+      } else {
+        return word[0].toUpperCase() + word.substring(1).toLowerCase();
+      }
+    }).join();
   }
 
   @override

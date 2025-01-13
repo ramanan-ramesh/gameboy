@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
 import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 

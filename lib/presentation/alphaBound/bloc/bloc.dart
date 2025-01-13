@@ -9,11 +9,11 @@ import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_event.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/events.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
-class AlphaBoundBloc extends GameBloc<GameEvent, appGameState.GameState,
+class AlphaBoundBloc extends GameBloc<GameEvent, GameState,
     AlphaBoundStatsModifier, AlphaBoundGameEngineDriver> {
   AlphaBoundBloc(String userId) : super(userId: userId) {
     on<SubmitGuessWord>(_onSubmitGuessWord);
@@ -41,11 +41,11 @@ class AlphaBoundBloc extends GameBloc<GameEvent, appGameState.GameState,
 
   @override
   Future<AlphaBoundStatsModifier> statisticsCreator() async {
-    return await AlphaBoundStatisticsImpl.create(userId);
+    return await AlphaBoundStatsRepo.create(userId);
   }
 
   FutureOr<void> _onSubmitGuessWord(
-      SubmitGuessWord event, Emitter<appGameState.GameState> emit) async {
+      SubmitGuessWord event, Emitter<GameState> emit) async {
     if (gameEngine.numberOfWordsGuessedToday !=
         AlphaBoundConstants.numberOfAllowedGuesses) {
       if (event.guessWord.length ==

@@ -7,7 +7,7 @@ import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/bloc.dart';
 import 'package:gameboy/presentation/alphaBound/pages/game_layout.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_data.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/bloc.dart';
 import 'package:gameboy/presentation/spelling_bee/pages/game_layout.dart';

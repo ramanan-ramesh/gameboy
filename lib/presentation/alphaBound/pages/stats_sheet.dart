@@ -38,6 +38,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Divider(),
         Row(
           children: [
             Expanded(
@@ -50,6 +51,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
             ),
           ],
         ),
+        Divider(),
         Row(
           children: [
             Expanded(
@@ -62,6 +64,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
             ),
           ],
         ),
+        Divider(),
       ],
     );
   }

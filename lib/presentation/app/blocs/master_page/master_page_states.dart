@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_data.dart';
 
 abstract class MasterPageState {}

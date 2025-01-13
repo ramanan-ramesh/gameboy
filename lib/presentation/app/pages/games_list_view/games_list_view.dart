@@ -46,6 +46,9 @@ class _GamesListViewState extends State<GamesListView> {
               builder: (context) => GameContentPage(gameData: state.gameData)));
         }
       },
+      listenWhen: (previousState, currentState) {
+        return currentState is LoadedGame;
+      },
       child: Scaffold(
         appBar: HomeAppBar(),
         body: Center(
@@ -100,18 +103,18 @@ class _GameCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 5.0),
               child: Image.asset(
                 game.imageAsset,
-                height: 150,
-                width: 150,
+                height: 175,
+                width: 175,
                 fit: BoxFit.cover,
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: Text(
-                game.name,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  game.name,
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
               ),
             ),

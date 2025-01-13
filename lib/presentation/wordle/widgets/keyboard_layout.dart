@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/data/wordle/models/extensions.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/wordle/bloc/events.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';

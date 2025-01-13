@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/models/game_engine.dart';
 import 'package:gameboy/data/app/models/stats.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/events.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/blocs/game_data.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_app_bar.dart';
 
 class GameContentPage extends StatelessWidget {
@@ -31,23 +32,68 @@ class GameContentPage extends StatelessWidget {
               RepositoryProvider(
                   create: (context) => gameLoadedState.gameEngine),
             ],
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                var (layoutWidth, layoutHeight, appBarWidth) =
-                    _calculateLayoutConstraints(
-                        constraints.maxWidth, constraints.maxHeight);
-                return _GameLayout(
-                  gameData: gameData,
-                  layoutSizes: (layoutWidth, layoutHeight, appBarWidth),
-                );
-              },
-            ),
+            child: _GameLayout(gameData: gameData),
           );
         },
         buildWhen: (previous, current) {
           return current is GameLoading || current is GameLoaded;
         },
         listener: (context, state) {},
+      ),
+    );
+  }
+}
+
+const _appBarHeight = 80.0;
+
+class _GameLayout extends StatelessWidget {
+  final GameData gameData;
+  late double _layoutHeight;
+  BuildContext? _statsSheetPopupContext;
+  _GameLayout({super.key, required this.gameData});
+
+  @override
+  Widget build(BuildContext context) {
+    _statsSheetPopupContext = null;
+    return BlocListener<GameBloc, GameState>(
+      listener: (BuildContext layoutContext, GameState state) {
+        if (state is ShowStats) {
+          _displayStatisticsSheet(layoutContext);
+        }
+      },
+      listenWhen: (previousState, currentState) {
+        return currentState is ShowStats;
+      },
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          var (layoutWidth, layoutHeight, appBarWidth) =
+              _calculateLayoutConstraints(
+                  constraints.maxWidth, constraints.maxHeight);
+          _layoutHeight = layoutHeight;
+          return Scaffold(
+            appBar: GameAppBar(
+              game: gameData.game,
+              actionButtonBar: IconButton(
+                onPressed: () {
+                  BlocProvider.of<GameBloc>(context).add(RequestStats());
+                },
+                icon: Icon(Icons.query_stats_rounded),
+              ),
+              contentWidth: appBarWidth,
+              height: _appBarHeight,
+            ),
+            body: SingleChildScrollView(
+              child: Center(
+                child: SizedBox(
+                  width: layoutWidth,
+                  height: layoutHeight,
+                  child: gameData.gameLayout
+                      .buildGameLayout(context, layoutWidth, layoutHeight),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -74,55 +120,19 @@ class GameContentPage extends StatelessWidget {
 
     return (layoutWidth, layoutHeight, appBarWidth);
   }
-}
-
-const _appBarHeight = 80.0;
-
-class _GameLayout extends StatelessWidget {
-  final GameData gameData;
-  (double layoutWidth, double layoutHeight, double? appBarWidth) layoutSizes;
-
-  _GameLayout({super.key, required this.gameData, required this.layoutSizes});
-
-  @override
-  Widget build(BuildContext context) {
-    var (layoutWidth, layoutHeight, appBarWidth) = layoutSizes;
-    return BlocListener<GameBloc, GameState>(
-      listener: (BuildContext layoutContext, GameState state) {
-        if (state is ShowStats) {
-          _displayStatisticsSheet(layoutContext);
-        }
-      },
-      child: Scaffold(
-        appBar: GameAppBar(
-          game: gameData.game,
-          actionButtonBar: gameData.gameLayout.buildActionButtonBar(context),
-          contentWidth: appBarWidth,
-          height: _appBarHeight,
-        ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: SizedBox(
-              width: layoutWidth,
-              height: layoutHeight,
-              child: gameData.gameLayout
-                  .buildGameLayout(context, layoutWidth, layoutHeight),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   void _displayStatisticsSheet(BuildContext layoutContext) {
+    if (_statsSheetPopupContext != null && _statsSheetPopupContext!.mounted) {
+      Navigator.of(_statsSheetPopupContext!).pop();
+      _statsSheetPopupContext = null;
+    }
     showModalBottomSheet(
         context: layoutContext,
         enableDrag: true,
-        // showDragHandle: true,
         isScrollControlled: true,
         builder: (BuildContext context) {
+          _statsSheetPopupContext = context;
           var layoutConstraints = gameData.gameLayout.constraints;
-          var (layoutWidth, layoutHeight, appBarWidth) = layoutSizes;
           return MultiRepositoryProvider(
             providers: [
               RepositoryProvider(
@@ -139,8 +149,8 @@ class _GameLayout extends StatelessWidget {
                   constraints: BoxConstraints(
                     minWidth: layoutConstraints.minWidth,
                     maxWidth: layoutConstraints.maxWidth * 0.75,
-                    minHeight: layoutHeight * 0.5,
-                    maxHeight: layoutHeight * 0.75,
+                    minHeight: _layoutHeight * 0.5,
+                    maxHeight: _layoutHeight * 0.75,
                   ),
                   child: SingleChildScrollView(
                     child: _createStatsSheet(context),
@@ -167,7 +177,9 @@ class _GameLayout extends StatelessWidget {
               ],
             ),
           );
-        });
+        }).whenComplete(() {
+      _statsSheetPopupContext = null;
+    });
   }
 
   Widget _createStatsSheet(BuildContext context) {
@@ -187,7 +199,7 @@ class _GameLayout extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 3.0),
-            child: gameData.gameLayout.createStatsSheet(context, gameData.game),
+            child: gameData.gameLayout.buildStatsSheet(context, gameData.game),
           ),
         ],
       ),

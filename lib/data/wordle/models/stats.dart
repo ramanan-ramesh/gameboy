@@ -1,8 +1,6 @@
 import 'package:gameboy/data/app/models/stats.dart';
-import 'package:gameboy/data/wordle/implementation/stats_repository.dart';
-import 'package:gameboy/data/wordle/models/stat_modifier.dart';
 
-abstract class WordleStats extends Statistics {
+abstract class WordleStatistics extends Statistics {
   String get wordOfTheDay;
 
   int get numberOfGamesPlayed;
@@ -20,8 +18,4 @@ abstract class WordleStats extends Statistics {
       : ((numberOfGamesWon / numberOfGamesPlayed) * 100).round();
 
   int get numberOfGamesWon => winCountsInPositions.fold(0, (a, b) => a + b);
-
-  static Future<WordleStatModifier> createInstance(String userId) async {
-    return await StatsRepository.createInstance(userId);
-  }
 }

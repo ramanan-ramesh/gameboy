@@ -19,52 +19,58 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      leading: null,
-      automaticallyImplyLeading: false,
-      flexibleSpace: Center(
-        child: SizedBox(
-          width: contentWidth,
-          height: height,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.close_rounded),
+    return SizedBox(
+      height: height,
+      child: AppBar(
+        leading: null,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Center(
+          child: SizedBox(
+            width: contentWidth,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.close_rounded),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Image.asset(
-                        game.imageAsset,
-                        width: 40,
-                        height: 40,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        game.name.toUpperCase(),
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    )
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _buildGameLogo(),
                 ),
-              ),
-              if (actionButtonBar != null) actionButtonBar!,
-            ],
+                if (actionButtonBar != null) actionButtonBar!,
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildGameLogo() {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Image.asset(
+            game.imageAsset,
+            width: 40,
+            height: 40,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            game.name.toUpperCase(),
+            style: TextStyle(fontSize: 20),
+          ),
+        )
+      ],
     );
   }
 }

@@ -142,7 +142,7 @@ class _ContentPage extends StatelessWidget {
         unselectedLabelColor: Colors.grey,
       ),
       appBarTheme: AppBarTheme(
-        color: Colors.grey.shade900,
+        color: Colors.green,
         iconTheme: IconThemeData(
           color: Colors.black,
         ),

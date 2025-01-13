@@ -1,7 +1,7 @@
 import 'package:gameboy/data/wordle/models/stats.dart';
 
-abstract class WordleStatModifier extends WordleStats {
-  Future<bool> registerGuess(int index, String word);
+abstract class WordleStatsModifier extends WordleStatistics {
+  Future<bool> registerGuess(int index, String guess);
 
   Future<bool> registerWin();
 

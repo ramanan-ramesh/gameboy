@@ -5,9 +5,10 @@ import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_event.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart' as appGameState;
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/events.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart'
+    as appGameState;
 
 import 'animated_guess_letters.dart';
 

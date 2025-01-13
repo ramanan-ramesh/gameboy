@@ -1,4 +1,4 @@
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 abstract class WordleState extends GameState {}
 

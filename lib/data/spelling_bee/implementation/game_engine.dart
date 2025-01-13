@@ -1,19 +1,20 @@
 import 'package:flutter/services.dart';
+import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/spelling_bee/models/constants.dart';
-import 'package:gameboy/data/spelling_bee/models/game_engine_driver.dart';
+import 'package:gameboy/data/spelling_bee/models/game_engine.dart';
 import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
 import 'package:gameboy/data/spelling_bee/models/score.dart';
-import 'package:gameboy/data/wordle/models/extensions.dart';
 
-class GameEngine implements GameEngineDriver {
+class SpellingBeeGameEngineImpl implements SpellingBeeGameEngineDriver {
   static const _allowedGuessesPath =
       'assets/atleastFourLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
 
-  static Future<GameEngineDriver> createEngine(
+  static Future<SpellingBeeGameEngineDriver> createEngine(
       List<String> attemptedGuesses, String lettersOfTheDay) async {
     var allowedGuesses = await _getAllowedGuesses();
-    return GameEngine._(attemptedGuesses, lettersOfTheDay, allowedGuesses);
+    return SpellingBeeGameEngineImpl._(
+        attemptedGuesses, lettersOfTheDay, allowedGuesses);
   }
 
   @override
@@ -44,8 +45,7 @@ class GameEngine implements GameEngineDriver {
       return GuessedWordState.doesNotContainLettersOfTheDay;
     }
 
-    if (uniqueLetters.any((element) => !lettersOfTheDay.doesContain(element)) ||
-        !word.doesContain(lettersOfTheDay[0])) {
+    if (!word.doesContain(lettersOfTheDay[0])) {
       return GuessedWordState.doesNotContainCenterLetter;
     }
 
@@ -81,5 +81,6 @@ class GameEngine implements GameEngineDriver {
     return score;
   }
 
-  GameEngine._(this.guessedWords, this.lettersOfTheDay, this._allowedGuesses);
+  SpellingBeeGameEngineImpl._(
+      this.guessedWords, this.lettersOfTheDay, this._allowedGuesses);
 }

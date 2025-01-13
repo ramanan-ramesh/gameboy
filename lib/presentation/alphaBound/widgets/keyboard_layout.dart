@@ -5,8 +5,9 @@ import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart' as gameAppState;
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart'
+    as gameAppState;
 
 class KeyboardLayout extends StatefulWidget {
   final Function(String letter)? onLetterPressed;

@@ -7,7 +7,7 @@ import 'package:gameboy/data/alphaBound/models/stats.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:intl/intl.dart';
 
-class AlphaBoundStatisticsImpl extends AlphaBoundStatsModifier {
+class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
   static const _alphaBoundField = 'alphaBound';
   static const _userDataField = 'userData';
   static const _lowerBoundField = 'lowerBound';
@@ -77,7 +77,7 @@ class AlphaBoundStatisticsImpl extends AlphaBoundStatsModifier {
       }
     }
 
-    return AlphaBoundStatisticsImpl._(
+    return AlphaBoundStatsRepo._(
         initializedDateTime: initializedDateTime,
         numberOfGamesPlayed: numberOfGamesPlayed,
         lowerBound: lowerBound,
@@ -232,7 +232,7 @@ class AlphaBoundStatisticsImpl extends AlphaBoundStatsModifier {
       .child(_userDataField)
       .child(userId);
 
-  AlphaBoundStatisticsImpl._(
+  AlphaBoundStatsRepo._(
       {required this.initializedDateTime,
       required this.numberOfGamesPlayed,
       required this.lowerBound,

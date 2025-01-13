@@ -32,7 +32,8 @@ class StatsSheet extends StatelessWidget {
     );
   }
 
-  Widget _createStatsTiles(WordleStats statsRepository, BuildContext context) {
+  Widget _createStatsTiles(
+      WordleStatistics statsRepository, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -67,7 +68,7 @@ class StatsSheet extends StatelessWidget {
     );
   }
 
-  Widget _createGuessDistribution(WordleStats statsRepository) {
+  Widget _createGuessDistribution(WordleStatistics statsRepository) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -104,7 +105,7 @@ class StatsSheet extends StatelessWidget {
   }
 
   Widget _createGuessDistributionForPosition(
-      WordleStats statsRepository, int index) {
+      WordleStatistics statsRepository, int index) {
     var numberOfGamesWon =
         statsRepository.winCountsInPositions.reduce((a, b) => a + b);
     var winPercentageForPosition = numberOfGamesWon == 0

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/spelling_bee/models/guessed_word_state.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_state.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
 import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 import 'package:gameboy/presentation/spelling_bee/widgets/game_results/guess_words_display.dart';
@@ -70,18 +70,18 @@ class MaximizedGameResults extends StatelessWidget {
 
 class MinimizedGameResults extends StatelessWidget {
   final VoidCallback onGameResultsSizeToggled;
-  bool isExpanded;
+  final bool isExpandedInitially;
 
   MinimizedGameResults(
       {super.key,
       required this.onGameResultsSizeToggled,
-      this.isExpanded = false});
+      required this.isExpandedInitially});
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, GameState>(
       builder: (BuildContext context, GameState state) {
-        if (!isExpanded) {
+        if (!isExpandedInitially) {
           return Column(
             children: [
               Padding(
@@ -114,7 +114,7 @@ class MinimizedGameResults extends StatelessWidget {
 
   Widget _createGuessWordsDisplay(BuildContext context) {
     var guessedWords = context.getGameEngineData().guessedWords;
-    if (!isExpanded) {
+    if (!isExpandedInitially) {
       var textToDisplay = guessedWords.isEmpty
           ? 'You have not guessed any word yet!'
           : guessedWords.join(' ').toUpperCase();

@@ -17,4 +17,6 @@ extension StringExt on String {
     }
     return compareTo(other);
   }
+
+  bool doesContain(String other) => toLowerCase().contains(other.toLowerCase());
 }

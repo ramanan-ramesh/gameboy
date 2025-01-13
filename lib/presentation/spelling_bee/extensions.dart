@@ -4,13 +4,13 @@ import 'package:gameboy/data/app/models/game_engine.dart';
 import 'package:gameboy/data/app/models/stats.dart';
 import 'package:gameboy/data/spelling_bee/models/game_engine.dart';
 import 'package:gameboy/data/spelling_bee/models/stats.dart';
-import 'package:gameboy/presentation/app/blocs/game_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_event.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/events.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/bloc.dart';
 
 extension BuildContextExt on BuildContext {
-  GameEngineData getGameEngineData() {
-    return RepositoryProvider.of<GameEngine>(this) as GameEngineData;
+  SpellingBeeGameEngine getGameEngineData() {
+    return RepositoryProvider.of<GameEngine>(this) as SpellingBeeGameEngine;
   }
 
   Stats getStatsRepository() {

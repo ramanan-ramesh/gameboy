@@ -7,25 +7,28 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   static const String _appLogoAsset =
       'assets/logos/app_logo_without_phrase.webp';
 
-  @override
-  Size get preferredSize => const Size.fromHeight(90);
-
   const HomeAppBar({super.key});
 
   @override
+  Size get preferredSize => const Size.fromHeight(100);
+
+  @override
   Widget build(BuildContext context) {
-    return AppBar(
-      flexibleSpace: Center(
-        child: Image.asset(
-          _appLogoAsset,
-          width: 80,
-          height: 80,
-          fit: BoxFit.contain,
+    return SizedBox(
+      height: 100,
+      child: AppBar(
+        flexibleSpace: Center(
+          child: Image.asset(
+            _appLogoAsset,
+            width: 80,
+            height: 80,
+            fit: BoxFit.contain,
+          ),
         ),
+        actions: [
+          _UserProfilePopupMenu(),
+        ],
       ),
-      actions: [
-        _UserProfilePopupMenu(),
-      ],
     );
   }
 }

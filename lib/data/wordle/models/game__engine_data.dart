@@ -3,7 +3,7 @@ import 'package:gameboy/data/wordle/models/guess_word.dart';
 
 import 'guess_letter.dart';
 
-abstract class GameEngineData extends GameEngine {
+abstract class WordleGameEngine extends GameEngine {
   String get wordOfTheDay;
 
   GuessWord? get guessWordUnderEdit;

@@ -4,12 +4,13 @@ import 'package:gameboy/data/wordle/constants.dart';
 import 'guess_row/guess_row.dart';
 
 class GuessesLayout extends StatelessWidget {
-  const GuessesLayout({super.key});
+  final double widthFactor;
+  const GuessesLayout({super.key, required this.widthFactor});
 
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      widthFactor: 0.7,
+      widthFactor: widthFactor,
       child: Column(
         children: List<Widget>.generate(
           WordleConstants.numberOfGuesses,

@@ -2,10 +2,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/spelling_bee/implementation/game_engine.dart';
 import 'package:gameboy/data/spelling_bee/models/constants.dart';
-import 'package:gameboy/data/spelling_bee/models/stats_modifier.dart';
+import 'package:gameboy/data/spelling_bee/models/stats.dart';
 import 'package:intl/intl.dart';
 
-class StatsRepository extends StatsModifier {
+class SpellingBeeStatsRepo extends SpellingBeeStatsModifier {
   static const _spellingBeeRootField = 'spelling-bee';
   static const _lettersOfTheDayField = 'lettersOfTheDay';
   static const _userDataField = 'userData';
@@ -19,7 +19,8 @@ class StatsRepository extends StatsModifier {
   static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   static final _firstDay = DateTime(2024, 11, 6);
 
-  static Future<StatsModifier> createRepository(String userId) async {
+  static Future<SpellingBeeStatsModifier> createRepository(
+      String userId) async {
     var spellingBeeRootDBRef =
         FirebaseDatabase.instance.ref().child(_spellingBeeRootField);
     var initializedDateTime = DateTime.now();
@@ -62,7 +63,7 @@ class StatsRepository extends StatsModifier {
             .toList();
       }
     }
-    return StatsRepository._(
+    return SpellingBeeStatsRepo._(
         rankingsCount: rankingsCount,
         numberOfGamesPlayed: numberOfGamesPlayed,
         numberOfWordsSubmitted: numberOfWordsSubmitted,
@@ -81,7 +82,8 @@ class StatsRepository extends StatsModifier {
       final daysDifference =
           initializedDateTime.numberOfDaysInBetween(_lastCompletedMatchDay!);
       if (daysDifference > 0) {
-        var rank = GameEngine.rankCalculator(wordsSubmittedToday);
+        var rank =
+            SpellingBeeGameEngineImpl.rankCalculator(wordsSubmittedToday);
         if (_rankingsCount.containsKey(rank)) {
           _rankingsCount[rank] = _rankingsCount[rank]! + 1;
         } else {
@@ -98,7 +100,7 @@ class StatsRepository extends StatsModifier {
           }
         }
         await _userDataReference.update({
-          _rankingsCountField: rankingsCount,
+          _rankingsCountField: _rankingsCount,
           _lastPlayedMatchDateField: null,
           _wordsSubmittedTodayField: null,
           _numberOfWordsSubmittedField: numberOfWordsSubmitted,
@@ -117,40 +119,6 @@ class StatsRepository extends StatsModifier {
 
   @override
   int numberOfWordsSubmitted;
-
-  @override
-  Future<bool> trySubmitWord(String word) async {
-    if (_doesWordListContainWord(wordsSubmittedToday, word)) {
-      return false;
-    }
-    var didSubmitWord = false;
-    var shouldUpdateLongestGuess =
-        word.length > (_longestGuessedWord?.length ?? 0);
-    var isPangram =
-        word.split('').toSet().length == SpellingBeeConstants.numberOfLetters;
-    await _userDataReference.update({
-      _wordsSubmittedTodayField: wordsSubmittedToday,
-      _lastPlayedMatchDateField: _dateFormat.format(initializedDateTime),
-      if (shouldUpdateLongestGuess) _longestSubmittedWordField: word,
-      _numberOfWordsSubmittedField: numberOfWordsSubmitted + 1,
-      if (isPangram) _numberOfPangramsField: numberOfPangrams + 1,
-    }).then((_) {
-      didSubmitWord = true;
-      numberOfWordsSubmitted++;
-      wordsSubmittedToday.add(word);
-      _lastCompletedMatchDay ??= initializedDateTime;
-      if (shouldUpdateLongestGuess) {
-        _longestGuessedWord = word;
-      }
-      if (isPangram) {
-        numberOfPangrams++;
-      }
-    }).onError((_, __) {
-      didSubmitWord = false;
-    });
-
-    return didSubmitWord;
-  }
 
   @override
   Iterable<MapEntry<String, int>> get rankingsCount => _rankingsCount.entries;
@@ -173,6 +141,39 @@ class StatsRepository extends StatsModifier {
   String? get longestSubmittedWord => _longestGuessedWord;
   String? _longestGuessedWord;
 
+  @override
+  Future<bool> trySubmitWord(String word) async {
+    if (_doesWordListContainWord(wordsSubmittedToday, word)) {
+      return false;
+    }
+    var didSubmitWord = false;
+    var isLongestGuess = word.length > (_longestGuessedWord?.length ?? 0);
+    var isPangram =
+        word.split('').toSet().length == SpellingBeeConstants.numberOfLetters;
+    await _userDataReference.update({
+      _wordsSubmittedTodayField: wordsSubmittedToday.toList()..add(word),
+      _lastPlayedMatchDateField: _dateFormat.format(initializedDateTime),
+      if (isLongestGuess) _longestSubmittedWordField: word,
+      _numberOfWordsSubmittedField: numberOfWordsSubmitted + 1,
+      if (isPangram) _numberOfPangramsField: numberOfPangrams + 1,
+    }).then((_) {
+      didSubmitWord = true;
+      numberOfWordsSubmitted++;
+      wordsSubmittedToday.add(word);
+      _lastCompletedMatchDay ??= initializedDateTime;
+      if (isLongestGuess) {
+        _longestGuessedWord = word;
+      }
+      if (isPangram) {
+        numberOfPangrams++;
+      }
+    }).onError((_, __) {
+      didSubmitWord = false;
+    });
+
+    return didSubmitWord;
+  }
+
   static int _getIntegerStatistic(Map userData, String field) {
     return userData.containsKey(field)
         ? int.parse(userData[field].toString())
@@ -186,8 +187,7 @@ class StatsRepository extends StatsModifier {
       .child(_userId);
 
   bool _doesWordListContainWord(Iterable<String> wordList, String word) {
-    return wordList
-        .any((element) => element.toLowerCase() == word.toLowerCase());
+    return wordList.any((element) => element.isEqualTo(word));
   }
 
   static Future<String> _getLettersOfTheDay(
@@ -204,7 +204,7 @@ class StatsRepository extends StatsModifier {
     return lettersOfTheDayDoc.value as String;
   }
 
-  StatsRepository._(
+  SpellingBeeStatsRepo._(
       {required Map<String, int> rankingsCount,
       required this.numberOfGamesPlayed,
       required this.numberOfWordsSubmitted,

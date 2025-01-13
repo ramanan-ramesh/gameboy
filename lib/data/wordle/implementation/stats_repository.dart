@@ -6,7 +6,7 @@ import 'package:gameboy/data/wordle/constants.dart';
 import 'package:gameboy/data/wordle/models/stat_modifier.dart';
 import 'package:intl/intl.dart';
 
-class StatsRepository extends WordleStatModifier {
+class WordleStatsRepo extends WordleStatsModifier {
   static const _wordleField = 'wordle';
   static const _userDataField = 'userData';
   static const _answersField = 'answers';
@@ -19,7 +19,7 @@ class StatsRepository extends WordleStatModifier {
   static const _lastPlayedDayField = 'lastPlayedDay';
   static final _firstDay = DateTime(2024, 11, 6);
 
-  static Future<StatsRepository> createInstance(String userId) async {
+  static Future<WordleStatsRepo> createInstance(String userId) async {
     var userDataReference = FirebaseDatabase.instance
         .ref()
         .child(_wordleField)
@@ -60,7 +60,7 @@ class StatsRepository extends WordleStatModifier {
       }
     }
     var wordOfTheDay = await _getWordOfTheDay(currentDay);
-    return StatsRepository._(
+    return WordleStatsRepo._(
         currentStreak: currentStreak,
         maxStreak: maxStreak,
         numberOfGamesPlayed: numberOfGamesPlayed,
@@ -198,7 +198,7 @@ class StatsRepository extends WordleStatModifier {
     return wordOfTheDayDoc.value as String;
   }
 
-  StatsRepository._(
+  WordleStatsRepo._(
       {required this.currentStreak,
       required this.maxStreak,
       required this.numberOfGamesPlayed,

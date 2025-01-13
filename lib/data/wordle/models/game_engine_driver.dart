@@ -3,8 +3,8 @@ import 'package:gameboy/data/wordle/implementation/game_engine.dart';
 
 import 'game__engine_data.dart';
 
-abstract class GameEngineDriver extends appGameEngine.GameEngine
-    implements GameEngineData {
+abstract class WordleGameEngineDriver extends appGameEngine.GameEngine
+    implements WordleGameEngine {
   bool isWordInDictionary(String guess);
 
   bool canSubmitWord();
@@ -15,8 +15,9 @@ abstract class GameEngineDriver extends appGameEngine.GameEngine
 
   bool didRemoveLetter();
 
-  static Future<GameEngineDriver> createEngine(
+  static Future<WordleGameEngineDriver> createEngine(
       List<String> attemptedGuesses, String wordOfTheDay) async {
-    return await GameEngine.createEngine(attemptedGuesses, wordOfTheDay);
+    return await WordleGameEngineImpl.createEngine(
+        attemptedGuesses, wordOfTheDay);
   }
 }

@@ -15,3 +15,7 @@ abstract class Stats extends Statistics {
 
   String? get longestSubmittedWord;
 }
+
+abstract class SpellingBeeStatsModifier extends Stats {
+  Future<bool> trySubmitWord(String word);
+}

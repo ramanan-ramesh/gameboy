@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/constants.dart';
 import 'package:gameboy/data/app/implementations/firebase_options.dart';
 import 'package:gameboy/data/app/implementations/user_management.dart';
-import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
@@ -29,7 +28,7 @@ class AppDataRepository extends AppDataModifier {
   @override
   String googleWebClientId;
 
-  static Future<AppDataFacade> create() async {
+  static Future<AppDataModifier> create() async {
     if (_appDataRepository != null) {
       return _appDataRepository!;
     }

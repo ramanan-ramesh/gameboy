@@ -21,3 +21,5 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+tasks.register("testClasses")

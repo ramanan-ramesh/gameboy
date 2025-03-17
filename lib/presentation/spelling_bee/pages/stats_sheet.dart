@@ -135,7 +135,7 @@ class SpellingBeeStatsSheet extends StatelessWidget {
             ? 0.0
             : numberOfGamesWonForRank / statsRepository.numberOfGamesPlayed;
     return ListTile(
-      leading: Container(
+      leading: SizedBox(
         width: 100,
         child: FittedBox(
           fit: BoxFit.scaleDown,

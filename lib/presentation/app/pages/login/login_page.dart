@@ -238,7 +238,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
   Widget _createPasswordField(AuthenticationState authState) {
     String? errorText;
     if (authState is AuthenticationFailure) {
-      if (authState.failureReason == AuthenticationFailures.WrongPassword) {
+      if (authState.failureReason == AuthenticationFailures.wrongPassword) {
         errorText = 'Wrong password entered';
       }
     }
@@ -262,11 +262,11 @@ class _LoginPageFormState extends State<_LoginPageForm>
     String? errorText;
     if (authState is AuthenticationFailure) {
       if (authState.failureReason ==
-          AuthenticationFailures.UsernameAlreadyExists) {
+          AuthenticationFailures.usernameAlreadyExists) {
         errorText =
             'This username is already registered. You can login with it instead';
       } else if (authState.failureReason ==
-          AuthenticationFailures.NoSuchUsernameExists) {
+          AuthenticationFailures.noSuchUsernameExists) {
         errorText = 'No such username exists. You can register with it instead';
       }
     }

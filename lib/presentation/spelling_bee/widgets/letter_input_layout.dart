@@ -4,7 +4,7 @@ import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 import 'polygon_border.dart';
 
 class LetterInputLayout extends StatefulWidget {
-  Function(String letter) onLetterPressed;
+  final Function(String letter) onLetterPressed;
   final double sizeOfCell;
 
   LetterInputLayout(
@@ -73,10 +73,10 @@ class _LetterInputLayoutState extends State<LetterInputLayout> {
 }
 
 class _LetterKey extends StatefulWidget {
-  String letter;
-  bool isCentered;
-  double size;
-  VoidCallback onLetterPressed;
+  final String letter;
+  final bool isCentered;
+  final double size;
+  final VoidCallback onLetterPressed;
 
   _LetterKey(
       {super.key,

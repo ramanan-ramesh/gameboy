@@ -39,7 +39,7 @@ class _GuessWordRangeLayoutState extends State<GuessWordRangeLayout> {
       AlphaBoundConstants.numberOfLettersInGuess,
       (index) => GlobalKey(debugLabel: 'upperBoundLetterSlot$index'));
 
-  List<OverlayEntry> _overlayEntries = [];
+  final List<OverlayEntry> _overlayEntries = [];
 
   @override
   Widget build(BuildContext context) {

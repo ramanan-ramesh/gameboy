@@ -77,7 +77,7 @@ class AppDataRepository extends AppDataModifier {
 
   @override
   Iterable<Game> get games => _games;
-  List<Game> _games;
+  final List<Game> _games;
 
   Future _writeRecordToLocalStorage(
       Box hiveBox, String recordKey, String recordValue) async {

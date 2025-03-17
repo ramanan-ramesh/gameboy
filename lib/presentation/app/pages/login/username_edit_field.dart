@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class UsernameEditField extends StatelessWidget {
-  InputDecoration? inputDecoration;
-  TextEditingController controller;
-  TextInputAction? textInputAction;
+  final InputDecoration? inputDecoration;
+  final TextEditingController controller;
+  final TextInputAction? textInputAction;
 
   static const double _formElementSize = 15;
   static final _emailRegExValidator = RegExp('.*@.*.com');

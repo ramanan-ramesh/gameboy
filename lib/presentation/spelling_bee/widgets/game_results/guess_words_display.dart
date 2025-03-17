@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class GuessWordsDisplay extends StatelessWidget {
   final List<String> words;
 
-  GuessWordsDisplay({required Iterable<String> guessWords})
+  GuessWordsDisplay({super.key, required Iterable<String> guessWords})
       : words = guessWords.toList();
 
   @override

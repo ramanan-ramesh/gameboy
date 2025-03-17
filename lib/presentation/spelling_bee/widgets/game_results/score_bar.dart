@@ -22,7 +22,7 @@ class ScoreBar extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
+            child: SizedBox(
               height: 100,
               child: _buildRankIndicators(currentScore, context),
             ),

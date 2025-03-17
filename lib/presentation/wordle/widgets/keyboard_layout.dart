@@ -55,14 +55,14 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     secondRowWidgets.insert(
       0,
       Expanded(
-        child: Container(),
         flex: 5,
+        child: Container(),
       ),
     );
     secondRowWidgets.add(
       Expanded(
-        child: Container(),
         flex: 5,
+        child: Container(),
       ),
     );
 

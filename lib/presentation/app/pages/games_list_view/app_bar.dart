@@ -71,8 +71,7 @@ class _UserProfilePopupMenu extends StatelessWidget {
 class _ProfileActionButton extends StatefulWidget {
   final String? photoUrl;
 
-  const _ProfileActionButton({Key? key, required this.photoUrl})
-      : super(key: key);
+  const _ProfileActionButton({super.key, required this.photoUrl});
 
   @override
   State<_ProfileActionButton> createState() => _ProfileActionButtonState();
@@ -93,8 +92,6 @@ class _ProfileActionButtonState extends State<_ProfileActionButton> {
             _isImageLoaded = true;
           });
         }
-      }, onError: (error, stackTrace) {
-        print('Error loading image: $error');
       });
       _userProfileNetworkImage!
           .resolve(const ImageConfiguration(size: Size(40, 40)))

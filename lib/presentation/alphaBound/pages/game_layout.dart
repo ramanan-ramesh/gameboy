@@ -71,22 +71,4 @@ class AlphaBoundLayout extends GameLayout {
       context.addGameEvent(SubmitGuessWord(_guessLetterValueNotifier.value));
     }
   }
-
-  Widget _createGuessesLayout(double layoutWidth) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          flex: 4,
-          child: GuessesLayout(
-              layoutWidth: layoutWidth,
-              guessLetterValueNotifier: _guessLetterValueNotifier),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(),
-        ),
-      ],
-    );
-  }
 }

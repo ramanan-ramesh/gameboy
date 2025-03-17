@@ -17,8 +17,7 @@ class _LinearProgressIndicator extends StatefulWidget {
   final double distanceOfWordOfTheDayFromBounds;
 
   const _LinearProgressIndicator(
-      {Key? key, required this.distanceOfWordOfTheDayFromBounds})
-      : super(key: key);
+      {super.key, required this.distanceOfWordOfTheDayFromBounds});
 
   @override
   _AnimatedLinearProgressIndicatorState createState() =>
@@ -60,7 +59,7 @@ class _AnimatedLinearProgressIndicatorState
           children: [
             RotatedBox(
               quarterTurns: 1,
-              child: Container(
+              child: SizedBox(
                 height: 10,
                 child: Stack(
                   children: [

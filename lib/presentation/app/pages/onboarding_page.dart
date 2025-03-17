@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class OnBoardingPage extends StatelessWidget {
-  VoidCallback? onNavigateToNextPage;
-  bool isBigLayout;
+  final VoidCallback? onNavigateToNextPage;
+  final bool isBigLayout;
 
   OnBoardingPage(
       {super.key, this.onNavigateToNextPage, required this.isBigLayout});

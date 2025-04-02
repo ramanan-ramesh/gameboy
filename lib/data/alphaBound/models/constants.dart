@@ -1,4 +1,4 @@
 class AlphaBoundConstants {
-  static const numberOfAllowedGuesses = 15;
-  static const numberOfLettersInGuess = 5;
+  static const maximumGuessesAllowed = 15;
+  static const guessWordLength = 5;
 }

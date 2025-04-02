@@ -40,10 +40,11 @@ class PolygonPathDrawer {
   _drawLine(Path path, double currentAngle, double radius, bool move) {
     Offset current = _getOffset(currentAngle, radius);
 
-    if (move)
+    if (move) {
       path.moveTo(current.dx, current.dy);
-    else
+    } else {
       path.lineTo(current.dx, current.dy);
+    }
   }
 
   _drawLineAndArc(Path path, double currentAngle, double radius,

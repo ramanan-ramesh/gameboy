@@ -64,15 +64,6 @@ class _StartupPageState extends State<StartupPage> {
       );
     }
 
-    return _shouldNavigateToLoginScreen
-        ? LoginPage()
-        : OnBoardingPage(
-            isBigLayout: isBigLayout,
-            onNavigateToNextPage: () {
-              setState(() {
-                _shouldNavigateToLoginScreen = true;
-              });
-            },
-          );
+    return LoginPage();
   }
 }

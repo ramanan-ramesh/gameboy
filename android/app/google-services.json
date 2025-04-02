@@ -3,7 +3,7 @@
     "project_number": "406654937423",
     "firebase_url": "https://gameboy-22c94-default-rtdb.firebaseio.com",
     "project_id": "gameboy-22c94",
-    "storage_bucket": "gameboy-22c94.appspot.com"
+    "storage_bucket": "gameboy-22c94.firebasestorage.app"
   },
   "client": [
     {
@@ -14,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "406654937423-cmju8m0554f34dvrip59nrt210atffak.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rareapps.gameboy",
+            "certificate_hash": "bb6e5d9a7fea7f32490647cc51c7c0ee29a07173"
+          }
+        },
         {
           "client_id": "406654937423-jbim5pvd7ip96503pkl5l9ip1j3r080c.apps.googleusercontent.com",
           "client_type": 1,

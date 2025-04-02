@@ -7,33 +7,33 @@ import 'package:gameboy/data/alphaBound/models/game_engine.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 
-class _GameInProgress extends AlphaBoundGameStatus {
-  _GameInProgress({required super.lowerBound, required super.upperBound});
-}
-
 class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
   static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _sortedDictionary;
-  static final _firstDay = DateTime(2024, 11, 26);
+  static final _firstDay = DateTime(2025, 3, 16);
   static const _defaultLowerBoundGuess = 'AAAAA';
   static const _defaultUpperBoundGuess = 'ZZZZZ';
 
   static Future<AlphaBoundGameEngineDriver> create(
       String? lowerBound,
       String? upperBound,
-      String? finalGuessWord,
+      String? lastGuessedWord,
       int numberOfWordsGuessed) async {
     var allowedGuesses = await _getAllowedGuesses();
-    var numberOfDaysInBetween = _firstDay.numberOfDaysInBetween(DateTime.now());
-    var wordOfTheDay = allowedGuesses[numberOfDaysInBetween];
+
+    var currentDayIndex = _firstDay.numberOfDaysInBetween(DateTime.now());
+    var wordOfTheDay = allowedGuesses[currentDayIndex];
+
     var displayUpperBoundGuess = upperBound ?? _defaultUpperBoundGuess,
         displayLowerBoundGuess = lowerBound ?? _defaultLowerBoundGuess;
-    var gameState = _getInitialGameResult(finalGuessWord, wordOfTheDay,
+
+    var startupGameState = _getStartupGameState(lastGuessedWord, wordOfTheDay,
         displayLowerBoundGuess, displayUpperBoundGuess);
+
     return AlphaBoundGameEngineImpl._(
-        currentState: gameState,
+        currentState: startupGameState,
         allowedGuesses: allowedGuesses,
-        wordOfTheDay: allowedGuesses[numberOfDaysInBetween],
+        wordOfTheDay: allowedGuesses[currentDayIndex],
         numberOfWordsGuessedToday: numberOfWordsGuessed);
   }
 
@@ -48,7 +48,7 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
   AlphaBoundGameStatus _currentState;
 
   @override
-  FutureOr<AlphaBoundGameStatus> trySubmitGuess(String guess) async {
+  Future<AlphaBoundGameStatus> trySubmitGuess(String guess) async {
     if (!await compute(_isGuessInDictionary, guess)) {
       _currentState = GuessNotInDictionary(
           lowerBound: _currentState.lowerBound,
@@ -73,7 +73,7 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
       return _currentState;
     } else {
       if (numberOfWordsGuessedToday ==
-          AlphaBoundConstants.numberOfAllowedGuesses) {
+          AlphaBoundConstants.maximumGuessesAllowed) {
         _currentState = GameLost(
             lowerBound: _currentState.lowerBound,
             upperBound: _currentState.upperBound,
@@ -83,19 +83,19 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
 
       if (guess.comparedTo(wordOfTheDay, false) > 0 &&
           guess.comparedTo(_currentState.upperBound, false) < 0) {
-        _currentState = GuessMovesDown(
+        _currentState = GuessReplacesUpperBound(
             lowerBound: _currentState.lowerBound, upperBound: guess);
         return _currentState;
       }
 
-      _currentState =
-          GuessMovesUp(lowerBound: guess, upperBound: _currentState.upperBound);
+      _currentState = GuessReplacesLowerBound(
+          lowerBound: guess, upperBound: _currentState.upperBound);
       return _currentState;
     }
   }
 
   @override
-  double get distanceRatioOfWordOfTheDayFromLowerBound {
+  double get wordOfTheDayProximityRatio {
     var lowerBoundIndex = _sortedDictionary
         .indexWhere((e) => e.isEqualTo(_currentState.lowerBound));
     var upperBoundIndex = _sortedDictionary
@@ -111,13 +111,13 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
     return _sortedDictionary.any((element) => element.isEqualTo(guess));
   }
 
-  static AlphaBoundGameStatus _getInitialGameResult(
-      String? finalGuessWord,
+  static AlphaBoundGameStatus _getStartupGameState(
+      String? lastGuessedWord,
       String wordOfTheDay,
       String displayLowerBoundGuess,
       String displayUpperBoundGuess) {
-    if (finalGuessWord != null) {
-      if (finalGuessWord.isEqualTo(wordOfTheDay)) {
+    if (lastGuessedWord != null) {
+      if (lastGuessedWord.isEqualTo(wordOfTheDay)) {
         return GameWon(
             lowerBound: displayLowerBoundGuess,
             upperBound: displayUpperBoundGuess);
@@ -125,10 +125,10 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
         return GameLost(
             lowerBound: displayLowerBoundGuess,
             upperBound: displayUpperBoundGuess,
-            finalGuess: finalGuessWord);
+            finalGuess: lastGuessedWord);
       }
     } else {
-      return _GameInProgress(
+      return AlphaBoundGameStatus(
           lowerBound: displayLowerBoundGuess,
           upperBound: displayUpperBoundGuess);
     }

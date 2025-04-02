@@ -19,10 +19,10 @@ class AuthenticationFailure extends AuthenticationState {
 }
 
 enum AuthenticationFailures {
-  UsernameAlreadyExists,
-  WrongPassword,
-  NoSuchUsernameExists,
-  InvalidEmail,
-  Undefined,
-  WeakPassword
+  usernameAlreadyExists,
+  wrongPassword,
+  noSuchUsernameExists,
+  invalidEmail,
+  undefined,
+  weakPassword
 }

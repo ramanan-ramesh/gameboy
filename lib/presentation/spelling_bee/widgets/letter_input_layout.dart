@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/presentation/spelling_bee/extensions.dart';
 
 import 'polygon_border.dart';
 
 class LetterInputLayout extends StatefulWidget {
-  Function(String letter) onLetterPressed;
+  final Function(String letter) onLetterPressed;
   final double sizeOfCell;
+  String lettersOfTheDay;
 
   LetterInputLayout(
-      {super.key, required this.onLetterPressed, required this.sizeOfCell});
+      {super.key,
+      required this.onLetterPressed,
+      required this.sizeOfCell,
+      required this.lettersOfTheDay});
 
   @override
   State<LetterInputLayout> createState() => _LetterInputLayoutState();
@@ -19,8 +22,7 @@ class _LetterInputLayoutState extends State<LetterInputLayout> {
 
   @override
   Widget build(BuildContext context) {
-    String letters = context.getGameEngineData().lettersOfTheDay;
-
+    final letters = widget.lettersOfTheDay;
     return SizedBox(
       height: widget.sizeOfCell * 3,
       child: Stack(
@@ -73,10 +75,10 @@ class _LetterInputLayoutState extends State<LetterInputLayout> {
 }
 
 class _LetterKey extends StatefulWidget {
-  String letter;
-  bool isCentered;
-  double size;
-  VoidCallback onLetterPressed;
+  final String letter;
+  final bool isCentered;
+  final double size;
+  final VoidCallback onLetterPressed;
 
   _LetterKey(
       {super.key,
@@ -95,7 +97,6 @@ class _LetterKeyState extends State<_LetterKey>
 
   double _scaleTransformValue = 1;
 
-  // needed for the "click" tap effect
   late final AnimationController animationController;
 
   @override
@@ -122,10 +123,7 @@ class _LetterKeyState extends State<_LetterKey>
   }
 
   void _restoreButtonSize() {
-    Future.delayed(
-      const Duration(milliseconds: clickAnimationDurationMillis),
-      () => animationController.reverse(),
-    );
+    animationController.reverse();
   }
 
   @override

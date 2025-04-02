@@ -42,8 +42,11 @@ class _GamesListViewState extends State<GamesListView> {
     return BlocListener<MasterPageBloc, MasterPageState>(
       listener: (context, state) {
         if (state is LoadedGame) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => GameContentPage(gameData: state.gameData)));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => GameContentPage(gameData: state.gameData),
+            ),
+          );
         }
       },
       listenWhen: (previousState, currentState) {
@@ -58,7 +61,7 @@ class _GamesListViewState extends State<GamesListView> {
             itemCount: games.length,
             itemBuilder: (context, index) {
               double scale = (_currentPage - index).abs();
-              double scaleFactor = 1 - (scale * 0.3);
+              double scaleFactor = 1 - (scale * 0.5);
 
               return Transform.scale(
                 scale: scaleFactor,

@@ -8,7 +8,8 @@ class AnimatedGuessLetterPositioner extends StatefulWidget {
   final String letter;
 
   const AnimatedGuessLetterPositioner(
-      {required this.startPosition,
+      {super.key,
+      required this.startPosition,
       required this.endPosition,
       required this.letter,
       required this.letterSize,

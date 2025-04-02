@@ -4,12 +4,12 @@ class LoginFormSubmitterButton extends StatefulWidget {
   final IconData icon;
   final BuildContext context;
   final VoidCallback? callback;
-  VoidCallback? validationFailureCallback;
-  VoidCallback? validationSuccessCallback;
+  final VoidCallback? validationFailureCallback;
+  final VoidCallback? validationSuccessCallback;
   final Color? iconColor;
-  GlobalKey<FormState>? formState;
+  final GlobalKey<FormState>? formState;
+  final bool isEnabledInitially;
   bool isSubmitted;
-  bool isEnabledInitially;
 
   LoginFormSubmitterButton(
       {super.key,

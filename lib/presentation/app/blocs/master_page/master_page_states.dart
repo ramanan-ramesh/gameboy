@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_data.dart';
 
 abstract class MasterPageState {}
 
-class Startup extends MasterPageState {}
+class LoadingAppDataRepository extends MasterPageState {}
+
+class LoadedAppDataRepository extends MasterPageState {
+  final AppDataFacade appData;
+  LoadedAppDataRepository({required this.appData});
+}
 
 class ActiveLanguageChanged extends MasterPageState {
   String language;

@@ -5,6 +5,7 @@ import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordle/models/guess_letter.dart';
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game/states.dart';
+import 'package:gameboy/presentation/app/widgets/button.dart';
 import 'package:gameboy/presentation/wordle/bloc/events.dart';
 import 'package:gameboy/presentation/wordle/bloc/states.dart';
 import 'package:gameboy/presentation/wordle/extensions.dart';
@@ -55,14 +56,14 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     secondRowWidgets.insert(
       0,
       Expanded(
-        child: Container(),
         flex: 5,
+        child: Container(),
       ),
     );
     secondRowWidgets.add(
       Expanded(
-        child: Container(),
         flex: 5,
+        child: Container(),
       ),
     );
 
@@ -156,25 +157,23 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         .firstOrNull;
     return Expanded(
       flex: flex,
-      child: Container(
-        margin: const EdgeInsets.all(5),
+      child: AnimatedButton(
         color: alreadyGuessedLetter == null
-            ? Colors.white12
+            ? Colors.white38
             : alreadyGuessedLetter.getKeyboardTileBackgroundColor(),
-        child: InkWell(
-          onTap: () {
-            context.addGameEvent(SubmitLetter(letter: letter));
-          },
-          child: Center(
-            child: Text(
-              letter,
-              style: TextStyle(
-                  color: alreadyGuessedLetter == null
-                      ? Colors.white
-                      : alreadyGuessedLetter.getTextColor()),
-            ),
-          ),
+        onPressedColor: alreadyGuessedLetter == null
+            ? Colors.white60
+            : alreadyGuessedLetter.getKeyboardTilePressedColor(),
+        content: Text(
+          letter,
+          style: TextStyle(
+              color: alreadyGuessedLetter == null
+                  ? Colors.white
+                  : alreadyGuessedLetter.getTextColor()),
         ),
+        onPressed: () {
+          context.addGameEvent(SubmitLetter(letter: letter));
+        },
       ),
     );
   }
@@ -183,17 +182,13 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
       BuildContext context, WordleEvent actionEvent, Widget key, int flex) {
     return Expanded(
       flex: flex,
-      child: Container(
-        margin: const EdgeInsets.all(5),
+      child: AnimatedButton(
+        content: key,
         color: Colors.white12,
-        child: InkWell(
-          onTap: () {
-            context.addGameEvent(actionEvent);
-          },
-          child: Center(
-            child: key,
-          ),
-        ),
+        onPressedColor: Colors.white38,
+        onPressed: () {
+          context.addGameEvent(actionEvent);
+        },
       ),
     );
   }

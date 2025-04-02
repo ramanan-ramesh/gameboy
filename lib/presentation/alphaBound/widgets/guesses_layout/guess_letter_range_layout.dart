@@ -6,30 +6,40 @@ import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/animated_
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
-//TODO: If the first and last possible letters are the same, then first and last letters must denote the letters of lower/upper bound until the differentiating letter is found.
-//Ex: If lower bound - 'AAAAA' and upper bound - 'AMBER', then first and last letters must denote 'AA' and 'AM' respectively.
 class GuessLetterRangeLayout extends StatelessWidget {
-  final double _rangeLetterIndicatorSize;
+  final double _letterIndicatorSize;
+  static const _lettersIndicatorRadius = 12.0;
 
   const GuessLetterRangeLayout({super.key, required double letterSize})
-      : _rangeLetterIndicatorSize = letterSize * 0.8;
+      : _letterIndicatorSize = letterSize * 0.8;
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, GameState>(
       builder: (BuildContext context, GameState state) {
-        var gameEngineData = context.getGameEngineData();
-        var firstPossibleStartLetter =
-            gameEngineData.currentState.lowerBound[0];
-        var lastPossibleStartLetter = gameEngineData.currentState.upperBound[0];
+        var currentGameState = context.getGameEngineData().currentState;
+        var lowerBoundStartLetters = currentGameState.lowerBound[0];
+        var upperBoundStartLetters = currentGameState.upperBound[0];
+        for (var index = 0;
+            index < currentGameState.lowerBound.length;
+            index++) {
+          if (currentGameState.lowerBound[index] !=
+              currentGameState.upperBound[index]) {
+            lowerBoundStartLetters =
+                currentGameState.lowerBound.substring(0, index + 1);
+            upperBoundStartLetters =
+                currentGameState.upperBound.substring(0, index + 1);
+            break;
+          }
+        }
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _createFirstPossibleStartLetter(firstPossibleStartLetter),
+            _createLowerBoundStartLetters(lowerBoundStartLetters, context),
             Expanded(
-              child: AnimatedLinearProgressIndicator(),
+              child: AnimatedWordOfTheDayProximityIndicator(),
             ),
-            _createLastPossibleStartLetter(lastPossibleStartLetter),
+            _createUpperBoundStartLetters(upperBoundStartLetters, context),
           ],
         );
       },
@@ -41,37 +51,35 @@ class GuessLetterRangeLayout extends StatelessWidget {
     );
   }
 
-  Widget _createFirstPossibleStartLetter(String firstPossibleStartLetter) {
+  Widget _createLowerBoundStartLetters(
+      String lowerBoundStartLetters, BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: _rangeLetterIndicatorSize,
-          height: _rangeLetterIndicatorSize,
+          width: _letterIndicatorSize,
+          height: _letterIndicatorSize,
           decoration: BoxDecoration(
             color: Colors.blue,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+              topLeft: Radius.circular(_lettersIndicatorRadius),
+              topRight: Radius.circular(_lettersIndicatorRadius),
               bottomLeft: Radius.zero,
               bottomRight: Radius.zero,
             ),
           ),
-          child: Center(
+          child: FittedBox(
+            alignment: Alignment.center,
             child: Text(
-              firstPossibleStartLetter.toUpperCase(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              lowerBoundStartLetters.toUpperCase(),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
         ),
         CustomPaint(
           painter: _RoundedRectangleWithDownArrowPainter(),
           child: SizedBox(
-            width: _rangeLetterIndicatorSize,
+            width: _letterIndicatorSize,
             height: 20,
           ),
         ),
@@ -79,37 +87,35 @@ class GuessLetterRangeLayout extends StatelessWidget {
     );
   }
 
-  Widget _createLastPossibleStartLetter(String lastPossibleStartLetter) {
+  Widget _createUpperBoundStartLetters(
+      String upperBoundStartLetters, BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         CustomPaint(
           painter: _RoundedRectangleWithUpArrowPainter(),
           child: SizedBox(
-            width: _rangeLetterIndicatorSize,
+            width: _letterIndicatorSize,
             height: 20,
           ),
         ),
         Container(
-          width: _rangeLetterIndicatorSize,
-          height: _rangeLetterIndicatorSize,
+          width: _letterIndicatorSize,
+          height: _letterIndicatorSize,
           decoration: BoxDecoration(
             color: Colors.blue,
             borderRadius: BorderRadius.only(
               topLeft: Radius.zero,
               topRight: Radius.zero,
-              bottomLeft: Radius.circular(12),
-              bottomRight: Radius.circular(12),
+              bottomLeft: Radius.circular(_lettersIndicatorRadius),
+              bottomRight: Radius.circular(_lettersIndicatorRadius),
             ),
           ),
-          child: Center(
+          child: FittedBox(
+            alignment: Alignment.center,
             child: Text(
-              lastPossibleStartLetter.toUpperCase(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              upperBoundStartLetters.toUpperCase(),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
         ),
@@ -128,7 +134,6 @@ class _RoundedRectangleWithDownArrowPainter extends CustomPainter {
     final Path downArrowPath = Path()
       ..lineTo(size.width, 0) // Right of the flat line
       ..lineTo(size.width / 2, size.height) // Bottom of the triangle
-      ..lineTo(0, 0) // Left of the flat line
       ..close();
 
     canvas.drawPath(downArrowPath, paint);

@@ -5,12 +5,11 @@ import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/guess_wor
 class GuessesLayout extends StatelessWidget {
   final double _letterSize;
   final ValueNotifier<String> guessLetterValueNotifier;
-  final double layoutWidth;
 
   const GuessesLayout(
       {super.key,
       required this.guessLetterValueNotifier,
-      required this.layoutWidth})
+      required double layoutWidth})
       : _letterSize = layoutWidth / 7;
 
   @override
@@ -26,9 +25,9 @@ class GuessesLayout extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: GuessWordRangeLayout(
+          child: GuessWordLayout(
               letterSize: _letterSize,
-              guessLetterValueNotifier: guessLetterValueNotifier),
+              guessWordNotifier: guessLetterValueNotifier),
         ),
       ],
     );

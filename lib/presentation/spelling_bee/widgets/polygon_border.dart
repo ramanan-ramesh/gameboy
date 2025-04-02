@@ -34,9 +34,8 @@ class PolygonBorder extends OutlinedBorder {
     required this.sides,
     this.rotate = 0.0,
     this.borderRadius = 0.0,
-    BorderSide side = BorderSide.none,
-  })  : assert(sides >= 2),
-        super(side: side);
+    super.side,
+  }) : assert(sides >= 2);
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);

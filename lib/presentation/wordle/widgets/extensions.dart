@@ -38,4 +38,17 @@ extension GuessLetterExt on GuessLetter {
         return Colors.yellow;
     }
   }
+
+  Color getKeyboardTilePressedColor() {
+    switch (letterMatchDescription) {
+      case LetterMatchDescription.notYetMatched:
+        return Colors.white38;
+      case LetterMatchDescription.notInWord:
+        return Colors.white12;
+      case LetterMatchDescription.rightPositionInWord:
+        return Colors.green.shade300;
+      case LetterMatchDescription.wrongPositionInWord:
+        return Colors.yellow.shade300;
+    }
+  }
 }

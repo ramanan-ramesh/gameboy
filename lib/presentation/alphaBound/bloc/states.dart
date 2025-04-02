@@ -10,7 +10,7 @@ class AlphaBoundGameState extends GameState {
   bool hasGameMovedAhead() {
     return gameStatus is GameWon ||
         gameStatus is GameLost ||
-        gameStatus is GuessMovesUp ||
-        gameStatus is GuessMovesDown && !isStartup;
+        gameStatus is GuessReplacesLowerBound ||
+        gameStatus is GuessReplacesUpperBound && !isStartup;
   }
 }

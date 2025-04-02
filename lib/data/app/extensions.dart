@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/data/app/models/app_data.dart';
+import 'package:gameboy/data/app/models/platform_user.dart';
+
 extension DateTimeExt on DateTime {
   int numberOfDaysInBetween(DateTime other) {
     var day1 = DateTime(year, month, day);
@@ -19,4 +24,11 @@ extension StringExt on String {
   }
 
   bool doesContain(String other) => toLowerCase().contains(other.toLowerCase());
+}
+
+extension AppDataRepoExt on BuildContext {
+  AppDataFacade get appDataRepository =>
+      RepositoryProvider.of<AppDataFacade>(this);
+
+  PlatformUser? get activeUser => appDataRepository.activeUser;
 }

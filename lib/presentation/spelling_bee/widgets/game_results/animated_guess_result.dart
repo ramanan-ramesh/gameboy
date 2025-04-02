@@ -5,6 +5,7 @@ import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/states.dart';
 import 'package:gameboy/presentation/spelling_bee/extensions.dart';
+import 'package:gameboy/presentation/spelling_bee/widgets/game_results/text_animations.dart';
 
 class AnimatedGuessedWordResult extends StatefulWidget {
   final VoidCallback onAnimationComplete;
@@ -25,9 +26,7 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
     return BlocConsumer<GameBloc, GameState>(
       builder: (BuildContext context, GameState state) {
         if (_animationComplete || state is! GuessedWordResult) {
-          return Container(
-            height: 100,
-          );
+          return Container(height: 100);
         }
 
         var guessedWordResult = state.guessedWordState;
@@ -42,91 +41,11 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
           }
         });
 
-        if (guessedWordResult == GuessedWordState.notInDictionary) {
-          return AnimatedContainer(
-            height: 100,
-            color: Colors.white12,
-            curve: Curves.elasticInOut,
-            duration: Duration(seconds: 2),
-            child: Center(
-              child: Text(
-                'Not in dictionary!',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          );
-        } else if (guessedWordResult == GuessedWordState.tooShort) {
-          return AnimatedContainer(
-            height: 100,
-            color: Colors.white12,
-            curve: Curves.elasticInOut,
-            duration: Duration(seconds: 2),
-            child: Center(
-              child: Text(
-                'Too Short',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          );
-        } else if (guessedWordResult ==
-            GuessedWordState.doesNotContainLettersOfTheDay) {
-          return AnimatedContainer(
-            height: 100,
-            color: Colors.white12,
-            curve: Curves.elasticInOut,
-            duration: Duration(seconds: 2),
-            child: Center(
-              child: Text(
-                'Bad letters!',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          );
-        } else if (guessedWordResult ==
-            GuessedWordState.doesNotContainCenterLetter) {
-          return AnimatedContainer(
-            height: 100,
-            color: Colors.white12,
-            curve: Curves.elasticInOut,
-            duration: Duration(seconds: 2),
-            child: Center(
-              child: Text(
-                'Missing center letter!',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          );
-        } else if (state is GuessWordAccepted) {
-          var currentRank = context.getGameEngineData().currentScore.rank;
-
-          return AnimatedContainer(
-            height: 100,
-            color: Colors.white12,
-            curve: Curves.bounceInOut,
-            duration: Duration(seconds: 2),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Text(
-                      '$currentRank!',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                  Text(
-                    '+ ${state.score}',
-                    style: TextStyle(color: Colors.green),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
         return Container(
           height: 100,
+          child: Center(
+            child: _buildAnimatedText(context, guessedWordResult, state),
+          ),
         );
       },
       listener: (BuildContext context, GameState state) {},
@@ -138,5 +57,53 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
         return false;
       },
     );
+  }
+
+  Widget _buildAnimatedText(BuildContext context,
+      GuessedWordState guessedWordResult, GameState state) {
+    final textStyle = Theme.of(context).textTheme.headlineLarge!.copyWith(
+      color: Colors.red,
+      shadows: [
+        Shadow(
+          offset: Offset(2.0, 2.0),
+          blurRadius: 3.0,
+          color: Colors.black.withOpacity(0.5),
+        ),
+      ],
+    );
+
+    switch (guessedWordResult) {
+      case GuessedWordState.notInDictionary:
+        return Shake(text: 'Not in dictionary', style: textStyle);
+      case GuessedWordState.alreadyGuessed:
+        return Blink(text: 'Already Guessed', style: textStyle);
+      case GuessedWordState.tooShort:
+        return ExpandAndShrink(
+          text: 'Too short',
+          containerColor: Colors.white12,
+          style: textStyle,
+        );
+      case GuessedWordState.doesNotContainLettersOfTheDay:
+        return Bounce(text: 'Bad letters', style: textStyle);
+      case GuessedWordState.doesNotContainCenterLetter:
+        return Scale(text: 'Missing center letter', style: textStyle);
+      default:
+        if (state is GuessWordAccepted) {
+          var currentRank = context.getGameEngineData().currentScore.rank;
+          if (state.guessedWordState == GuessedWordState.pangram) {
+            return Rainbow(
+              text: 'Pangram!',
+              style: Theme.of(context).textTheme.headlineLarge!,
+            );
+          }
+          return PopIn(
+            text: '$currentRank! + ${state.score}',
+            style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  color: Colors.green,
+                ),
+          );
+        }
+        return Container();
+    }
   }
 }

@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/constants.dart';
-import 'package:gameboy/data/app/models/app_data.dart';
+import 'package:gameboy/data/app/implementations/app_data_repository.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/bloc.dart';
 import 'package:gameboy/presentation/alphaBound/pages/game_layout.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game_data.dart';
 import 'package:gameboy/presentation/spelling_bee/bloc/bloc.dart';
 import 'package:gameboy/presentation/spelling_bee/pages/game_layout.dart';
@@ -17,18 +16,24 @@ import 'package:gameboy/presentation/wordle/pages/game_layout.dart';
 import 'master_page_events.dart';
 import 'master_page_states.dart';
 
+class _LoadRepository extends MasterPageEvent {}
+
 class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
-  final AppDataModifier _appDataRepository;
+  AppDataModifier? _appDataRepository;
 
-  String get userId => _appDataRepository.activeUser!.id;
-
-  MasterPageBloc({required AppDataFacade appDataFacade})
-      : _appDataRepository = appDataFacade as AppDataModifier,
-        super(Startup()) {
+  MasterPageBloc() : super(LoadingAppDataRepository()) {
     on<ChangeTheme>(_onThemeChange);
     on<ChangeUser>(_onUserChange);
     on<Logout>(_onLogout);
     on<LoadGame>(_onLoadGame);
+    on<_LoadRepository>(_onLoadRepository);
+    add(_LoadRepository());
+  }
+
+  FutureOr<void> _onLoadRepository(
+      _LoadRepository event, Emitter<MasterPageState> emit) async {
+    _appDataRepository ??= await AppDataRepository.create();
+    emit(LoadedAppDataRepository(appData: _appDataRepository!));
   }
 
   FutureOr<void> _onThemeChange(
@@ -39,13 +44,13 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   FutureOr<void> _onUserChange(
       ChangeUser event, Emitter<MasterPageState> emit) async {
     if (event.authProviderUser != null) {
-      await _appDataRepository.updateActiveUser(event.authProviderUser!);
-      emit(ActiveUserChanged(user: _appDataRepository.activeUser));
+      await _appDataRepository!.updateActiveUser(event.authProviderUser!);
+      emit(ActiveUserChanged(user: _appDataRepository!.activeUser));
     }
   }
 
   FutureOr<void> _onLogout(Logout event, Emitter<MasterPageState> emit) async {
-    await _appDataRepository.updateActiveUser(null);
+    await _appDataRepository!.updateActiveUser(null);
     emit(ActiveUserChanged(user: null));
   }
 
@@ -57,6 +62,7 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   }
 
   GameData? _getGameData(Game game) {
+    var userId = _appDataRepository!.activeUser!.id;
     switch (game.name) {
       case AppConstants.wordleGameIdentifier:
         return GameData<WordleGameBloc>(
@@ -69,7 +75,7 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
             gameLayout: SpellingBeeLayout(),
             game: game);
       case AppConstants.alphaBoundGameIdentifier:
-        return GameData<GameBloc>(
+        return GameData<AlphaBoundBloc>(
             gameBloc: AlphaBoundBloc(userId),
             gameLayout: AlphaBoundLayout(),
             game: game);

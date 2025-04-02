@@ -11,10 +11,10 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   static final Map<String, AuthenticationFailures>
       _authenticationFailuresAndMessages = {
-    'invalid-email': AuthenticationFailures.InvalidEmail,
-    'wrong-password': AuthenticationFailures.WrongPassword,
-    'user-not-found': AuthenticationFailures.NoSuchUsernameExists,
-    'email-already-in-use': AuthenticationFailures.UsernameAlreadyExists
+    'invalid-email': AuthenticationFailures.invalidEmail,
+    'wrong-password': AuthenticationFailures.wrongPassword,
+    'user-not-found': AuthenticationFailures.noSuchUsernameExists,
+    'email-already-in-use': AuthenticationFailures.usernameAlreadyExists
   };
 
   final String googleWebClientId;
@@ -26,7 +26,7 @@ class AuthenticationBloc
 
   static AuthenticationFailures _getAuthFailureReason(
       String errorCode, String? errorMessage) {
-    AuthenticationFailures authFailureReason = AuthenticationFailures.Undefined;
+    AuthenticationFailures authFailureReason = AuthenticationFailures.undefined;
     if (errorMessage == null) {
       var matches = _authenticationFailuresAndMessages.keys
           .where((element) => errorCode.contains(element));
@@ -78,7 +78,6 @@ class AuthenticationBloc
       idToken: googleAuth?.idToken,
     );
 
-    // Once signed in, return the UserCredential
     var userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
     if (userCredential.user != null) {

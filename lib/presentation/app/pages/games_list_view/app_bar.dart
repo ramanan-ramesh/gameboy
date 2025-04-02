@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
-import 'package:gameboy/presentation/app/extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const String _appLogoAsset =
-      'assets/logos/app_logo_without_phrase.webp';
+  static const String _appLogoAsset = 'assets/logos/app_logo_round.webp';
 
   const HomeAppBar({super.key});
 
@@ -14,110 +12,41 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: AppBar(
-        flexibleSpace: Center(
-          child: Image.asset(
-            _appLogoAsset,
-            width: 80,
-            height: 80,
-            fit: BoxFit.contain,
+    return AppBar(
+      flexibleSpace: Row(
+        children: [
+          IgnorePointer(
+            //TODO: Find a way to remove this, and make sure logo is correctly centered
+            child: Opacity(
+              opacity: 0.0,
+              child: IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.home),
+              ),
+            ),
           ),
-        ),
-        actions: [
-          _UserProfilePopupMenu(),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset(
+              _appLogoAsset,
+              width: 80,
+              height: 80,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {
+                context.addMasterPageEvent(Logout());
+              },
+              icon: Icon(Icons.exit_to_app_rounded),
+            ),
+          ),
         ],
       ),
     );
-  }
-}
-
-class _UserProfilePopupMenu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var userPhotoUrl = context.getAppData().activeUser!.photoUrl;
-    return PopupMenuButton<Widget>(
-      itemBuilder: (BuildContext context) {
-        return [
-          PopupMenuItem(
-            child: Row(
-              children: [
-                Icon(
-                  Icons.logout,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                SizedBox(width: 8),
-                Text('Logout'),
-              ],
-            ),
-            onTap: () {
-              context.addMasterPageEvent(Logout());
-            },
-          ),
-        ];
-      },
-      offset: const Offset(0, kToolbarHeight + 5),
-      child: Padding(
-        padding: EdgeInsets.all(2.0),
-        child: _ProfileActionButton(
-          photoUrl: userPhotoUrl,
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileActionButton extends StatefulWidget {
-  final String? photoUrl;
-
-  const _ProfileActionButton({Key? key, required this.photoUrl})
-      : super(key: key);
-
-  @override
-  State<_ProfileActionButton> createState() => _ProfileActionButtonState();
-}
-
-class _ProfileActionButtonState extends State<_ProfileActionButton> {
-  var _isImageLoaded = false;
-  NetworkImage? _userProfileNetworkImage;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.photoUrl != null) {
-      _userProfileNetworkImage = NetworkImage(widget.photoUrl!);
-      var imageStreamListener = ImageStreamListener((image, synchronousCall) {
-        if (mounted) {
-          setState(() {
-            _isImageLoaded = true;
-          });
-        }
-      }, onError: (error, stackTrace) {
-        print('Error loading image: $error');
-      });
-      _userProfileNetworkImage!
-          .resolve(const ImageConfiguration(size: Size(40, 40)))
-          .addListener(imageStreamListener);
-    }
-  }
-
-  //TODO: Clip the CircleAvatar to a circle, and splash too
-  @override
-  Widget build(BuildContext context) {
-    return !_isImageLoaded
-        ? const CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.black,
-            child: Icon(
-              Icons.account_circle_rounded,
-              color: Colors.green,
-            ),
-          )
-        : CircleAvatar(
-            radius: 30,
-            backgroundImage: _userProfileNetworkImage,
-            backgroundColor: Colors.black,
-          );
   }
 }

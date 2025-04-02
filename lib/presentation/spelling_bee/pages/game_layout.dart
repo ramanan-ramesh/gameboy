@@ -17,6 +17,7 @@ class SpellingBeeLayout implements GameLayout {
   var guessWordNotifier = ValueNotifier('');
   final _keyBoardFocusNode = FocusNode();
   static const _cutOffWidth = 800.0;
+  final _lettersOTheDayNotifier = ValueNotifier('');
 
   @override
   BoxConstraints get constraints => const BoxConstraints(
@@ -25,6 +26,7 @@ class SpellingBeeLayout implements GameLayout {
   @override
   Widget buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
+    _lettersOTheDayNotifier.value = context.getGameEngineData().lettersOfTheDay;
     return KeyboardListener(
       focusNode: _keyBoardFocusNode,
       autofocus: true,
@@ -82,8 +84,11 @@ class SpellingBeeLayout implements GameLayout {
       builder: (BuildContext context, bool isGameLayoutVisible, Widget? child) {
         var gameResults = MinimizedGameResults(
           onGameResultsSizeToggled: () {
-            gameLayoutVisibilityNotifier.value =
-                !gameLayoutVisibilityNotifier.value;
+            var guessedWords = context.getGameEngineData().guessedWords;
+            if (guessedWords.length > 1) {
+              gameLayoutVisibilityNotifier.value =
+                  !gameLayoutVisibilityNotifier.value;
+            }
           },
           isExpandedInitially: !gameLayoutVisibilityNotifier.value,
         );
@@ -93,8 +98,11 @@ class SpellingBeeLayout implements GameLayout {
             children: [
               MinimizedGameResults(
                 onGameResultsSizeToggled: () {
-                  gameLayoutVisibilityNotifier.value =
-                      !gameLayoutVisibilityNotifier.value;
+                  var guessedWords = context.getGameEngineData().guessedWords;
+                  if (guessedWords.length > 1) {
+                    gameLayoutVisibilityNotifier.value =
+                        !gameLayoutVisibilityNotifier.value;
+                  }
                 },
                 isExpandedInitially: !gameLayoutVisibilityNotifier.value,
               ),
@@ -128,11 +136,18 @@ class SpellingBeeLayout implements GameLayout {
               child: _buildGuessWordDisplay(),
             ),
           ),
-          LetterInputLayout(
-            sizeOfCell:
-                layoutWidth > _cutOffWidth ? layoutWidth / 8 : layoutWidth / 4,
-            onLetterPressed: (letter) {
-              guessWordNotifier.value += letter;
+          ValueListenableBuilder<String>(
+            valueListenable: _lettersOTheDayNotifier,
+            builder: (context, lettersOfTheDay, child) {
+              return LetterInputLayout(
+                sizeOfCell: layoutWidth > _cutOffWidth
+                    ? layoutWidth / 8
+                    : layoutWidth / 4,
+                onLetterPressed: (letter) {
+                  guessWordNotifier.value += letter;
+                },
+                lettersOfTheDay: lettersOfTheDay,
+              );
             },
           ),
           Padding(
@@ -181,7 +196,15 @@ class SpellingBeeLayout implements GameLayout {
         ),
         FloatingActionButton(
           heroTag: null,
-          onPressed: () {},
+          onPressed: () {
+            var allLettersOfTheDay = _lettersOTheDayNotifier.value;
+            var allLettersExceptTheFirstLetter =
+                allLettersOfTheDay.substring(1);
+            var shuffledLetters =
+                (allLettersExceptTheFirstLetter.split('')..shuffle()).join();
+            _lettersOTheDayNotifier.value =
+                allLettersOfTheDay[0] + shuffledLetters;
+          },
           child: Icon(Icons.sync_rounded),
         ),
         FloatingActionButton(

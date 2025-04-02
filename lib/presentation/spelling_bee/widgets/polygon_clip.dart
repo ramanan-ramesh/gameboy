@@ -19,14 +19,13 @@ class ClipPolygon extends StatelessWidget {
   ///
   /// The [sides] argument must be at least 3.
   ClipPolygon(
-      {Key? key,
+      {super.key,
       required this.sides,
       this.rotate = 0.0,
       this.borderRadius = 0.0,
       this.boxShadows = const [],
       this.child})
-      : assert(sides >= 3),
-        super(key: key);
+      : assert(sides >= 3);
 
   @override
   Widget build(BuildContext context) {
@@ -77,9 +76,9 @@ class PolygonBoxShadowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Path path = PolygonPathDrawer(size: size, specs: specs).draw();
 
-    boxShadows.forEach((PolygonBoxShadow shadow) {
+    for (var shadow in boxShadows) {
       canvas.drawShadow(path, shadow.color, shadow.elevation, false);
-    });
+    }
   }
 
   @override

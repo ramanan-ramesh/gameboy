@@ -4,5 +4,6 @@ enum GuessedWordState {
   doesNotContainLettersOfTheDay,
   doesNotContainCenterLetter,
   tooShort,
+  pangram,
   valid,
 }

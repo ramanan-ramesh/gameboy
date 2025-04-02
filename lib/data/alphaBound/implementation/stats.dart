@@ -36,7 +36,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
         .child(userId);
     var userDocumentData = await userDataReference.get();
     List<int> winCountsInPositions =
-        List.generate(AlphaBoundConstants.numberOfAllowedGuesses, (index) => 0);
+        List.generate(AlphaBoundConstants.maximumGuessesAllowed, (index) => 0);
     if (userDocumentData.exists) {
       var userData = userDocumentData.value as Map;
       if (userData.containsKey(_numberOfGamesPlayedField)) {
@@ -84,7 +84,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
         upperBound: upperBound,
         userId: userId,
         numberOfWordsGuessedToday: numberOfWordsGuessedToday,
-        finalGuessWord: finalGuessWord,
+        lastGuessedWord: finalGuessWord,
         currentStreak: currentStreak,
         maximumStreak: maximumStreak,
         winCountsInPositions: winCountsInPositions,
@@ -120,7 +120,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
       await _userDataReference.update(jsonToUpdate).then((_) {
         lowerBound = null;
         upperBound = null;
-        finalGuessWord = null;
+        lastGuessedWord = null;
         _lastPlayedDate = null;
         numberOfWordsGuessedToday = 0;
         if (shouldResetStreak) {
@@ -150,7 +150,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
   int numberOfWordsGuessedToday;
 
   @override
-  String? finalGuessWord;
+  String? lastGuessedWord;
 
   @override
   int currentStreak;
@@ -159,7 +159,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
   int maximumStreak;
 
   @override
-  Iterable<int> get winCountsInPositions => _winCountsInPositions;
+  Iterable<int> get winCountsPerPosition => _winCountsInPositions;
   final List<int> _winCountsInPositions;
 
   @override
@@ -197,7 +197,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
       jsonToUpdate[_winCountsInPositionsField] = newWonPositionsValue;
     }
     return await _trySubmitGuessWord(jsonToUpdate, () {
-      finalGuessWord = guess;
+      lastGuessedWord = guess;
       this.currentStreak = currentStreak;
       this.maximumStreak = maximumStreak;
       numberOfGamesPlayed++;
@@ -239,7 +239,7 @@ class AlphaBoundStatsRepo extends AlphaBoundStatsModifier {
       required this.upperBound,
       required this.userId,
       required this.numberOfWordsGuessedToday,
-      required this.finalGuessWord,
+      required this.lastGuessedWord,
       required this.currentStreak,
       required this.maximumStreak,
       required List<int> winCountsInPositions,

@@ -89,16 +89,17 @@ class SpellingBeeStatsSheet extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
-          child: Text(
-            statistic,
-            style: int.tryParse(statistic) != null
-                ? Theme.of(context).textTheme.displayLarge
-                : Theme.of(context).textTheme.titleLarge,
-          ),
+          child: Text(statistic,
+              style: int.tryParse(statistic) != null
+                  ? Theme.of(context).textTheme.displayLarge
+                  : Theme.of(context).textTheme.titleLarge),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
-          child: Text(subtitle),
+          child: Text(
+            subtitle,
+            style: TextStyle(color: Colors.yellow),
+          ),
         ),
       ],
     );
@@ -148,6 +149,7 @@ class SpellingBeeStatsSheet extends StatelessWidget {
       title: LinearProgressIndicator(
         value: winPercentageForPosition,
         minHeight: 8,
+        color: Colors.yellow,
       ),
     );
   }

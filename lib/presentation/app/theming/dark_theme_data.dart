@@ -16,8 +16,8 @@ ThemeData createDarkThemeData(BuildContext context) {
       surface: Colors.grey.shade800,
       onSurface: Colors.white,
     ),
-    progressIndicatorTheme:
-        const ProgressIndicatorThemeData(color: Colors.green),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: Colors.green, linearTrackColor: Colors.white12),
     listTileTheme: ListTileThemeData(
       tileColor: Colors.grey.shade900,
       textColor: Colors.green,

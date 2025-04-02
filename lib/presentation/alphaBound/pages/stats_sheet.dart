@@ -46,8 +46,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
                   statsRepository.numberOfGamesPlayed, 'Played', context),
             ),
             Expanded(
-              child: _createStatsTile(
-                  statsRepository.numberOfTimesWon, 'Won', context),
+              child: _createStatsTile(statsRepository.winCount, 'Won', context),
             ),
           ],
         ),
@@ -73,7 +72,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
       AlphaBoundStatistics statsRepository, BuildContext context) {
     var guessDistributionWidgets = <Widget>[];
     for (var startIndex = 0;
-        startIndex < AlphaBoundConstants.numberOfAllowedGuesses;) {
+        startIndex < AlphaBoundConstants.maximumGuessesAllowed;) {
       var endIndex = startIndex + 2;
       guessDistributionWidgets.add(
         Padding(
@@ -87,12 +86,9 @@ class AlphaBoundStatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Align(
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3.0),
-            child: Text('WIN DISTRIBUTION'),
-          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3.0),
+          child: Text('WIN DISTRIBUTION'),
         ),
         ...guessDistributionWidgets,
       ],
@@ -104,7 +100,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
       int startIndex,
       int endIndex,
       BuildContext context) {
-    var numberOfGamesWonInPositionRange = statsRepository.winCountsInPositions
+    var numberOfGamesWonInPositionRange = statsRepository.winCountsPerPosition
         .skip(startIndex)
         .take(endIndex - startIndex + 1)
         .reduce((a, b) => a + b);
@@ -128,8 +124,8 @@ class AlphaBoundStatsSheet extends StatelessWidget {
       ),
       title: LinearProgressIndicator(
         value: winPercentage,
-        backgroundColor: Colors.white12,
         minHeight: 8,
+        color: Colors.blue,
       ),
     );
   }
@@ -146,7 +142,10 @@ class AlphaBoundStatsSheet extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
-          child: Text(subtitle),
+          child: Text(
+            subtitle,
+            style: TextStyle(color: Colors.blue),
+          ),
         ),
       ],
     );

@@ -78,7 +78,6 @@ class AuthenticationBloc
       idToken: googleAuth?.idToken,
     );
 
-    // Once signed in, return the UserCredential
     var userCredential =
         await FirebaseAuth.instance.signInWithCredential(credential);
     if (userCredential.user != null) {

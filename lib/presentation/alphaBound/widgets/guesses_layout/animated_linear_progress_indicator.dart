@@ -1,31 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 
-class AnimatedLinearProgressIndicator extends StatelessWidget {
-  const AnimatedLinearProgressIndicator({super.key});
+class AnimatedWordOfTheDayProximityIndicator extends StatefulWidget {
+  const AnimatedWordOfTheDayProximityIndicator({
+    super.key,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    var gameEngineData = context.getGameEngineData();
-    return _LinearProgressIndicator(
-        distanceOfWordOfTheDayFromBounds:
-            gameEngineData.distanceRatioOfWordOfTheDayFromLowerBound);
-  }
+  _AnimatedWordOfTheDayProximityIndicatorState createState() =>
+      _AnimatedWordOfTheDayProximityIndicatorState();
 }
 
-class _LinearProgressIndicator extends StatefulWidget {
-  final double distanceOfWordOfTheDayFromBounds;
-
-  const _LinearProgressIndicator(
-      {super.key, required this.distanceOfWordOfTheDayFromBounds});
-
-  @override
-  _AnimatedLinearProgressIndicatorState createState() =>
-      _AnimatedLinearProgressIndicatorState();
-}
-
-class _AnimatedLinearProgressIndicatorState
-    extends State<_LinearProgressIndicator>
+class _AnimatedWordOfTheDayProximityIndicatorState
+    extends State<AnimatedWordOfTheDayProximityIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -47,9 +34,9 @@ class _AnimatedLinearProgressIndicatorState
 
   @override
   Widget build(BuildContext context) {
-    _animation = Tween<double>(
-            begin: 0, end: widget.distanceOfWordOfTheDayFromBounds)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    var proximityRatio = context.getGameEngineData().wordOfTheDayProximityRatio;
+    _animation = Tween<double>(begin: 0, end: proximityRatio)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
     _controller.forward();
     return AnimatedBuilder(
       animation: _animation,
@@ -59,73 +46,40 @@ class _AnimatedLinearProgressIndicatorState
           children: [
             RotatedBox(
               quarterTurns: 1,
-              child: SizedBox(
-                height: 10,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: LinearProgressIndicator(
-                        value: _animation.value,
-                        backgroundColor: Colors.white,
-                        color: Colors.green,
-                      ),
-                    ),
-                    Positioned(
-                      //TODO: This is not positioning on the _animation.value
-                      top: 0,
-                      bottom: 0,
-                      left:
-                          _animation.value * MediaQuery.of(context).size.width -
-                              7.5,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ],
+              child: Center(
+                child: LinearProgressIndicator(
+                  value: _animation.value,
+                  backgroundColor: Colors.white,
+                  color: Colors.green,
                 ),
               ),
             ),
             if (_controller.isCompleted)
-              if (widget.distanceOfWordOfTheDayFromBounds <= 0.3)
-                Positioned(
-                  top: 0,
-                  right: -30,
-                  child: Text(
-                    widget.distanceOfWordOfTheDayFromBounds.toStringAsFixed(2),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-            if (_controller.isCompleted)
-              if (widget.distanceOfWordOfTheDayFromBounds >= 0.8)
-                Positioned(
-                  bottom: 0,
-                  right: -30,
-                  child: Text(
-                    widget.distanceOfWordOfTheDayFromBounds.toStringAsFixed(2),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-            if (_controller.isCompleted)
-              if (widget.distanceOfWordOfTheDayFromBounds > 0.3 &&
-                  widget.distanceOfWordOfTheDayFromBounds < 0.8)
-                Positioned(
-                  //TODO: This is not positioning as vertically centered
-                  top: 0,
-                  bottom: 0,
-                  right: -30,
-                  child: Text(
-                    widget.distanceOfWordOfTheDayFromBounds.toStringAsFixed(2),
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+              _createProximityRatioText(proximityRatio),
           ],
         );
       },
+    );
+  }
+
+  Widget _createProximityRatioText(double proximityRatio) {
+    double? top, bottom;
+    if (proximityRatio <= 0.3) {
+      top = 0;
+    } else if (proximityRatio <= 0.7) {
+      top = 0;
+      bottom = 0;
+    } else {
+      bottom = 0;
+    }
+    return Positioned(
+      top: top,
+      right: -30,
+      bottom: bottom,
+      child: Text(
+        proximityRatio.toStringAsFixed(2),
+        style: TextStyle(color: Colors.white),
+      ),
     );
   }
 }

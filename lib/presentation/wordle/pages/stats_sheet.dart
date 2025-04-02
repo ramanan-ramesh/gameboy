@@ -126,7 +126,10 @@ class StatsSheet extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 3.0),
-          child: Text(subtitle),
+          child: Text(
+            subtitle,
+            style: TextStyle(color: Colors.green),
+          ),
         ),
       ],
     );

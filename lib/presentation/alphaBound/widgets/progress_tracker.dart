@@ -7,8 +7,6 @@ import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
-//Expects fixed height and unbounded width.
-//TODO: Add expected layout constraints to other widgets doc like this as well.
 class ProgressTracker extends StatelessWidget {
   const ProgressTracker({super.key});
 
@@ -18,24 +16,21 @@ class ProgressTracker extends StatelessWidget {
       builder: (BuildContext context, GameState state) {
         var statistics = context.getStatsRepository();
         var gameState = context.getCurrentAlphaBoundGameStatus();
-        return SizedBox(
-          height: 100,
-          child: Row(
-            children: [
-              Padding(
+        return Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _createAttemptedGuessesCountText(
+                  statistics.numberOfWordsGuessedToday, context),
+            ),
+            Expanded(
+              child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: _createNumberOfAttemptedGuessesWidget(
-                    statistics.numberOfWordsGuessedToday),
+                child: _createAttemptedGuessesCountTracker(
+                    statistics.numberOfWordsGuessedToday, gameState),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _createNumberOfAttemptedGuessesTracker(
-                      statistics.numberOfWordsGuessedToday, gameState),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       },
       buildWhen: (previousState, currentState) {
@@ -46,45 +41,45 @@ class ProgressTracker extends StatelessWidget {
     );
   }
 
-  Widget _createNumberOfAttemptedGuessesWidget(int numberOfGuesses) {
+  Widget _createAttemptedGuessesCountText(
+      int numberOfGuesses, BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Text(
+          'GUESS',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         FittedBox(
           fit: BoxFit.contain,
-          child: Text('GUESS'),
-        ),
-        Expanded(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: Text(
-                '$numberOfGuesses / ${AlphaBoundConstants.numberOfAllowedGuesses}'),
+          child: Text(
+            '$numberOfGuesses / ${AlphaBoundConstants.maximumGuessesAllowed}',
+            style: Theme.of(context).textTheme.displaySmall,
           ),
         ),
       ],
     );
   }
 
-  Widget _createNumberOfAttemptedGuessesTracker(
-      int numberOfGuesses, AlphaBoundGameStatus gameState) {
+  Widget _createAttemptedGuessesCountTracker(
+      int numberOfGuessesAttempted, AlphaBoundGameStatus gameState) {
     return Wrap(
       alignment: WrapAlignment.center,
       runAlignment: WrapAlignment.center,
       children: List.generate(
-        AlphaBoundConstants.numberOfAllowedGuesses,
+        AlphaBoundConstants.maximumGuessesAllowed,
         (index) {
-          Color backgroundColor = Colors.grey;
-          if (index < numberOfGuesses) {
-            backgroundColor = Colors.red;
-            if (gameState is GameWon) {
-              if (index == (numberOfGuesses - 1)) {
-                backgroundColor = Colors.green;
-              }
-            }
-          } else if (index == numberOfGuesses) {
-            if (!(gameState is GameWon || gameState is GameLost)) {
-              backgroundColor = Colors.green;
-            }
+          Color backgroundColor;
+          if (index < numberOfGuessesAttempted) {
+            backgroundColor = (gameState is GameWon &&
+                    index == (numberOfGuessesAttempted - 1))
+                ? Colors.green
+                : Colors.red;
+          } else {
+            backgroundColor = (index == numberOfGuessesAttempted &&
+                    !(gameState is GameWon || gameState is GameLost))
+                ? Colors.green
+                : Colors.grey;
           }
           return Container(
             margin: const EdgeInsets.all(4.0),

@@ -8,11 +8,12 @@ import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
 import 'package:gameboy/presentation/app/blocs/game/states.dart'
     as gameAppState;
+import 'package:gameboy/presentation/app/widgets/button.dart';
 
 class KeyboardLayout extends StatefulWidget {
-  final Function(String letter)? onLetterPressed;
-  final VoidCallback? onBackspacePressed;
-  final VoidCallback? onEnterPressed;
+  final Function(String letter) onLetterPressed;
+  final VoidCallback onBackspacePressed;
+  final VoidCallback onEnterPressed;
 
   const KeyboardLayout(
       {super.key,
@@ -30,29 +31,13 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
   static const _thirdRow = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'];
   final _focusNode = FocusNode();
 
-  void _handleKeyEvent(KeyEvent keyEvent) {
-    if (keyEvent is! KeyUpEvent) {
-      return;
-    }
-    if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
-        keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
-      widget.onLetterPressed?.call(keyEvent.logicalKey.keyLabel);
-    } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
-      widget.onBackspacePressed?.call();
-    } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
-      widget.onEnterPressed?.call();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GameBloc, gameAppState.GameState>(
       builder: (BuildContext context, gameAppState.GameState state) {
         var currentState = context.getCurrentAlphaBoundGameStatus();
         if (currentState is GameWon || currentState is GameLost) {
-          return _createKeyBoardLayout(
-              currentState.lowerBound, currentState.upperBound);
+          return _createKeyBoardLayout(currentState, false);
         }
 
         _focusNode.requestFocus();
@@ -60,33 +45,62 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
           focusNode: _focusNode,
           autofocus: true,
           onKeyEvent: _handleKeyEvent,
-          child: _createKeyBoardLayout(
-              currentState.lowerBound, currentState.upperBound),
+          child: _createKeyBoardLayout(currentState, true),
         );
       },
       listener: (BuildContext context, gameAppState.GameState state) {},
       buildWhen: (previousState, currentState) {
         return currentState is AlphaBoundGameState &&
-            (currentState.gameStatus is GameWon ||
-                currentState.gameStatus is GameLost);
+            currentState.hasGameMovedAhead();
       },
     );
   }
 
-  Widget _createKeyBoardLayout(String lowerBound, String upperBound) {
+  void _handleKeyEvent(KeyEvent keyEvent) {
+    if (keyEvent is! KeyUpEvent) {
+      return;
+    }
+    if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
+        keyEvent.logicalKey.keyLabel.length == 1 &&
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+      widget.onLetterPressed.call(keyEvent.logicalKey.keyLabel);
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
+      widget.onBackspacePressed.call();
+    } else if (keyEvent.logicalKey == LogicalKeyboardKey.enter) {
+      widget.onEnterPressed.call();
+    }
+  }
+
+  Widget _createKeyBoardLayout(
+      AlphaBoundGameStatus alphaBoundGameStatus, bool listenToPress) {
     var firstRowWidgets = _firstRow
-        .map((key) =>
-            _buildLetterInputKey(context, key, 10, lowerBound, upperBound))
+        .map((key) => _buildLetterInputKey(
+            context,
+            key,
+            10,
+            alphaBoundGameStatus.lowerBound,
+            alphaBoundGameStatus.upperBound,
+            listenToPress))
         .toList();
     var secondRowWidgets = _secondRow
         .map(
-          (key) =>
-              _buildLetterInputKey(context, key, 10, lowerBound, upperBound),
+          (key) => _buildLetterInputKey(
+              context,
+              key,
+              10,
+              alphaBoundGameStatus.lowerBound,
+              alphaBoundGameStatus.upperBound,
+              listenToPress),
         )
         .toList();
     var thirdRowWidgets = _thirdRow
-        .map((key) =>
-            _buildLetterInputKey(context, key, 10, lowerBound, upperBound))
+        .map((key) => _buildLetterInputKey(
+            context,
+            key,
+            10,
+            alphaBoundGameStatus.lowerBound,
+            alphaBoundGameStatus.upperBound,
+            listenToPress))
         .toList();
     secondRowWidgets.insert(
       0,
@@ -101,13 +115,24 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         child: Container(),
       ),
     );
-
     thirdRowWidgets.insert(
         0,
-        _buildActionIconKey(
-            context, Icons.backspace_rounded, 10, widget.onBackspacePressed));
-    thirdRowWidgets.add(
-        _buildActionLetterKey(context, 'Enter', 20, widget.onEnterPressed));
+        _buildActionInputKey(
+            context,
+            Icon(
+              Icons.backspace_rounded,
+              size: 20,
+            ),
+            10,
+            listenToPress ? widget.onBackspacePressed : null));
+    thirdRowWidgets.add(_buildActionInputKey(
+        context,
+        Text(
+          'Enter',
+          style: TextStyle(color: Colors.white),
+        ),
+        20,
+        listenToPress ? widget.onEnterPressed : null));
     return Container(
       color: Colors.white12,
       child: Column(
@@ -141,50 +166,24 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     );
   }
 
-  Widget _buildActionLetterKey(
-      BuildContext context, String keyName, int flex, VoidCallback? callBack) {
-    return _buildActionInputKey(
-        context,
-        Text(
-          keyName,
-          style: TextStyle(color: Colors.white),
-        ),
-        flex,
-        callBack);
-  }
-
-  Widget _buildActionIconKey(
-      BuildContext context, IconData icon, int flex, VoidCallback? callBack) {
-    return _buildActionInputKey(
-        context,
-        Icon(
-          icon,
-          size: 20,
-        ),
-        flex,
-        callBack);
-  }
-
   Widget _buildLetterInputKey(BuildContext context, String letter, int flex,
-      String lowerBoundWord, String upperBoundWord) {
-    var shouldHighlightLetter = letter.comparedTo(lowerBoundWord, false) >= 0 ||
-        letter.comparedTo(upperBoundWord, false) <= 0;
+      String lowerBoundWord, String upperBoundWord, bool listenToPress) {
+    var shouldHighlightLetter =
+        letter.comparedTo(lowerBoundWord[0], false) >= 0 ||
+            letter.comparedTo(upperBoundWord[0], false) <= 0;
     return Expanded(
       flex: flex,
-      child: Container(
-        margin: const EdgeInsets.all(5),
+      child: AnimatedButton(
+        onPressed: listenToPress
+            ? () {
+                widget.onLetterPressed(letter);
+              }
+            : null,
         color: shouldHighlightLetter ? Colors.white38 : Colors.white12,
-        child: InkWell(
-          onTap: () {
-            widget.onLetterPressed?.call(letter);
-          },
-          child: Center(
-            child: Text(
-              letter,
-              style: TextStyle(
-                  color: shouldHighlightLetter ? Colors.black : Colors.green),
-            ),
-          ),
+        onPressedColor: shouldHighlightLetter ? Colors.white60 : Colors.white38,
+        content: Text(
+          letter,
+          style: TextStyle(color: Colors.black),
         ),
       ),
     );
@@ -194,18 +193,11 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
       BuildContext context, Widget key, int flex, VoidCallback? callBack) {
     return Expanded(
       flex: flex,
-      child: Container(
-        margin: const EdgeInsets.all(5),
-        color: Colors.white12,
-        child: InkWell(
-          onTap: () {
-            callBack?.call();
-          },
-          child: Center(
-            child: key,
-          ),
-        ),
-      ),
+      child: AnimatedButton(
+          onPressed: callBack,
+          color: Colors.white12,
+          onPressedColor: Colors.white38,
+          content: key),
     );
   }
 }

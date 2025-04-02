@@ -50,6 +50,10 @@ class SpellingBeeGameEngineImpl implements SpellingBeeGameEngineDriver {
     }
 
     guessedWords.add(word);
+    if (uniqueLetters.length == SpellingBeeConstants.numberOfLetters &&
+        uniqueLetters.every((uniqueLetter) => word.doesContain(uniqueLetter))) {
+      return GuessedWordState.pangram;
+    }
     return GuessedWordState.valid;
   }
 

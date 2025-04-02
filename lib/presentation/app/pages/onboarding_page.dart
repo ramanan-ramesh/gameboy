@@ -7,7 +7,7 @@ class OnBoardingPage extends StatelessWidget {
   OnBoardingPage(
       {super.key, this.onNavigateToNextPage, required this.isBigLayout});
 
-  static const _onBoardingImageAsset = 'assets/images/playing_games.webp';
+  static const _appLogoAsset = 'assets/logos/app_logo_round.webp';
 
   @override
   Widget build(BuildContext context) {
@@ -15,27 +15,28 @@ class OnBoardingPage extends StatelessWidget {
       fit: StackFit.expand,
       alignment: Alignment.center,
       children: [
-        const Positioned.fill(
-          child: Image(
-            image: AssetImage(_onBoardingImageAsset),
-            fit: BoxFit.cover,
-          ),
-        ),
         Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            child: FittedBox(
-                fit: BoxFit.fill,
-                child: Text(
-                  'Gameboy: Where words play hard to get!',
-                  style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 45,
-                      fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.visible,
-                )),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                child: Image(
+                  image: AssetImage(_appLogoAsset),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Text(
+                'Where words play hard to get!',
+                style: Theme.of(context)
+                    .textTheme
+                    .displayMedium!
+                    .copyWith(color: Colors.green),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.visible,
+              ),
+            ],
           ),
         ),
         Align(

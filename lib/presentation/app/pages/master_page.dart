@@ -81,11 +81,14 @@ class _MasterContentPageRouterState extends State<_MasterContentPageRouter> {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: Text(
-              'Loading user data and theme',
-              style: TextStyle(
-                fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
-                color: Colors.black,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Loading user data and theme',
+                style: TextStyle(
+                  fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

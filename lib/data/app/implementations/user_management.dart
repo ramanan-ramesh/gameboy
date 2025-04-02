@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 import 'package:gameboy/data/app/models/user_management.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserManagementImpl extends UserManagementFacade {
   static const _userDataField = 'userData';
@@ -12,16 +12,23 @@ class UserManagementImpl extends UserManagementFacade {
   static const _isLoggedInField = 'isLoggedIn';
   static const _photoUrlField = 'photoUrl';
 
+  final SharedPreferences _sharedPreferences;
+
   @override
   PlatformUser? get activeUser => _activeUser;
   PlatformUser? _activeUser;
 
-  static Future<UserManagementFacade> create() async {
-    var userFromCache = await _getUserFromCache();
-    return UserManagementImpl(initialUser: userFromCache);
+  static Future<UserManagementFacade> create(
+      SharedPreferences sharedPreferences) async {
+    var userFromCache = await _getUserFromCache(sharedPreferences);
+    return UserManagementImpl(
+        initialUser: userFromCache, sharedPreferences: sharedPreferences);
   }
 
-  UserManagementImpl({PlatformUser? initialUser}) : _activeUser = initialUser;
+  UserManagementImpl(
+      {PlatformUser? initialUser, required SharedPreferences sharedPreferences})
+      : _activeUser = initialUser,
+        _sharedPreferences = sharedPreferences;
 
   @override
   Future<bool> tryUpdateActiveUser({required User authProviderUser}) async {
@@ -76,42 +83,39 @@ class UserManagementImpl extends UserManagementFacade {
   }
 
   //TODO: Should ideally attach AuthProviderUser here(if it persists)?
-  static Future<PlatformUser?> _getUserFromCache() async {
-    var usersBox = await Hive.openBox(_userDataField);
-    var isLoggedInValue = usersBox.get(_isLoggedInField) ?? '';
-    if (bool.tryParse(isLoggedInValue) == true) {
-      var userID = await usersBox.get(_userIDField) as String;
-      var userName = await usersBox.get(_userNameField) as String;
-      var photoUrl = await usersBox.get(_photoUrlField) as String?;
-      var displayName = await usersBox.get(_displayNameField) as String?;
+  static Future<PlatformUser?> _getUserFromCache(
+      SharedPreferences sharedPreferences) async {
+    var isLoggedInValue = sharedPreferences.getBool(_isLoggedInField) ?? false;
+    if (isLoggedInValue) {
+      var userID = sharedPreferences.getString(_userIDField)!;
+      var userName = sharedPreferences.getString(_userNameField)!;
+      var photoUrl = sharedPreferences.getString(_photoUrlField);
+      var displayName = sharedPreferences.getString(_displayNameField);
       return PlatformUser(
           userName: userName,
           id: userID,
           photoUrl: photoUrl,
           displayName: displayName);
     }
-    await usersBox.close();
 
     return null;
   }
 
   Future _persistUser() async {
-    var usersBox = await Hive.openBox(_userDataField);
     if (activeUser != null) {
-      await usersBox.put(_userIDField, activeUser!.id);
-      await usersBox.put(_userNameField, activeUser!.userName);
+      await _sharedPreferences.setString(_userIDField, activeUser!.id);
+      await _sharedPreferences.setString(_userNameField, activeUser!.userName);
       var displayName = activeUser!.displayName;
       if (displayName != null && displayName.isNotEmpty) {
-        await usersBox.put(_displayNameField, displayName);
+        await _sharedPreferences.setString(_displayNameField, displayName);
       }
-      await usersBox.put(_isLoggedInField, true.toString());
+      await _sharedPreferences.setBool(_isLoggedInField, true);
       if (_activeUser!.photoUrl != null) {
-        await usersBox.put(_photoUrlField, activeUser!.photoUrl);
+        await _sharedPreferences.setString(
+            _photoUrlField, _activeUser!.photoUrl!);
       }
     } else {
-      await usersBox.clear();
-      await usersBox.put(_isLoggedInField, false.toString());
+      await _sharedPreferences.setBool(_isLoggedInField, false);
     }
-    await usersBox.close();
   }
 }

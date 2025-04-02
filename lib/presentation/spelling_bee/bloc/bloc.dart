@@ -38,11 +38,12 @@ class SpellingBeeBloc extends GameBloc<SpellingBeeEvent, SpellingBeeState,
       SubmitWord event, Emitter<GameState> emit) async {
     var currentScore = gameEngine.currentScore;
     var guessedWordState = gameEngine.trySubmitWord(event.word);
-    if (guessedWordState == GuessedWordState.valid) {
+    if (guessedWordState == GuessedWordState.valid ||
+        guessedWordState == GuessedWordState.pangram) {
       await stats.trySubmitWord(event.word);
       var newScore = gameEngine.currentScore;
       emit(GuessWordAccepted(
-          GuessedWordState.valid, newScore.score - currentScore.score));
+          guessedWordState, newScore.score - currentScore.score));
       return;
     }
     emit(GuessedWordResult(guessedWordState));

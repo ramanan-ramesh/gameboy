@@ -52,8 +52,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '406654937423',
     projectId: 'gameboy-22c94',
     authDomain: 'gameboy-22c94.firebaseapp.com',
-    databaseURL: "https://gameboy-22c94-default-rtdb.firebaseio.com",
-    storageBucket: 'gameboy-22c94.appspot.com',
+    databaseURL: 'https://gameboy-22c94-default-rtdb.firebaseio.com',
+    storageBucket: 'gameboy-22c94.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -61,7 +61,8 @@ class DefaultFirebaseOptions {
     appId: '1:406654937423:android:c686442d440b51d1d97d3a',
     messagingSenderId: '406654937423',
     projectId: 'gameboy-22c94',
-    storageBucket: 'gameboy-22c94.appspot.com',
+    databaseURL: 'https://gameboy-22c94-default-rtdb.firebaseio.com',
+    storageBucket: 'gameboy-22c94.firebasestorage.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -70,6 +71,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '406654937423',
     projectId: 'gameboy-22c94',
     authDomain: 'gameboy-22c94.firebaseapp.com',
-    storageBucket: 'gameboy-22c94.appspot.com',
+    databaseURL: 'https://gameboy-22c94-default-rtdb.firebaseio.com',
+    storageBucket: 'gameboy-22c94.firebasestorage.app',
   );
+
 }

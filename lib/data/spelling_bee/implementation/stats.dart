@@ -17,7 +17,7 @@ class SpellingBeeStatsRepo extends SpellingBeeStatsModifier {
   static const _wordsSubmittedTodayField = 'lastGuessedWords';
   static const _longestSubmittedWordField = 'longestWord';
   static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
-  static final _firstDay = DateTime(2024, 11, 6);
+  static final _firstDay = DateTime(2025, 3, 17);
 
   static Future<SpellingBeeStatsModifier> createRepository(
       String userId) async {
@@ -148,10 +148,13 @@ class SpellingBeeStatsRepo extends SpellingBeeStatsModifier {
     }
     var didSubmitWord = false;
     var isLongestGuess = word.length > (_longestGuessedWord?.length ?? 0);
-    var isPangram =
-        word.split('').toSet().length == SpellingBeeConstants.numberOfLetters;
+    var uniqueLettersInWord = word.split('').toSet();
+    var isPangram = uniqueLettersInWord.every(
+            (uniqueLetter) => lettersOfTheDay.doesContain(uniqueLetter)) &&
+        uniqueLettersInWord.length == SpellingBeeConstants.numberOfLetters;
     await _userDataReference.update({
-      _wordsSubmittedTodayField: wordsSubmittedToday.toList()..add(word),
+      _wordsSubmittedTodayField: wordsSubmittedToday.toList()
+        ..add(word.toLowerCase()),
       _lastPlayedMatchDateField: _dateFormat.format(initializedDateTime),
       if (isLongestGuess) _longestSubmittedWordField: word,
       _numberOfWordsSubmittedField: numberOfWordsSubmitted + 1,
@@ -159,7 +162,7 @@ class SpellingBeeStatsRepo extends SpellingBeeStatsModifier {
     }).then((_) {
       didSubmitWord = true;
       numberOfWordsSubmitted++;
-      wordsSubmittedToday.add(word);
+      wordsSubmittedToday.add(word.toLowerCase());
       _lastCompletedMatchDay ??= initializedDateTime;
       if (isLongestGuess) {
         _longestGuessedWord = word;
@@ -192,7 +195,7 @@ class SpellingBeeStatsRepo extends SpellingBeeStatsModifier {
 
   static Future<String> _getLettersOfTheDay(
       DateTime initializedDateTime) async {
-    final daysDifference = initializedDateTime.difference(_firstDay).inDays;
+    final daysDifference = initializedDateTime.numberOfDaysInBetween(_firstDay);
 
     var lettersOfTheDayDbRef = FirebaseDatabase.instance
         .ref()

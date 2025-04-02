@@ -1,4 +1,4 @@
-abstract class AlphaBoundGameStatus {
+class AlphaBoundGameStatus {
   final String lowerBound, upperBound;
 
   AlphaBoundGameStatus({required this.lowerBound, required this.upperBound});
@@ -30,10 +30,12 @@ class GameLost extends AlphaBoundGameStatus {
       required this.finalGuess});
 }
 
-class GuessMovesUp extends AlphaBoundGameStatus {
-  GuessMovesUp({required super.lowerBound, required super.upperBound});
+class GuessReplacesLowerBound extends AlphaBoundGameStatus {
+  GuessReplacesLowerBound(
+      {required super.lowerBound, required super.upperBound});
 }
 
-class GuessMovesDown extends AlphaBoundGameStatus {
-  GuessMovesDown({required super.lowerBound, required super.upperBound});
+class GuessReplacesUpperBound extends AlphaBoundGameStatus {
+  GuessReplacesUpperBound(
+      {required super.lowerBound, required super.upperBound});
 }

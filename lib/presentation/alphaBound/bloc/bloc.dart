@@ -35,7 +35,7 @@ class AlphaBoundBloc extends GameBloc<GameEvent, GameState,
     return await AlphaBoundGameEngineImpl.create(
         stats.lowerBound,
         stats.upperBound,
-        stats.finalGuessWord,
+        stats.lastGuessedWord,
         stats.numberOfWordsGuessedToday);
   }
 
@@ -47,11 +47,11 @@ class AlphaBoundBloc extends GameBloc<GameEvent, GameState,
   FutureOr<void> _onSubmitGuessWord(
       SubmitGuessWord event, Emitter<GameState> emit) async {
     if (gameEngine.numberOfWordsGuessedToday !=
-        AlphaBoundConstants.numberOfAllowedGuesses) {
-      if (event.guessWord.length ==
-          AlphaBoundConstants.numberOfLettersInGuess) {
+        AlphaBoundConstants.maximumGuessesAllowed) {
+      if (event.guessWord.length == AlphaBoundConstants.guessWordLength) {
         var gameState = await gameEngine.trySubmitGuess(event.guessWord);
-        if (gameState is GuessMovesUp || gameState is GuessMovesDown) {
+        if (gameState is GuessReplacesLowerBound ||
+            gameState is GuessReplacesUpperBound) {
           await stats.updateLowerAndUpperBound(
               gameEngine.currentState.lowerBound,
               gameEngine.currentState.upperBound);

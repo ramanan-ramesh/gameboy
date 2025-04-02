@@ -10,9 +10,9 @@ abstract class AlphaBoundGameEngine extends GameEngine {
 
   int get numberOfWordsGuessedToday;
 
-  double get distanceRatioOfWordOfTheDayFromLowerBound;
+  double get wordOfTheDayProximityRatio;
 }
 
 abstract class AlphaBoundGameEngineDriver extends AlphaBoundGameEngine {
-  FutureOr<AlphaBoundGameStatus> trySubmitGuess(String guess);
+  Future<AlphaBoundGameStatus> trySubmitGuess(String guess);
 }

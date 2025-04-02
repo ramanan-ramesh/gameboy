@@ -9,11 +9,10 @@ import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 import 'package:gameboy/data/app/models/user_management.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDataRepository extends AppDataModifier {
   static AppDataRepository? _appDataRepository;
-  static const String _localDataBoxName = 'localAppData';
   static const String _themeMode = "themeMode";
   static const _appConfigDBField = 'appConfig';
   static const String _googleWebClientIdField = 'webClientId';
@@ -24,6 +23,8 @@ class AppDataRepository extends AppDataModifier {
   @override
   PlatformUser? get activeUser => _userManagement.activeUser;
   final UserManagementFacade _userManagement;
+
+  final SharedPreferences _sharedPreferences;
 
   @override
   String googleWebClientId;
@@ -40,11 +41,9 @@ class AppDataRepository extends AppDataModifier {
     var googleWebClientIdField =
         await appConfigReference.child(_googleWebClientIdField).get();
     var googleWebClientId = googleWebClientIdField.value as String;
-    await Hive.initFlutter();
-    var userManagement = await UserManagementImpl.create();
-    var platformDataBox = await Hive.openBox(_localDataBoxName);
-    var themeModeValue = await platformDataBox.get(_themeMode);
-    await platformDataBox.close();
+    var sharedPreferences = await SharedPreferences.getInstance();
+    var userManagement = await UserManagementImpl.create(sharedPreferences);
+    var themeModeValue = sharedPreferences.getString(_themeMode);
     ThemeMode themeMode = themeModeValue is String
         ? (ThemeMode.values
             .firstWhere((element) => element.name == themeModeValue))
@@ -53,15 +52,13 @@ class AppDataRepository extends AppDataModifier {
     return AppDataRepository._(
         googleWebClientId: googleWebClientId,
         userManagement: userManagement,
-        activeThemeMode: themeMode);
+        activeThemeMode: themeMode,
+        sharedPreferences: sharedPreferences);
   }
 
   @override
   Future updateActiveThemeMode(ThemeMode themeMode) async {
-    var platformLocalBox = await Hive.openBox(_localDataBoxName);
-    await _writeRecordToLocalStorage(
-        platformLocalBox, _themeMode, themeMode.name);
-    await platformLocalBox.close();
+    await _sharedPreferences.setString(_themeMode, themeMode.name);
     activeThemeMode = themeMode;
   }
 
@@ -79,16 +76,13 @@ class AppDataRepository extends AppDataModifier {
   Iterable<Game> get games => _games;
   final List<Game> _games;
 
-  Future _writeRecordToLocalStorage(
-      Box hiveBox, String recordKey, String recordValue) async {
-    await hiveBox.put(recordKey, recordValue);
-  }
-
-  AppDataRepository._({
-    required this.googleWebClientId,
-    required UserManagementFacade userManagement,
-    required this.activeThemeMode,
-  })  : _userManagement = userManagement,
+  AppDataRepository._(
+      {required this.googleWebClientId,
+      required UserManagementFacade userManagement,
+      required this.activeThemeMode,
+      required SharedPreferences sharedPreferences})
+      : _userManagement = userManagement,
+        _sharedPreferences = sharedPreferences,
         _games = [
           Game(name: AppConstants.wordleGameIdentifier),
           Game(

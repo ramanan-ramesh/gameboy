@@ -10,7 +10,7 @@ import 'package:gameboy/presentation/alphaBound/widgets/progress_tracker.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
 class AlphaBoundLayout extends GameLayout {
-  final _guessLetterValueNotifier = ValueNotifier<String>('');
+  final _guessWordNotifier = ValueNotifier<String>('');
 
   @override
   Widget buildGameLayout(
@@ -20,21 +20,19 @@ class AlphaBoundLayout extends GameLayout {
         ProgressTracker(),
         Expanded(
           flex: 7,
-          child: Center(
-            child: GuessesLayout(
-                layoutWidth: layoutWidth,
-                guessLetterValueNotifier: _guessLetterValueNotifier),
-          ),
-          // child: _createGuessesLayout(layoutWidth),
+          child: GuessesLayout(
+              layoutWidth: layoutWidth,
+              guessLetterValueNotifier: _guessWordNotifier),
         ),
         Expanded(
           flex: 3,
           child: KeyboardLayout(
-              onLetterPressed: _onLetterPressed,
-              onBackspacePressed: _onBackspacePressed,
-              onEnterPressed: () {
-                _onEnterPressed(context);
-              }),
+            onLetterPressed: _onLetterPressed,
+            onBackspacePressed: _onBackspacePressed,
+            onEnterPressed: () {
+              _onEnterPressed(context);
+            },
+          ),
         ),
       ],
     );
@@ -52,23 +50,22 @@ class AlphaBoundLayout extends GameLayout {
   }
 
   void _onLetterPressed(String letter) {
-    if (_guessLetterValueNotifier.value.length <
-        AlphaBoundConstants.numberOfLettersInGuess) {
-      _guessLetterValueNotifier.value += letter;
+    if (_guessWordNotifier.value.length < AlphaBoundConstants.guessWordLength) {
+      _guessWordNotifier.value += letter;
     }
   }
 
   void _onBackspacePressed() {
-    if (_guessLetterValueNotifier.value.isNotEmpty) {
-      _guessLetterValueNotifier.value = _guessLetterValueNotifier.value
-          .substring(0, _guessLetterValueNotifier.value.length - 1);
+    if (_guessWordNotifier.value.isNotEmpty) {
+      _guessWordNotifier.value = _guessWordNotifier.value
+          .substring(0, _guessWordNotifier.value.length - 1);
     }
   }
 
   void _onEnterPressed(BuildContext context) {
-    if (_guessLetterValueNotifier.value.length ==
-        AlphaBoundConstants.numberOfLettersInGuess) {
-      context.addGameEvent(SubmitGuessWord(_guessLetterValueNotifier.value));
+    if (_guessWordNotifier.value.length ==
+        AlphaBoundConstants.guessWordLength) {
+      context.addGameEvent(SubmitGuessWord(_guessWordNotifier.value));
     }
   }
 }

@@ -21,13 +21,7 @@ class PasswordField extends StatefulWidget {
 
 class _PasswordFieldState extends State<PasswordField> {
   bool _obscurePassword = true;
-  late FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode();
-  }
+  final FocusNode focusNode = FocusNode();
 
   @override
   void dispose() {

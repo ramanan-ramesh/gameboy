@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 class OnBoardingPage extends StatelessWidget {
   final VoidCallback? onNavigateToNextPage;
   final bool isBigLayout;
+  static const _appLogoAsset = 'assets/logos/app_logo_round.webp';
 
   OnBoardingPage(
       {super.key, this.onNavigateToNextPage, required this.isBigLayout});
-
-  static const _appLogoAsset = 'assets/logos/app_logo_round.webp';
 
   @override
   Widget build(BuildContext context) {

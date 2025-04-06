@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
+import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
@@ -15,6 +16,7 @@ class AlphaBoundLayout extends GameLayout {
   @override
   Widget buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
+    _initializeAttemptedGuessWord(context);
     return Column(
       children: [
         ProgressTracker(),
@@ -36,6 +38,16 @@ class AlphaBoundLayout extends GameLayout {
         ),
       ],
     );
+  }
+
+  void _initializeAttemptedGuessWord(BuildContext context) {
+    var gameEngineData = context.getGameEngineData();
+    var gameStatus = gameEngineData.currentState;
+    if (gameStatus is GameWon) {
+      _guessWordNotifier.value = gameEngineData.wordOfTheDay;
+    } else if (gameStatus is GameLost) {
+      _guessWordNotifier.value = gameStatus.finalGuess;
+    }
   }
 
   @override

@@ -88,14 +88,14 @@ class _AnimatedGuessLetterPositionerState
 
 class AnimatedGuessLetterDancer extends StatefulWidget {
   final double letterSize;
-  final int index;
   final String letter;
+  final bool didWinGame;
 
   const AnimatedGuessLetterDancer(
       {super.key,
       required this.letterSize,
-      required this.index,
-      required this.letter});
+      required this.letter,
+      required this.didWinGame});
 
   @override
   State<AnimatedGuessLetterDancer> createState() =>
@@ -105,30 +105,20 @@ class AnimatedGuessLetterDancer extends StatefulWidget {
 class _AnimatedGuessLetterDancerState extends State<AnimatedGuessLetterDancer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Offset> _animation;
+  late Animation<double> _animation;
 
   @override
   void initState() {
-    _controller = AnimationController(
-        duration: const Duration(milliseconds: 1000), vsync: this);
-
-    _animation = TweenSequence<Offset>([
-      TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, 0), end: const Offset(0, -0.80)),
-          weight: 15),
-      TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, -0.80), end: const Offset(0, 0)),
-          weight: 10),
-      TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, 0), end: const Offset(0, -0.30)),
-          weight: 12),
-      TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, -0.30), end: const Offset(0, 0)),
-          weight: 8),
-    ]).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine));
-
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+
+    _animation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: -0.2, end: 0.2), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 0.2, end: -0.2), weight: 50),
+    ]).animate(_controller);
   }
 
   @override
@@ -139,13 +129,15 @@ class _AnimatedGuessLetterDancerState extends State<AnimatedGuessLetterDancer>
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(milliseconds: 250 * widget.index), () {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
-    return SlideTransition(
-      position: _animation,
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.rotationZ(_animation.value),
+          child: child,
+        );
+      },
       child: _buildGuessLetter(widget.letter),
     );
   }
@@ -157,13 +149,13 @@ class _AnimatedGuessLetterDancerState extends State<AnimatedGuessLetterDancer>
       width: widget.letterSize,
       height: widget.letterSize,
       decoration: BoxDecoration(
-        color: Colors.green,
+        color: widget.didWinGame ? Colors.green : Colors.red,
       ),
       child: Center(
         child: Text(
           widget.letter.toUpperCase(),
           style: TextStyle(
-            color: Colors.black,
+            color: widget.didWinGame ? Colors.black : Colors.white,
             fontSize: widget.letterSize / 2,
           ),
         ),

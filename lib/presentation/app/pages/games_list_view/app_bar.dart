@@ -16,7 +16,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       flexibleSpace: Row(
         children: [
           IgnorePointer(
-            //TODO: Find a way to remove this, and make sure logo is correctly centered
+            //TODO: Find a way to remove this, and make sure logo is correctly centered horizontally
             child: Opacity(
               opacity: 0.0,
               child: IconButton(

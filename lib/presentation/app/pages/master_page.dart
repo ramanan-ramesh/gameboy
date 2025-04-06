@@ -11,26 +11,39 @@ import 'package:rive/rive.dart';
 import 'startup_page.dart';
 
 class MasterPage extends StatelessWidget {
+  static const String _appTitle = 'gameboy';
   const MasterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<MasterPageBloc>(
-      create: (context) => MasterPageBloc(),
-      child: const _MasterContentPageRouter(),
+    return MaterialApp(
+      title: _appTitle,
+      debugShowCheckedModeBanner: false,
+      darkTheme: createDarkThemeData(context),
+      themeMode: ThemeMode.dark,
+      theme: createDarkThemeData(context),
+      home: Material(
+        child: SafeArea(
+          child: BlocProvider<MasterPageBloc>(
+            create: (context) => MasterPageBloc(),
+            child: const _AppDataRepositoryLoader(),
+          ),
+        ),
+      ),
     );
+    ;
   }
 }
 
-class _MasterContentPageRouter extends StatefulWidget {
-  const _MasterContentPageRouter({super.key});
+class _AppDataRepositoryLoader extends StatefulWidget {
+  const _AppDataRepositoryLoader({super.key});
 
   @override
-  State<_MasterContentPageRouter> createState() =>
-      _MasterContentPageRouterState();
+  State<_AppDataRepositoryLoader> createState() =>
+      _AppDataRepositoryLoaderState();
 }
 
-class _MasterContentPageRouterState extends State<_MasterContentPageRouter> {
+class _AppDataRepositoryLoaderState extends State<_AppDataRepositoryLoader> {
   var _hasMinimumAnimationTimePassed = false;
   static final _animationController = SimpleAnimation('Hover');
   static const _minimumAnimationTime = Duration(seconds: 2);
@@ -108,35 +121,18 @@ class _MasterContentPageRouterState extends State<_MasterContentPageRouter> {
 }
 
 class _ContentPage extends StatelessWidget {
-  static const String _appTitle = 'gameboy';
-
   const _ContentPage();
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<MasterPageBloc, MasterPageState>(
       builder: (BuildContext context, MasterPageState state) {
-        var appLevelData = context.appDataRepository;
-        var currentTheme = appLevelData.activeThemeMode;
-        return MaterialApp(
-          title: _appTitle,
-          debugShowCheckedModeBanner: false,
-          darkTheme: createDarkThemeData(context),
-          themeMode: currentTheme,
-          theme: createDarkThemeData(context),
-          home: Material(
-            child: SafeArea(
-              child: context.activeUser == null
-                  ? const StartupPage()
-                  : const GamesListView(),
-            ),
-          ),
-        );
+        return context.activeUser == null
+            ? const StartupPage()
+            : const GamesListView();
       },
       buildWhen: (previousState, currentState) {
-        return currentState is ActiveLanguageChanged ||
-            currentState is ActiveThemeModeChanged ||
-            currentState is ActiveUserChanged;
+        return currentState is ActiveUserChanged;
       },
       listener: (BuildContext context, MasterPageState state) {},
     );

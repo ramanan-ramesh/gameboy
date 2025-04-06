@@ -40,9 +40,9 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
 
   @override
   Widget build(BuildContext context) {
-    var gameEngineData = context.getGameEngineData();
     return BlocConsumer<GameBloc, appGameState.GameState>(
       builder: (context, appGameState.GameState state) {
+        var gameEngineData = context.getGameEngineData();
         var lowerBoundGuessWord = _BoundaryGuessWord(
             letterSize: widget.letterSize,
             boundaryGuessWord: gameEngineData.currentState.lowerBound,
@@ -56,9 +56,8 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
             letterSize: widget.letterSize,
             boundaryGuessWord: gameEngineData.currentState.upperBound,
             slotContexts: _upperBoundLetterSlotsKeys);
-        _handleStartupGameState(state, gameEngineData, context);
+        // _handleStartupGameState(state, gameEngineData, context);
         return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.all(_guessRowPadding),
@@ -81,11 +80,10 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
             _handleBoundsChange(context, true);
           } else if (state.gameStatus is GuessReplacesUpperBound) {
             _handleBoundsChange(context, false);
-          } else if (state.gameStatus is GuessNotInDictionary) {
           } else if (state.gameStatus is GameWon) {
-            _handleGameResult(context, true);
+            // _handleGameResult(context, true);
           } else if (state.gameStatus is GameLost) {
-            _handleGameResult(context, false);
+            // _handleGameResult(context, false);
           }
         } else if (state is appGameState.ShowStats) {
           _removeAllOverlays();
@@ -94,7 +92,8 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
       buildWhen: (previousState, currentState) {
         return currentState is AlphaBoundGameState &&
             (currentState.hasGameMovedAhead() ||
-                currentState.gameStatus is GuessNotInDictionary);
+                currentState.gameStatus is GuessNotInDictionary ||
+                currentState.gameStatus is GuessNotInBounds);
       },
     );
   }
@@ -211,14 +210,15 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
   OverlayEntry _createAnimatedGuessLetterOnGameResult(int index, bool didWin) {
     var guessLetter = widget.guessWordNotifier.value[index].toUpperCase();
 
-    Widget guessLetterWidget;
-    if (didWin) {
-      guessLetterWidget = AnimatedGuessLetterDancer(
-          letterSize: widget.letterSize, index: index, letter: guessLetter);
-    } else {
-      guessLetterWidget = AnimatedGuessLetterShaker(
-          letterSize: widget.letterSize, index: index, letter: guessLetter);
-    }
+    Widget guessLetterWidget = AnimatedGuessLetterShaker(
+        letterSize: widget.letterSize, index: index, letter: guessLetter);
+    // if (didWin) {
+    //   guessLetterWidget = AnimatedGuessLetterDancer(
+    //       letterSize: widget.letterSize, index: index, letter: guessLetter);
+    // } else {
+    //   guessLetterWidget = AnimatedGuessLetterShaker(
+    //       letterSize: widget.letterSize, index: index, letter: guessLetter);
+    // }
     var middleRowGuessLetterSlotContext =
         _guessRowLetterSlotsKeys[index].currentContext!;
     var middleRowGuessLetterSlotRenderBox =
@@ -292,10 +292,10 @@ class _AttemptedGuessWord extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var gameEngineData = context.getGameEngineData().currentState;
     return ValueListenableBuilder<String>(
       valueListenable: guessWordNotifier,
       builder: (context, guessLetterValue, child) {
+        var gameEngineData = context.getGameEngineData().currentState;
         var guessLetterSlots = <Widget>[];
         for (var index = 0;
             index < AlphaBoundConstants.guessWordLength;
@@ -322,11 +322,19 @@ class _AttemptedGuessWord extends StatelessWidget {
     var guessLetterValue = guessWordNotifier.value;
     var guessLetterValueLength = guessLetterValue.length;
     var didWinGame = gameStatus is GameWon;
-    if (gameStatus is GuessNotInDictionary &&
-        gameStatus.guess.isEqualTo(guessLetterValue)) {
+    if ((gameStatus is GuessNotInDictionary &&
+            gameStatus.guess.isEqualTo(guessLetterValue)) ||
+        (gameStatus is GuessNotInBounds &&
+            gameStatus.guess.isEqualTo(guessLetterValue))) {
       return ShakingGuessLetter(
           letter: guessLetterValue[index].toUpperCase(),
           letterSize: letterSize);
+    } else if (gameStatus is GameWon) {
+      return AnimatedGuessLetterDancer(
+        letterSize: letterSize,
+        letter: guessLetterValue[index].toUpperCase(),
+        didWinGame: true,
+      );
     }
     if (index < guessLetterValueLength) {
       centerWidget = Text(

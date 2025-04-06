@@ -39,11 +39,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.rareapps.gameboy"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23 // Cannot use flutter.minSdkVersion == 21 as it is not firebase-auth requires minSdkVersion 23.
+        minSdk = 23 // firebase-auth requires minSdkVersion 23.
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -51,13 +48,10 @@ android {
 
     buildTypes {
         debug {
-            // fix Failed to transform firebase-auth-22.3.1.aar
-            minifyEnabled true
+            minifyEnabled true // fix Failed to transform firebase-auth-22.3.1.aar
             signingConfig = signingConfigs.debug
         }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.release
         }
     }
@@ -65,7 +59,7 @@ android {
 
 dependencies {
     // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:33.4.0')
+    implementation platform('com.google.firebase:firebase-bom:33.12.0')
 }
 
 flutter {

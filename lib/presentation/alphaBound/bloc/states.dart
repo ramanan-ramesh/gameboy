@@ -8,9 +8,10 @@ class AlphaBoundGameState extends GameState {
   AlphaBoundGameState({required this.gameStatus, this.isStartup = false});
 
   bool hasGameMovedAhead() {
-    return gameStatus is GameWon ||
-        gameStatus is GameLost ||
-        gameStatus is GuessReplacesLowerBound ||
-        gameStatus is GuessReplacesUpperBound && !isStartup;
+    return (gameStatus is GameWon ||
+            gameStatus is GameLost ||
+            gameStatus is GuessReplacesLowerBound ||
+            gameStatus is GuessReplacesUpperBound) &&
+        !isStartup;
   }
 }

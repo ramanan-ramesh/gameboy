@@ -259,6 +259,19 @@ class _LoginPageFormState extends State<_LoginPageForm>
   }
 
   Widget _createUserNameField(AuthenticationState authState) {
+    String? errorText = _createErrorTextOnAuthFailure(authState);
+    return UsernameEditField(
+      textInputAction: TextInputAction.next,
+      controller: _usernameController,
+      inputDecoration: InputDecoration(
+        icon: const Icon(Icons.person_2_rounded),
+        labelText: 'UserName',
+        errorText: errorText,
+      ),
+    );
+  }
+
+  String? _createErrorTextOnAuthFailure(AuthenticationState authState) {
     String? errorText;
     if (authState is AuthenticationFailure) {
       if (authState.failureReason ==
@@ -270,14 +283,6 @@ class _LoginPageFormState extends State<_LoginPageForm>
         errorText = 'No such username exists. You can register with it instead';
       }
     }
-    return UsernameEditField(
-      textInputAction: TextInputAction.next,
-      controller: _usernameController,
-      inputDecoration: InputDecoration(
-        icon: const Icon(Icons.person_2_rounded),
-        labelText: 'UserName',
-        errorText: errorText,
-      ),
-    );
+    return errorText;
   }
 }

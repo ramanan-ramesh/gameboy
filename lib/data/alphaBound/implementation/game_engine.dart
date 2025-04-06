@@ -10,7 +10,7 @@ import 'package:gameboy/data/app/extensions.dart';
 class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
   static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _sortedDictionary;
-  static final _firstDay = DateTime(2025, 3, 16);
+  static final _firstDay = DateTime(2025, 4, 3);
   static const _defaultLowerBoundGuess = 'AAAAA';
   static const _defaultUpperBoundGuess = 'ZZZZZ';
 
@@ -61,7 +61,8 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
         guess.comparedTo(_currentState.upperBound, false) >= 0) {
       _currentState = GuessNotInBounds(
           lowerBound: _currentState.lowerBound,
-          upperBound: _currentState.upperBound);
+          upperBound: _currentState.upperBound,
+          guess: guess);
       return _currentState;
     }
 

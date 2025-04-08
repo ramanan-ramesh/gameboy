@@ -13,6 +13,8 @@ import 'package:gameboy/presentation/beeWise/widgets/game_results/animated_guess
 import 'package:gameboy/presentation/beeWise/widgets/game_results/game_results.dart';
 import 'package:gameboy/presentation/beeWise/widgets/letter_input_layout.dart';
 
+import 'tutorial_sheet.dart';
+
 class BeeWiseLayout implements GameLayout {
   var guessWordNotifier = ValueNotifier('');
   final _keyBoardFocusNode = FocusNode();
@@ -39,9 +41,12 @@ class BeeWiseLayout implements GameLayout {
 
   @override
   Widget buildStatsSheet(BuildContext context, Game game) {
-    return BeeWiseStatsSheet(
-      game: game,
-    );
+    return const BeeWiseStatsSheet();
+  }
+
+  @override
+  Widget buildTutorialSheet(BuildContext context, Game game) {
+    return const BeeWiseTutorialSheet();
   }
 
   void _handleKeyEvent(BuildContext context, KeyEvent keyEvent) {
@@ -70,7 +75,7 @@ class BeeWiseLayout implements GameLayout {
         Expanded(
           child: _buildGameLayout(context, layoutWidth, layoutHeight),
         ),
-        Expanded(
+        const Expanded(
           child: MaximizedGameResults(),
         )
       ],
@@ -192,7 +197,7 @@ class BeeWiseLayout implements GameLayout {
                   currentGuessWord.substring(0, currentGuessWord.length - 1);
             }
           },
-          child: Icon(Icons.cancel_rounded),
+          child: const Icon(Icons.cancel_rounded),
         ),
         FloatingActionButton(
           heroTag: null,
@@ -205,14 +210,14 @@ class BeeWiseLayout implements GameLayout {
             _lettersOTheDayNotifier.value =
                 allLettersOfTheDay[0] + shuffledLetters;
           },
-          child: Icon(Icons.sync_rounded),
+          child: const Icon(Icons.sync_rounded),
         ),
         FloatingActionButton(
           heroTag: null,
           onPressed: () {
             context.addGameEvent(SubmitWord(guessWordNotifier.value));
           },
-          child: Icon(Icons.keyboard_return_rounded),
+          child: const Icon(Icons.keyboard_return_rounded),
         ),
       ],
     );

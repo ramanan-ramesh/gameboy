@@ -31,7 +31,7 @@ class _AnimatedGuessLetterPositionerState
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 400),
     );
     _positionAnimation = Tween<Offset>(
       begin: widget.startPosition,
@@ -60,7 +60,7 @@ class _AnimatedGuessLetterPositionerState
             child: Container(
               width: widget.letterSize,
               height: widget.letterSize,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.deepPurple,
               ),
               child: Center(
@@ -237,7 +237,7 @@ class _AnimatedGuessLetterShakerState extends State<AnimatedGuessLetterShaker>
     return Container(
       width: widget.letterSize,
       height: widget.letterSize,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.red,
       ),
       child: Center(
@@ -257,7 +257,7 @@ class ShakingGuessLetter extends StatefulWidget {
   final String letter;
   final double letterSize;
 
-  ShakingGuessLetter(
+  const ShakingGuessLetter(
       {super.key, required this.letter, required this.letterSize});
 
   @override

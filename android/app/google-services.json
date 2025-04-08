@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "406654937423-6e86qdhkqhabo77qlp7mf5a2gjj1rgnn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rareapps.gameboy",
+            "certificate_hash": "4b9900b51b79191e00bb8c4775e5e6356d47e2a1"
+          }
+        },
+        {
           "client_id": "406654937423-cmju8m0554f34dvrip59nrt210atffak.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

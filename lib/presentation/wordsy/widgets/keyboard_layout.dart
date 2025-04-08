@@ -84,7 +84,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
           if (state is GuessWordSubmitted ||
               state is GameWon ||
               state is GameLost) {
-            Future.delayed(Duration(seconds: 6), () {
+            Future.delayed(const Duration(seconds: 6), () {
               if (mounted) {
                 setState(() {});
               }
@@ -133,7 +133,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         actionEvent,
         Text(
           keyName,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         flex);
   }

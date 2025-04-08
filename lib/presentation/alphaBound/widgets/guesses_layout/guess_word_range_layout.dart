@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
-import 'package:gameboy/data/alphaBound/models/game_engine.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/events.dart';
 import 'package:gameboy/presentation/app/blocs/game/states.dart'
     as appGameState;
 
@@ -56,7 +54,6 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
             letterSize: widget.letterSize,
             boundaryGuessWord: gameEngineData.currentState.upperBound,
             slotContexts: _upperBoundLetterSlotsKeys);
-        // _handleStartupGameState(state, gameEngineData, context);
         return Column(
           children: [
             Padding(
@@ -80,10 +77,6 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
             _handleBoundsChange(context, true);
           } else if (state.gameStatus is GuessReplacesUpperBound) {
             _handleBoundsChange(context, false);
-          } else if (state.gameStatus is GameWon) {
-            // _handleGameResult(context, true);
-          } else if (state.gameStatus is GameLost) {
-            // _handleGameResult(context, false);
           }
         } else if (state is appGameState.ShowStats) {
           _removeAllOverlays();
@@ -104,22 +97,6 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
     super.dispose();
   }
 
-  void _handleStartupGameState(appGameState.GameState state,
-      AlphaBoundGameEngine gameEngineData, BuildContext context) {
-    if (state is AlphaBoundGameState) {
-      if (state.isStartup) {
-        if (state.gameStatus is GameWon) {
-          widget.guessWordNotifier.value = gameEngineData.wordOfTheDay;
-          _handleGameResult(context, true);
-        } else if (state.gameStatus is GameLost) {
-          widget.guessWordNotifier.value =
-              (state.gameStatus as GameLost).finalGuess;
-          _handleGameResult(context, false);
-        }
-      }
-    }
-  }
-
   void _handleBoundsChange(
       BuildContext layoutContext, bool isLowerBoundChanged) {
     var letterSlotKeys = isLowerBoundChanged
@@ -138,27 +115,6 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
       }
       _onAnimationCompleted(true, true);
     }
-  }
-
-  void _handleGameResult(BuildContext context, bool didWin) {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (_guessRowLetterSlotsKeys.every(
-          (e) => e.currentContext != null && e.currentContext!.mounted)) {
-        for (int index = 0;
-            index < AlphaBoundConstants.guessWordLength;
-            index++) {
-          var overlayEntry =
-              _createAnimatedGuessLetterOnGameResult(index, didWin);
-          _insertOverlayEntry(overlayEntry);
-        }
-        _onAnimationCompleted(false, false);
-      }
-    });
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (context.mounted) {
-        context.addGameEvent(RequestStats());
-      }
-    });
   }
 
   void _onAnimationCompleted(bool shouldResetGuess, bool shouldRebuild) {
@@ -205,33 +161,6 @@ class _GuessWordLayoutState extends State<GuessWordLayout> {
       letterSize: widget.letterSize,
     );
     return OverlayEntry(builder: (context) => animatedGuessedLetterSlot);
-  }
-
-  OverlayEntry _createAnimatedGuessLetterOnGameResult(int index, bool didWin) {
-    var guessLetter = widget.guessWordNotifier.value[index].toUpperCase();
-
-    Widget guessLetterWidget = AnimatedGuessLetterShaker(
-        letterSize: widget.letterSize, index: index, letter: guessLetter);
-    // if (didWin) {
-    //   guessLetterWidget = AnimatedGuessLetterDancer(
-    //       letterSize: widget.letterSize, index: index, letter: guessLetter);
-    // } else {
-    //   guessLetterWidget = AnimatedGuessLetterShaker(
-    //       letterSize: widget.letterSize, index: index, letter: guessLetter);
-    // }
-    var middleRowGuessLetterSlotContext =
-        _guessRowLetterSlotsKeys[index].currentContext!;
-    var middleRowGuessLetterSlotRenderBox =
-        middleRowGuessLetterSlotContext.findRenderObject() as RenderBox;
-    var middleRowGuessLetterSlotPosition =
-        middleRowGuessLetterSlotRenderBox.localToGlobal(Offset.zero);
-    return OverlayEntry(
-      builder: (context) => Positioned(
-        left: middleRowGuessLetterSlotPosition.dx,
-        top: middleRowGuessLetterSlotPosition.dy,
-        child: Material(child: guessLetterWidget),
-      ),
-    );
   }
 
   void _insertOverlayEntry(OverlayEntry overlayEntry) {

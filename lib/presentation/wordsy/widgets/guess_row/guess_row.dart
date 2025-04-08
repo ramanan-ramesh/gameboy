@@ -243,7 +243,7 @@ class _FlippedGuessWordsWithDanceState
       guessLetterWidgets.add(guessLetterWidget);
     }
 
-    Future.delayed(Duration(seconds: 6, milliseconds: 250), () {
+    Future.delayed(const Duration(seconds: 6, milliseconds: 250), () {
       if (mounted && !_shouldAnimateWin) {
         setState(() {
           _shouldAnimateWin = true;
@@ -293,7 +293,7 @@ class _FlippedGuessWordsWithShakeState
       guessLetterWidgets.add(guessLetterWidget);
     }
 
-    Future.delayed(Duration(seconds: 6, milliseconds: 250), () {
+    Future.delayed(const Duration(seconds: 6, milliseconds: 250), () {
       if (mounted && !_shouldAnimateWin) {
         setState(() {
           _shouldAnimateWin = true;

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/wordsy/models/stats.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';
 
-class StatsSheet extends StatelessWidget {
-  final Game game;
-
-  const StatsSheet({super.key, required this.game});
+class WordsyStatsSheet extends StatelessWidget {
+  const WordsyStatsSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +34,7 @@ class StatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(),
+        const Divider(),
         Row(
           children: [
             Expanded(
@@ -50,7 +47,7 @@ class StatsSheet extends StatelessWidget {
             ),
           ],
         ),
-        Divider(),
+        const Divider(),
         Row(
           children: [
             Expanded(
@@ -63,7 +60,7 @@ class StatsSheet extends StatelessWidget {
             ),
           ],
         ),
-        Divider(),
+        const Divider(),
       ],
     );
   }
@@ -72,8 +69,8 @@ class StatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 3.0),
           child: Text('GUESS DISTRIBUTION'),
         ),
         Padding(
@@ -128,7 +125,7 @@ class StatsSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 3.0),
           child: Text(
             subtitle,
-            style: TextStyle(color: Colors.green),
+            style: const TextStyle(color: Colors.green),
           ),
         ),
       ],
@@ -148,7 +145,7 @@ class _WinDistribution extends StatelessWidget {
     return ListTile(
       leading: Text('$index', style: Theme.of(context).textTheme.titleLarge!),
       title: winPercentage == 0
-          ? SizedBox.shrink()
+          ? const SizedBox.shrink()
           : LinearProgressIndicator(
               value: winPercentage,
               backgroundColor: Colors.white12,

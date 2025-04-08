@@ -32,7 +32,7 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
         var guessedWordResult = state.guessedWordState;
         _animationComplete = false;
 
-        Future.delayed(Duration(seconds: 2, milliseconds: 100), () {
+        Future.delayed(const Duration(seconds: 2, milliseconds: 100), () {
           if (mounted) {
             setState(() {
               widget.onAnimationComplete();
@@ -41,7 +41,7 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
           }
         });
 
-        return Container(
+        return SizedBox(
           height: 100,
           child: Center(
             child: _buildAnimatedText(context, guessedWordResult, state),
@@ -65,9 +65,9 @@ class _AnimatedGuessedWordResultState extends State<AnimatedGuessedWordResult> {
       color: Colors.red,
       shadows: [
         Shadow(
-          offset: Offset(2.0, 2.0),
+          offset: const Offset(2.0, 2.0),
           blurRadius: 3.0,
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withValues(alpha: 0.5),
         ),
       ],
     );

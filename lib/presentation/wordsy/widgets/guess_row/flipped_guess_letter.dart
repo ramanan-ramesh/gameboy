@@ -29,7 +29,7 @@ class _FlippedGuessLetterState extends State<FlippedGuessLetter>
       }
     });
     return AnimatedSwitcher(
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
       transitionBuilder: _transitionBuilder,
       layoutBuilder: (widget, list) => Stack(children: [widget!, ...list]),
       switchInCurve: Curves.easeInBack,

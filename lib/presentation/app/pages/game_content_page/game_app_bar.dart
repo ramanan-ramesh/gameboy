@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/models/game.dart';
+import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
+import 'package:gameboy/presentation/app/blocs/game/events.dart';
 
 class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? contentWidth;
   final Game game;
-  final Widget? actionButtonBar;
   final double height;
 
   @override
   Size get preferredSize => Size.fromHeight(height);
 
   const GameAppBar(
-      {super.key,
-      this.contentWidth,
-      required this.game,
-      this.actionButtonBar,
-      required this.height});
+      {super.key, this.contentWidth, required this.game, required this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +41,40 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _buildGameLogo(),
                 ),
-                if (actionButtonBar != null) actionButtonBar!,
+                _createActionButtonBar(context),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _createActionButtonBar(BuildContext context) {
+    var actionButtons = [
+      IconButton(
+        onPressed: () {
+          BlocProvider.of<GameBloc>(context).add(RequestTutorial());
+        },
+        icon: const Icon(Icons.help_rounded),
+      ),
+      IconButton(
+        onPressed: () {
+          BlocProvider.of<GameBloc>(context).add(RequestStats());
+        },
+        icon: const Icon(Icons.query_stats_rounded),
+      ),
+    ];
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...actionButtons.map((button) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3.0),
+            child: button,
+          );
+        }),
+      ],
     );
   }
 
@@ -67,7 +93,7 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
             game.name.toUpperCase(),
-            style: TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 20),
           ),
         )
       ],

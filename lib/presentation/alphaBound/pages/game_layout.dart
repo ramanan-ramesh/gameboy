@@ -10,6 +10,8 @@ import 'package:gameboy/presentation/alphaBound/widgets/keyboard_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/progress_tracker.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
+import 'tutorial_sheet.dart';
+
 class AlphaBoundLayout extends GameLayout {
   final _guessWordNotifier = ValueNotifier<String>('');
 
@@ -19,7 +21,7 @@ class AlphaBoundLayout extends GameLayout {
     _initializeAttemptedGuessWord(context);
     return Column(
       children: [
-        ProgressTracker(),
+        const ProgressTracker(),
         Expanded(
           flex: 7,
           child: GuessesLayout(
@@ -59,6 +61,11 @@ class AlphaBoundLayout extends GameLayout {
     return AlphaBoundStatsSheet(
       game: game,
     );
+  }
+
+  @override
+  Widget buildTutorialSheet(BuildContext context, Game game) {
+    return const AlphaBoundTutorialSheet();
   }
 
   void _onLetterPressed(String letter) {

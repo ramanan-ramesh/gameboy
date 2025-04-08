@@ -9,7 +9,7 @@ import 'package:gameboy/presentation/beeWise/widgets/game_results/guess_words_di
 import 'package:gameboy/presentation/beeWise/widgets/game_results/score_bar.dart';
 
 class MaximizedGameResults extends StatelessWidget {
-  MaximizedGameResults({super.key});
+  const MaximizedGameResults({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +18,8 @@ class MaximizedGameResults extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child: ScoreBar(),
             ),
             Expanded(
@@ -45,7 +45,7 @@ class MaximizedGameResults extends StatelessWidget {
         ? 'You have not guessed any word yet!'
         : 'You have guessed ${guessedWords.length} words!';
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(color: Colors.white),
@@ -56,7 +56,7 @@ class MaximizedGameResults extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               numberOfFoundWordsMessage,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ),
           Expanded(
@@ -72,7 +72,7 @@ class MinimizedGameResults extends StatelessWidget {
   final VoidCallback onGameResultsSizeToggled;
   final bool isExpandedInitially;
 
-  MinimizedGameResults(
+  const MinimizedGameResults(
       {super.key,
       required this.onGameResultsSizeToggled,
       required this.isExpandedInitially});
@@ -84,8 +84,8 @@ class MinimizedGameResults extends StatelessWidget {
         if (!isExpandedInitially) {
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: ScoreBar(),
               ),
               _createGuessWordsDisplay(context),
@@ -94,8 +94,8 @@ class MinimizedGameResults extends StatelessWidget {
         }
         return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child: ScoreBar(),
             ),
             Expanded(
@@ -120,7 +120,7 @@ class MinimizedGameResults extends StatelessWidget {
           : guessedWords.join(' ').toUpperCase();
       return Container(
         height: 100,
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
           border: Border.all(color: Colors.white),
@@ -129,7 +129,7 @@ class MinimizedGameResults extends StatelessWidget {
           children: [
             Expanded(
               child: Text(textToDisplay,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                   overflow: TextOverflow.ellipsis),
             ),
             _buildExpander(Icons.arrow_circle_down_rounded),
@@ -141,7 +141,7 @@ class MinimizedGameResults extends StatelessWidget {
           ? 'You have not guessed any word yet!'
           : 'You have guessed ${guessedWords.length} words!';
       return Container(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
           border: Border.all(color: Colors.white),
@@ -153,7 +153,7 @@ class MinimizedGameResults extends StatelessWidget {
               children: [
                 Text(
                   numberOfFoundWordsMessage,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
                 _buildExpander(Icons.arrow_circle_up_rounded),
               ],

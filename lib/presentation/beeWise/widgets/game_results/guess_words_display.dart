@@ -38,7 +38,7 @@ class GuessWordsDisplay extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Text(
                         word.toUpperCase(),
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 16, decoration: TextDecoration.underline),
                       ),
                     );

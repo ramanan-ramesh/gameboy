@@ -55,7 +55,7 @@ class _GamesListViewState extends State<GamesListView> {
       child: LayoutBuilder(builder: (context, constraints) {
         var isBigLayout = constraints.minWidth > 1000;
         return Scaffold(
-          appBar: HomeAppBar(),
+          appBar: const HomeAppBar(),
           body: Center(
             child: PageView.builder(
               scrollDirection: isBigLayout ? Axis.horizontal : Axis.vertical,

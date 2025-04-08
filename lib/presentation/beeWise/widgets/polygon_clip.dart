@@ -18,7 +18,7 @@ class ClipPolygon extends StatelessWidget {
   /// Provide a [borderRadius] to set the radius of the corners.
   ///
   /// The [sides] argument must be at least 3.
-  ClipPolygon(
+  const ClipPolygon(
       {super.key,
       required this.sides,
       this.rotate = 0.0,

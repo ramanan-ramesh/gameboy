@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/beeWise/models/constants.dart';
 import 'package:gameboy/data/beeWise/models/stats.dart';
 import 'package:gameboy/presentation/beeWise/extensions.dart';
 
 class BeeWiseStatsSheet extends StatelessWidget {
-  final Game game;
-
-  const BeeWiseStatsSheet({super.key, required this.game});
+  const BeeWiseStatsSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +38,7 @@ class BeeWiseStatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(),
+        const Divider(),
         Row(
           children: [
             Expanded(
@@ -64,7 +61,7 @@ class BeeWiseStatsSheet extends StatelessWidget {
             ),
           ],
         ),
-        Divider(),
+        const Divider(),
         if (isLongestWordAvailable || isHighestRankAvailable)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -79,7 +76,7 @@ class BeeWiseStatsSheet extends StatelessWidget {
                     context),
             ],
           ),
-        if (isLongestWordAvailable || isHighestRankAvailable) Divider(),
+        if (isLongestWordAvailable || isHighestRankAvailable) const Divider(),
       ],
     );
   }
@@ -99,7 +96,7 @@ class BeeWiseStatsSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 3.0),
           child: Text(
             subtitle,
-            style: TextStyle(color: Colors.yellow),
+            style: const TextStyle(color: Colors.yellow),
           ),
         ),
       ],
@@ -117,8 +114,8 @@ class BeeWiseStatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 3.0),
           child: Text('GUESS DISTRIBUTION'),
         ),
         ...guessDistributionsForRank

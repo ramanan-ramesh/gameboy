@@ -12,6 +12,8 @@ import 'package:gameboy/presentation/wordsy/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/wordsy/widgets/guesses_layout.dart';
 import 'package:gameboy/presentation/wordsy/widgets/keyboard_layout.dart';
 
+import 'tutorial_sheet.dart';
+
 class WordsyLayout implements GameLayout {
   @override
   BoxConstraints get constraints => const BoxConstraints(
@@ -48,7 +50,7 @@ class WordsyLayout implements GameLayout {
               widthFactor: widthFactor,
             ),
           ),
-          Expanded(
+          const Expanded(
             flex: 3,
             child: KeyboardLayout(),
           ),
@@ -59,9 +61,12 @@ class WordsyLayout implements GameLayout {
 
   @override
   Widget buildStatsSheet(BuildContext context, Game game) {
-    return StatsSheet(
-      game: game,
-    );
+    return const WordsyStatsSheet();
+  }
+
+  @override
+  Widget buildTutorialSheet(BuildContext context, Game game) {
+    return const WordsyTutorialSheet();
   }
 
   void _onGameWon(GameWon gameWon, BuildContext context) {
@@ -70,7 +75,7 @@ class WordsyLayout implements GameLayout {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(_getWinMessage(gameWon.guessedIndex)),
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           ),
         );
       }
@@ -89,7 +94,7 @@ class WordsyLayout implements GameLayout {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('You lost! The word was $wordOfTheDay'),
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           ),
         );
       }

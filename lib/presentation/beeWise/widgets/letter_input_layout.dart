@@ -5,9 +5,9 @@ import 'polygon_border.dart';
 class LetterInputLayout extends StatefulWidget {
   final Function(String letter) onLetterPressed;
   final double sizeOfCell;
-  String lettersOfTheDay;
+  final String lettersOfTheDay;
 
-  LetterInputLayout(
+  const LetterInputLayout(
       {super.key,
       required this.onLetterPressed,
       required this.sizeOfCell,
@@ -80,7 +80,7 @@ class _LetterKey extends StatefulWidget {
   final double size;
   final VoidCallback onLetterPressed;
 
-  _LetterKey(
+  const _LetterKey(
       {super.key,
       required this.letter,
       this.isCentered = false,
@@ -145,7 +145,7 @@ class _LetterKeyState extends State<_LetterKey>
               child: Material(
                 color: Colors.transparent,
                 clipBehavior: Clip.hardEdge,
-                shape: PolygonBorder(
+                shape: const PolygonBorder(
                   sides: 6,
                   borderRadius: 0.0,
                   rotate: 90.0,
@@ -154,13 +154,14 @@ class _LetterKeyState extends State<_LetterKey>
                 child: ElevatedButton(
                   onPressed: widget.onLetterPressed,
                   style: ButtonStyle(
-                    overlayColor: WidgetStatePropertyAll(Colors.black12),
+                    overlayColor: const WidgetStatePropertyAll(Colors.black12),
                     backgroundColor: WidgetStatePropertyAll(
                       widget.isCentered ? Colors.yellow : Colors.white70,
                     ),
                   ),
                   child: Text(widget.letter.toUpperCase(),
-                      style: TextStyle(color: Colors.black, fontSize: 24)),
+                      style:
+                          const TextStyle(color: Colors.black, fontSize: 24)),
                 ),
               ),
             ),

@@ -4,7 +4,7 @@ class Shake extends StatefulWidget {
   final String text;
   final TextStyle? style;
 
-  const Shake({required this.text, this.style, Key? key}) : super(key: key);
+  const Shake({required this.text, this.style, super.key});
 
   @override
   _ShakeState createState() => _ShakeState();
@@ -49,9 +49,9 @@ class _ShakeState extends State<Shake> with SingleTickerProviderStateMixin {
               style: widget.style?.copyWith(
                 shadows: [
                   Shadow(
-                    offset: Offset(2.0, 2.0),
+                    offset: const Offset(2.0, 2.0),
                     blurRadius: 3.0,
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                   ),
                 ],
               )),
@@ -71,7 +71,7 @@ class Blink extends StatefulWidget {
   final String text;
   final TextStyle? style;
 
-  const Blink({required this.text, this.style, Key? key}) : super(key: key);
+  const Blink({required this.text, this.style, super.key});
 
   @override
   _BlinkState createState() => _BlinkState();
@@ -83,10 +83,10 @@ class _BlinkState extends State<Blink> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       setState(() => _opacity = 0.0);
     });
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       setState(() => _opacity = 1.0);
     });
   }
@@ -94,7 +94,7 @@ class _BlinkState extends State<Blink> {
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      duration: Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 400),
       opacity: _opacity,
       child: Text(widget.text, style: widget.style),
     );
@@ -105,13 +105,12 @@ class Bounce extends StatelessWidget {
   final String text;
   final TextStyle style;
 
-  const Bounce({required this.text, required this.style, Key? key})
-      : super(key: key);
+  const Bounce({required this.text, required this.style, super.key});
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
       curve: Curves.bounceOut,
       tween: Tween(begin: 20.0, end: -20.0)
         ..chain(Tween(begin: -20.0, end: 15.0))
@@ -134,13 +133,12 @@ class Scale extends StatelessWidget {
   final String text;
   final TextStyle style;
 
-  const Scale({required this.text, required this.style, Key? key})
-      : super(key: key);
+  const Scale({required this.text, required this.style, super.key});
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       tween: Tween(begin: 0.5, end: 1.2),
       curve: Curves.bounceOut,
       builder: (context, value, child) {
@@ -149,9 +147,9 @@ class Scale extends StatelessWidget {
           child: Text(text, style: style),
         );
       },
-      onEnd: () => Future.delayed(Duration(milliseconds: 100), () {
+      onEnd: () => Future.delayed(const Duration(milliseconds: 100), () {
         return TweenAnimationBuilder<double>(
-          duration: Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 500),
           tween: Tween(begin: 1.2, end: 1.0),
           builder: (context, value, child) {
             return Transform.scale(
@@ -171,8 +169,10 @@ class ExpandAndShrink extends StatefulWidget {
   final TextStyle style;
 
   const ExpandAndShrink(
-      {required this.text, required this.style, Key? key, this.containerColor})
-      : super(key: key);
+      {required this.text,
+      required this.style,
+      this.containerColor,
+      super.key});
 
   @override
   _ExpandAndShrinkState createState() => _ExpandAndShrinkState();
@@ -230,7 +230,7 @@ class _ExpandAndShrinkState extends State<ExpandAndShrink>
 class Rainbow extends StatefulWidget {
   final String text;
   final TextStyle? style;
-  const Rainbow({required this.text, Key? key, this.style}) : super(key: key);
+  const Rainbow({required this.text, this.style, super.key});
 
   @override
   _RainbowState createState() => _RainbowState();
@@ -242,22 +242,22 @@ class _RainbowState extends State<Rainbow> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) setState(() => _color = Colors.blue);
     });
-    Future.delayed(Duration(milliseconds: 400), () {
+    Future.delayed(const Duration(milliseconds: 400), () {
       if (mounted) setState(() => _color = Colors.green);
     });
-    Future.delayed(Duration(milliseconds: 600), () {
+    Future.delayed(const Duration(milliseconds: 600), () {
       if (mounted) setState(() => _color = Colors.pink);
     });
-    Future.delayed(Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _color = Colors.orange);
     });
-    Future.delayed(Duration(milliseconds: 1000), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted) setState(() => _color = Colors.purple);
     });
-    Future.delayed(Duration(milliseconds: 1200), () {
+    Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) setState(() => _color = Colors.yellow);
     });
   }
@@ -265,8 +265,8 @@ class _RainbowState extends State<Rainbow> {
   @override
   Widget build(BuildContext context) {
     return AnimatedDefaultTextStyle(
-      duration: Duration(milliseconds: 200),
-      style: (widget.style ?? TextStyle()).copyWith(
+      duration: const Duration(milliseconds: 200),
+      style: (widget.style ?? const TextStyle()).copyWith(
         color: _color,
       ),
       child: Text(
@@ -279,7 +279,16 @@ class _RainbowState extends State<Rainbow> {
 class PopIn extends StatefulWidget {
   final String text;
   final TextStyle? style;
-  PopIn({required this.text, this.style, Key? key}) : super(key: key);
+  final bool shouldRepeat;
+  final bool shouldReverse;
+  final int milliSeconds;
+  const PopIn(
+      {required this.text,
+      this.milliSeconds = 500,
+      this.style,
+      this.shouldReverse = false,
+      this.shouldRepeat = false,
+      super.key});
 
   @override
   _PopInState createState() => _PopInState();
@@ -293,16 +302,19 @@ class _PopInState extends State<PopIn> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: widget.milliSeconds),
       vsync: this,
     );
+    if (widget.shouldRepeat) {
+      _controller.repeat(reverse: widget.shouldReverse);
+    } else {
+      _controller.forward();
+    }
 
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.elasticOut,
     );
-
-    // _controller.forward();
   }
 
   @override

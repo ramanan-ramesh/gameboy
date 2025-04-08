@@ -81,7 +81,7 @@ class WordsyGameEngineImpl extends WordsyGameEngineDriver {
     var indexOfGuessLetterToRemove = _guessWordUnderEdit!.word.length - 1;
     if (indexOfGuessLetterToRemove >= 0) {
       _guessWordUnderEdit!.guessLetters[indexOfGuessLetterToRemove] =
-          GuessLetter.notYetGuessed();
+          const GuessLetter.notYetGuessed();
       return true;
     }
     return false;
@@ -167,7 +167,7 @@ class WordsyGameEngineImpl extends WordsyGameEngineDriver {
     for (var i = submittedWord.length;
         i < WordsyConstants.numberOfLettersInGuess;
         i++) {
-      guessLetters.add(GuessLetter.notYetGuessed());
+      guessLetters.add(const GuessLetter.notYetGuessed());
     }
     return GuessWord(index: guessIndex, guessLetters: guessLetters);
   }

@@ -58,7 +58,7 @@ class _StartupPageState extends State<StartupPage> {
               isBigLayout: isBigLayout,
             ),
           ),
-        Expanded(
+        const Expanded(
           child: LoginPage(),
         ),
       ],

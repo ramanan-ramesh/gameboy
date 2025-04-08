@@ -36,7 +36,7 @@ class GuessLetterRangeLayout extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _createLowerBoundStartLetters(lowerBoundStartLetters, context),
-            Expanded(
+            const Expanded(
               child: AnimatedWordOfTheDayProximityIndicator(),
             ),
             _createUpperBoundStartLetters(upperBoundStartLetters, context),
@@ -59,7 +59,7 @@ class GuessLetterRangeLayout extends StatelessWidget {
         Container(
           width: _letterIndicatorSize,
           height: _letterIndicatorSize,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.blue,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(_lettersIndicatorRadius),
@@ -102,7 +102,7 @@ class GuessLetterRangeLayout extends StatelessWidget {
         Container(
           width: _letterIndicatorSize,
           height: _letterIndicatorSize,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.blue,
             borderRadius: BorderRadius.only(
               topLeft: Radius.zero,

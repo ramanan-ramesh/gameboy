@@ -78,7 +78,7 @@ class _AnimatedWordOfTheDayProximityIndicatorState
       bottom: bottom,
       child: Text(
         proximityRatio.toStringAsFixed(2),
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white),
       ),
     );
   }

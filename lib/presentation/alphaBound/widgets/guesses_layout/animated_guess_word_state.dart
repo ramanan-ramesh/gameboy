@@ -10,8 +10,8 @@ import 'package:gameboy/presentation/app/blocs/game/states.dart'
 import 'package:gameboy/presentation/app/widgets/text_animations.dart';
 
 class AnimatedGuessWordState extends StatefulWidget {
-  VoidCallback? onAnimationComplete;
-  AnimatedGuessWordState({super.key, this.onAnimationComplete});
+  final VoidCallback? onAnimationComplete;
+  const AnimatedGuessWordState({super.key, this.onAnimationComplete});
 
   @override
   State<AnimatedGuessWordState> createState() => _AnimatedGuessWordStateState();
@@ -25,15 +25,15 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
     return BlocConsumer<GameBloc, appGameState.GameState>(
       listener: (context, state) {
         if (state is AlphaBoundGameState) {
-          if (state.gameStatus is GuessNotInDictionary ||
-              state.gameStatus is GuessNotInBounds) {
+          if (!(state.gameStatus is GuessReplacesLowerBound ||
+              state.gameStatus is GuessReplacesUpperBound)) {
             _animationComplete = false;
           }
         }
       },
       builder: (context, state) {
         var gameEngineData = context.getGameEngineData();
-        return Container(
+        return SizedBox(
           height: 100,
           child: _animationComplete
               ? null
@@ -53,9 +53,9 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
       color: Colors.red,
       shadows: [
         Shadow(
-          offset: Offset(2.0, 2.0),
+          offset: const Offset(2.0, 2.0),
           blurRadius: 3.0,
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withValues(alpha: 0.5),
         ),
       ],
     );
@@ -64,7 +64,7 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
     var shouldResetAnimation = true;
     if (alphaBoundGameStatus is GuessNotInDictionary) {
       animatedGuessWordState =
-          Shake(text: 'Not in dictionary!', style: textStyle);
+          Blink(text: 'Not in dictionary!', style: textStyle);
     } else if (alphaBoundGameStatus is GuessNotInBounds) {
       animatedGuessWordState =
           Blink(text: 'Word outside bounds!', style: textStyle);
@@ -72,16 +72,16 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
       shouldResetAnimation = false;
       animatedGuessWordState = PopIn(
         text: 'You won in ${gameEngineData.numberOfWordsGuessedToday} moves!',
-        style: textStyle.copyWith(
-          color: Colors.green,
-        ),
+        style: textStyle.copyWith(color: Colors.green),
+        shouldRepeat: true,
+        milliSeconds: 1500,
       );
     } else if (alphaBoundGameStatus is GameLost) {
       shouldResetAnimation = false;
       animatedGuessWordState = Bounce(text: 'Game Over!', style: textStyle);
     }
     if (animatedGuessWordState != null) {
-      Future.delayed(Duration(seconds: 2, milliseconds: 100), () {
+      Future.delayed(const Duration(seconds: 2, milliseconds: 100), () {
         if (mounted) {
           setState(() {
             widget.onAnimationComplete?.call();

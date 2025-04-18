@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
+import 'package:gameboy/presentation/alphaBound/widgets/guess_letter_range/guess_letter_range_layout.dart';
 
 class AlphaBoundTutorialSheet extends StatelessWidget {
   const AlphaBoundTutorialSheet({super.key});
@@ -62,7 +63,7 @@ class AlphaBoundTutorialSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: Text(
-                'One of the following can happen, depending on the word of the day:',
+                'One of the following can happen in your next move, depending on the word of the day:',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
@@ -93,9 +94,43 @@ class AlphaBoundTutorialSheet extends StatelessWidget {
               ],
             ),
             const Divider(),
+            SizedBox(
+              height: 250,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _createProximityRatioDescription(context),
+              ),
+            ),
+            const Divider(),
           ],
         );
       },
+    );
+  }
+
+  Widget _createProximityRatioDescription(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: GuessLetterRangeLayout(
+              letterSize: 55,
+              proximityRatio: 0.5,
+              lowerBoundLetters: 'A',
+              upperBoundLetters: 'Z'),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              'The proximity ratio is the indicator of how close the word of the day is to the lower bound, than the upper bound. It changes as the game progresses, based on what is the current lower and upper bound. It is the most useful tool in determining your guess.',
+              style: Theme.of(context).textTheme.bodyLarge,
+              softWrap: true,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

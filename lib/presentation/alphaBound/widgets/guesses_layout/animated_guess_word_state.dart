@@ -33,8 +33,7 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
       },
       builder: (context, state) {
         var gameEngineData = context.getGameEngineData();
-        return SizedBox(
-          height: 100,
+        return Container(
           child: _animationComplete
               ? null
               : _createAnimatedGuessWordState(gameEngineData),
@@ -73,7 +72,6 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
       animatedGuessWordState = PopIn(
         text: 'You won in ${gameEngineData.numberOfWordsGuessedToday} moves!',
         style: textStyle.copyWith(color: Colors.green),
-        shouldRepeat: true,
         milliSeconds: 1500,
       );
     } else if (alphaBoundGameStatus is GameLost) {

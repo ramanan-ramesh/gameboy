@@ -23,9 +23,9 @@ class AlphaBoundLayout extends GameLayout {
       children: [
         const ProgressTracker(),
         Expanded(
-          flex: 7,
+          flex: 6,
           child: GuessesLayout(
-              layoutWidth: layoutWidth,
+              letterSize: layoutWidth / 7,
               guessLetterValueNotifier: _guessWordNotifier),
         ),
         Expanded(

@@ -279,16 +279,9 @@ class _RainbowState extends State<Rainbow> {
 class PopIn extends StatefulWidget {
   final String text;
   final TextStyle? style;
-  final bool shouldRepeat;
-  final bool shouldReverse;
   final int milliSeconds;
   const PopIn(
-      {required this.text,
-      this.milliSeconds = 500,
-      this.style,
-      this.shouldReverse = false,
-      this.shouldRepeat = false,
-      super.key});
+      {required this.text, this.milliSeconds = 500, this.style, super.key});
 
   @override
   _PopInState createState() => _PopInState();
@@ -297,7 +290,6 @@ class PopIn extends StatefulWidget {
 class _PopInState extends State<PopIn> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-
   @override
   void initState() {
     super.initState();
@@ -305,11 +297,7 @@ class _PopInState extends State<PopIn> with SingleTickerProviderStateMixin {
       duration: Duration(milliseconds: widget.milliSeconds),
       vsync: this,
     );
-    if (widget.shouldRepeat) {
-      _controller.repeat(reverse: widget.shouldReverse);
-    } else {
-      _controller.forward();
-    }
+    _controller.forward();
 
     _animation = CurvedAnimation(
       parent: _controller,

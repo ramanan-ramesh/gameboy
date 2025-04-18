@@ -146,7 +146,7 @@ class WordsyTutorialSheet extends StatelessWidget {
             guessLetter.letterMatchDescription ==
             LetterMatchDescription.rightPositionInWord)
         .map((guessLetter) => guessLetter.guessLetter);
-    var guessLettersInWrongCorrectPosition = guessWord.guessLetters
+    var guessLettersInWrongPosition = guessWord.guessLetters
         .where((guessLetter) =>
             guessLetter.letterMatchDescription ==
             LetterMatchDescription.wrongPositionInWord)
@@ -167,20 +167,35 @@ class WordsyTutorialSheet extends StatelessWidget {
           ],
         ),
         if (guessLettersInCorrectPosition.isNotEmpty)
-          Text(
-            'The letters ${guessLettersInCorrectPosition.join(', ')} are in the correct position.',
-            style: const TextStyle(fontSize: 16),
-          ),
-        if (guessLettersInWrongCorrectPosition.isNotEmpty)
-          Text(
-            'The letters ${guessLettersInWrongCorrectPosition.join(', ')} are in the word but in the wrong position.',
-            style: const TextStyle(fontSize: 16),
-          ),
+          guessLettersInCorrectPosition.length > 1
+              ? Text(
+                  'The letters ${guessLettersInCorrectPosition.join(', ')} are in the correct position.',
+                  style: const TextStyle(fontSize: 16),
+                )
+              : Text(
+                  'The letter ${guessLettersInCorrectPosition.join(', ')} is in the correct position.',
+                  style: const TextStyle(fontSize: 16),
+                ),
+        if (guessLettersInWrongPosition.isNotEmpty)
+          guessLettersInWrongPosition.length > 1
+              ? Text(
+                  'The letters ${guessLettersInWrongPosition.join(', ')} are in the word but in the wrong position.',
+                  style: const TextStyle(fontSize: 16),
+                )
+              : Text(
+                  'The letter ${guessLettersInWrongPosition.join(', ')} is in the word but in the wrong position.',
+                  style: const TextStyle(fontSize: 16),
+                ),
         if (guessLettersNotInWord.isNotEmpty)
-          Text(
-            'The letters ${guessLettersNotInWord.join(', ')} are not in the word.',
-            style: const TextStyle(fontSize: 16),
-          ),
+          guessLettersNotInWord.length > 1
+              ? Text(
+                  'The letters ${guessLettersNotInWord.join(', ')} are not in the word.',
+                  style: const TextStyle(fontSize: 16),
+                )
+              : Text(
+                  'The letter ${guessLettersNotInWord.join(', ')} is not in the word.',
+                  style: const TextStyle(fontSize: 16),
+                ),
       ],
     );
   }

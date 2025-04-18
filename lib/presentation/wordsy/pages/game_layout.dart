@@ -45,13 +45,13 @@ class WordsyLayout implements GameLayout {
       child: Column(
         children: [
           Expanded(
-            flex: 7,
+            flex: 2,
             child: GuessesLayout(
               widthFactor: widthFactor,
             ),
           ),
           const Expanded(
-            flex: 3,
+            flex: 1,
             child: KeyboardLayout(),
           ),
         ],

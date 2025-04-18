@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/presentation/alphaBound/extensions.dart';
 
 class AnimatedWordOfTheDayProximityIndicator extends StatefulWidget {
+  final double proximityRatio;
   const AnimatedWordOfTheDayProximityIndicator({
     super.key,
+    required this.proximityRatio,
   });
 
   @override
@@ -34,8 +35,7 @@ class _AnimatedWordOfTheDayProximityIndicatorState
 
   @override
   Widget build(BuildContext context) {
-    var proximityRatio = context.getGameEngineData().wordOfTheDayProximityRatio;
-    _animation = Tween<double>(begin: 0, end: proximityRatio)
+    _animation = Tween<double>(begin: 0, end: widget.proximityRatio)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
     _controller.forward();
     return AnimatedBuilder(
@@ -55,7 +55,7 @@ class _AnimatedWordOfTheDayProximityIndicatorState
               ),
             ),
             if (_controller.isCompleted)
-              _createProximityRatioText(proximityRatio),
+              _createProximityRatioText(widget.proximityRatio),
           ],
         );
       },

@@ -14,7 +14,11 @@ class GuessNotInDictionary extends AlphaBoundGameStatus {
 }
 
 class GuessNotInBounds extends AlphaBoundGameStatus {
-  GuessNotInBounds({required super.lowerBound, required super.upperBound});
+  final String guess;
+  GuessNotInBounds(
+      {required super.lowerBound,
+      required super.upperBound,
+      required this.guess});
 }
 
 class GameWon extends AlphaBoundGameStatus {

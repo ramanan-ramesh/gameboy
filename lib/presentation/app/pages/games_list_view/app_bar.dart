@@ -16,16 +16,16 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       flexibleSpace: Row(
         children: [
           IgnorePointer(
-            //TODO: Find a way to remove this, and make sure logo is correctly centered
+            //TODO: Find a way to remove this, and make sure logo is correctly centered horizontally
             child: Opacity(
               opacity: 0.0,
               child: IconButton(
                 onPressed: () {},
-                icon: Icon(Icons.home),
+                icon: const Icon(Icons.home),
               ),
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
@@ -35,14 +35,14 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               fit: BoxFit.contain,
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
               onPressed: () {
                 context.addMasterPageEvent(Logout());
               },
-              icon: Icon(Icons.exit_to_app_rounded),
+              icon: const Icon(Icons.exit_to_app_rounded),
             ),
           ),
         ],

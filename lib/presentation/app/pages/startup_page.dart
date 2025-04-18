@@ -11,7 +11,6 @@ class StartupPage extends StatefulWidget {
 }
 
 class _StartupPageState extends State<StartupPage> {
-  bool _shouldNavigateToLoginScreen = false;
   static const _cutOffSize = 600.0;
   static const _smallScreenSize = 550.0;
 
@@ -51,19 +50,18 @@ class _StartupPageState extends State<StartupPage> {
   }
 
   Widget _getPageToRender(bool isBigLayout) {
-    if (isBigLayout) {
-      return Row(
-        children: [
+    return Row(
+      children: [
+        if (isBigLayout)
           Expanded(
             child: OnBoardingPage(
               isBigLayout: isBigLayout,
             ),
           ),
-          Expanded(child: LoginPage())
-        ],
-      );
-    }
-
-    return LoginPage();
+        const Expanded(
+          child: LoginPage(),
+        ),
+      ],
+    );
   }
 }

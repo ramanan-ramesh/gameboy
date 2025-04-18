@@ -8,10 +8,10 @@ import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/bloc.dart';
 import 'package:gameboy/presentation/alphaBound/pages/game_layout.dart';
 import 'package:gameboy/presentation/app/blocs/game_data.dart';
-import 'package:gameboy/presentation/spelling_bee/bloc/bloc.dart';
-import 'package:gameboy/presentation/spelling_bee/pages/game_layout.dart';
-import 'package:gameboy/presentation/wordle/bloc/bloc.dart';
-import 'package:gameboy/presentation/wordle/pages/game_layout.dart';
+import 'package:gameboy/presentation/beeWise/bloc/bloc.dart';
+import 'package:gameboy/presentation/beeWise/pages/game_layout.dart';
+import 'package:gameboy/presentation/wordsy/bloc/bloc.dart';
+import 'package:gameboy/presentation/wordsy/pages/game_layout.dart';
 
 import 'master_page_events.dart';
 import 'master_page_states.dart';
@@ -22,7 +22,6 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   AppDataModifier? _appDataRepository;
 
   MasterPageBloc() : super(LoadingAppDataRepository()) {
-    on<ChangeTheme>(_onThemeChange);
     on<ChangeUser>(_onUserChange);
     on<Logout>(_onLogout);
     on<LoadGame>(_onLoadGame);
@@ -34,11 +33,6 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
       _LoadRepository event, Emitter<MasterPageState> emit) async {
     _appDataRepository ??= await AppDataRepository.create();
     emit(LoadedAppDataRepository(appData: _appDataRepository!));
-  }
-
-  FutureOr<void> _onThemeChange(
-      ChangeTheme event, Emitter<MasterPageState> emit) {
-    emit(ActiveThemeModeChanged(themeMode: event.themeModeToChangeTo));
   }
 
   FutureOr<void> _onUserChange(
@@ -64,15 +58,15 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   GameData? _getGameData(Game game) {
     var userId = _appDataRepository!.activeUser!.id;
     switch (game.name) {
-      case AppConstants.wordleGameIdentifier:
-        return GameData<WordleGameBloc>(
-            gameBloc: WordleGameBloc(userId),
-            gameLayout: WordleLayout(),
+      case AppConstants.wordsyGameIdentifier:
+        return GameData<WordsyGameBloc>(
+            gameBloc: WordsyGameBloc(userId),
+            gameLayout: WordsyLayout(),
             game: game);
-      case AppConstants.spellingBeeGameIdentifier:
-        return GameData<SpellingBeeBloc>(
-            gameBloc: SpellingBeeBloc(userId),
-            gameLayout: SpellingBeeLayout(),
+      case AppConstants.beeWiseGameIdentifier:
+        return GameData<BeeWiseBloc>(
+            gameBloc: BeeWiseBloc(userId),
+            gameLayout: BeeWiseLayout(),
             game: game);
       case AppConstants.alphaBoundGameIdentifier:
         return GameData<AlphaBoundBloc>(

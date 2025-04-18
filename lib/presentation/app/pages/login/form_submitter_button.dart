@@ -40,8 +40,9 @@ class _LoginFormSubmitterButtonState extends State<LoginFormSubmitterButton> {
       onPressed: widget.isSubmitted || !canEnable ? () {} : _onPressed,
       splashColor: !canEnable ? Colors.white30 : null,
       backgroundColor: !canEnable ? Colors.white10 : null,
-      child:
-          widget.isSubmitted ? CircularProgressIndicator() : Icon(widget.icon),
+      child: widget.isSubmitted
+          ? const CircularProgressIndicator()
+          : Icon(widget.icon),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
+import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
@@ -9,19 +10,22 @@ import 'package:gameboy/presentation/alphaBound/widgets/keyboard_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/progress_tracker.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
+import 'tutorial_sheet.dart';
+
 class AlphaBoundLayout extends GameLayout {
   final _guessWordNotifier = ValueNotifier<String>('');
 
   @override
   Widget buildGameLayout(
       BuildContext context, double layoutWidth, double layoutHeight) {
+    _initializeAttemptedGuessWord(context);
     return Column(
       children: [
-        ProgressTracker(),
+        const ProgressTracker(),
         Expanded(
-          flex: 7,
+          flex: 6,
           child: GuessesLayout(
-              layoutWidth: layoutWidth,
+              letterSize: layoutWidth / 7,
               guessLetterValueNotifier: _guessWordNotifier),
         ),
         Expanded(
@@ -38,6 +42,16 @@ class AlphaBoundLayout extends GameLayout {
     );
   }
 
+  void _initializeAttemptedGuessWord(BuildContext context) {
+    var gameEngineData = context.getGameEngineData();
+    var gameStatus = gameEngineData.currentState;
+    if (gameStatus is GameWon) {
+      _guessWordNotifier.value = gameEngineData.wordOfTheDay;
+    } else if (gameStatus is GameLost) {
+      _guessWordNotifier.value = gameStatus.finalGuess;
+    }
+  }
+
   @override
   BoxConstraints get constraints => const BoxConstraints(
       minWidth: 300.0, maxWidth: 500.0, minHeight: 600.0, maxHeight: 1000.0);
@@ -47,6 +61,11 @@ class AlphaBoundLayout extends GameLayout {
     return AlphaBoundStatsSheet(
       game: game,
     );
+  }
+
+  @override
+  Widget buildTutorialSheet(BuildContext context, Game game) {
+    return const AlphaBoundTutorialSheet();
   }
 
   void _onLetterPressed(String letter) {

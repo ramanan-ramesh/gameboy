@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PasswordField extends StatefulWidget {
-  PasswordField(
+  const PasswordField(
       {super.key,
       required this.controller,
       this.labelText,
@@ -21,13 +21,7 @@ class PasswordField extends StatefulWidget {
 
 class _PasswordFieldState extends State<PasswordField> {
   bool _obscurePassword = true;
-  late FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode();
-  }
+  final FocusNode focusNode = FocusNode();
 
   @override
   void dispose() {
@@ -49,7 +43,7 @@ class _PasswordFieldState extends State<PasswordField> {
       obscureText: _obscurePassword,
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
-        icon: Icon(Icons.password_rounded),
+        icon: const Icon(Icons.password_rounded),
         labelText: widget.labelText,
         suffixIcon: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 3.0),

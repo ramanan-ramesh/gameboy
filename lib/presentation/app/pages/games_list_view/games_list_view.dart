@@ -38,7 +38,7 @@ class _GamesListViewState extends State<GamesListView> {
 
   @override
   Widget build(BuildContext context) {
-    var games = context.getAppData().games;
+    var gamesData = context.getAppData().games;
     return BlocListener<MasterPageBloc, MasterPageState>(
       listener: (context, state) {
         if (state is LoadedGame) {
@@ -52,28 +52,31 @@ class _GamesListViewState extends State<GamesListView> {
       listenWhen: (previousState, currentState) {
         return currentState is LoadedGame;
       },
-      child: Scaffold(
-        appBar: HomeAppBar(),
-        body: Center(
-          child: PageView.builder(
-            scrollDirection: Axis.vertical,
-            controller: _pageController,
-            itemCount: games.length,
-            itemBuilder: (context, index) {
-              double scale = (_currentPage - index).abs();
-              double scaleFactor = 1 - (scale * 0.5);
+      child: LayoutBuilder(builder: (context, constraints) {
+        var isBigLayout = constraints.minWidth > 1000;
+        return Scaffold(
+          appBar: const HomeAppBar(),
+          body: Center(
+            child: PageView.builder(
+              scrollDirection: isBigLayout ? Axis.horizontal : Axis.vertical,
+              controller: _pageController,
+              itemCount: gamesData.length,
+              itemBuilder: (context, index) {
+                double scale = (_currentPage - index).abs();
+                double scaleFactor = 1 - (scale * 0.5);
 
-              return Transform.scale(
-                scale: scaleFactor,
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: _GameCard(game: games.elementAt(index)),
-                ),
-              );
-            },
+                return Transform.scale(
+                  scale: scaleFactor,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: _GameCard(game: gamesData.elementAt(index)),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

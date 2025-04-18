@@ -25,6 +25,7 @@ abstract class GameBloc<
   GameBloc({required this.userId}) : super(GameLoading()) {
     on<_LoadGame>(_onLoadGame);
     on<RequestStats>(_onRequestStats);
+    on<RequestTutorial>(_onRequestTutorial);
     add(_LoadGame(userId));
   }
 
@@ -36,6 +37,11 @@ abstract class GameBloc<
 
   FutureOr<void> _onRequestStats(RequestStats event, Emitter<GameState> emit) {
     emit(ShowStats());
+  }
+
+  FutureOr<void> _onRequestTutorial(
+      RequestTutorial event, Emitter<GameState> emit) {
+    emit(ShowTutorial());
   }
 
   FutureOr<void> _onLoadGame(_LoadGame event, Emitter<GameState> emit) async {

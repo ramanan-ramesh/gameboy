@@ -8,4 +8,6 @@ abstract class GameLayout {
   BoxConstraints get constraints;
 
   Widget buildStatsSheet(BuildContext context, Game game);
+
+  Widget buildTutorialSheet(BuildContext context, Game game);
 }

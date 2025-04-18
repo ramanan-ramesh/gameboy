@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/constants.dart';
 import 'package:gameboy/data/app/implementations/firebase_options.dart';
 import 'package:gameboy/data/app/implementations/user_management.dart';
@@ -13,18 +12,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDataRepository extends AppDataModifier {
   static AppDataRepository? _appDataRepository;
-  static const String _themeMode = "themeMode";
   static const _appConfigDBField = 'appConfig';
   static const String _googleWebClientIdField = 'webClientId';
 
   @override
-  ThemeMode activeThemeMode;
-
-  @override
   PlatformUser? get activeUser => _userManagement.activeUser;
   final UserManagementFacade _userManagement;
-
-  final SharedPreferences _sharedPreferences;
 
   @override
   String googleWebClientId;
@@ -43,23 +36,9 @@ class AppDataRepository extends AppDataModifier {
     var googleWebClientId = googleWebClientIdField.value as String;
     var sharedPreferences = await SharedPreferences.getInstance();
     var userManagement = await UserManagementImpl.create(sharedPreferences);
-    var themeModeValue = sharedPreferences.getString(_themeMode);
-    ThemeMode themeMode = themeModeValue is String
-        ? (ThemeMode.values
-            .firstWhere((element) => element.name == themeModeValue))
-        : ThemeMode.dark;
 
     return AppDataRepository._(
-        googleWebClientId: googleWebClientId,
-        userManagement: userManagement,
-        activeThemeMode: themeMode,
-        sharedPreferences: sharedPreferences);
-  }
-
-  @override
-  Future updateActiveThemeMode(ThemeMode themeMode) async {
-    await _sharedPreferences.setString(_themeMode, themeMode.name);
-    activeThemeMode = themeMode;
+        googleWebClientId: googleWebClientId, userManagement: userManagement);
   }
 
   @override
@@ -78,15 +57,12 @@ class AppDataRepository extends AppDataModifier {
 
   AppDataRepository._(
       {required this.googleWebClientId,
-      required UserManagementFacade userManagement,
-      required this.activeThemeMode,
-      required SharedPreferences sharedPreferences})
+      required UserManagementFacade userManagement})
       : _userManagement = userManagement,
-        _sharedPreferences = sharedPreferences,
         _games = [
-          Game(name: AppConstants.wordleGameIdentifier),
+          Game(name: AppConstants.wordsyGameIdentifier),
           Game(
-            name: AppConstants.spellingBeeGameIdentifier,
+            name: AppConstants.beeWiseGameIdentifier,
           ),
           Game(
             name: AppConstants.alphaBoundGameIdentifier,

@@ -14,3 +14,5 @@ class GameLoaded<TGameEngine extends GameEngine, TStats extends Statistics>
 }
 
 class ShowStats extends GameState {}
+
+class ShowTutorial extends GameState {}

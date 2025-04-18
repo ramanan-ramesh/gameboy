@@ -118,20 +118,29 @@ class _GameLayout extends StatelessWidget {
   final GameData gameData;
   late double _layoutHeight;
   BuildContext? _statsSheetPopupContext;
+  BuildContext? _tutorialSheetPopupContext;
   _GameLayout({super.key, required this.gameData});
 
   @override
   Widget build(BuildContext context) {
     _statsSheetPopupContext = null;
+    _tutorialSheetPopupContext = null;
     return SafeArea(
       child: BlocListener<GameBloc, GameState>(
         listener: (BuildContext layoutContext, GameState state) {
           if (state is ShowStats) {
             _displayStatisticsSheet(layoutContext);
+          } else if (state is ShowTutorial) {
+            _displaySheet(
+                layoutContext,
+                _tutorialSheetPopupContext,
+                'How To Play',
+                gameData.gameLayout.buildTutorialSheet(context, gameData.game),
+                false);
           }
         },
         listenWhen: (previousState, currentState) {
-          return currentState is ShowStats;
+          return currentState is ShowStats || currentState is ShowTutorial;
         },
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -142,12 +151,6 @@ class _GameLayout extends StatelessWidget {
             return Scaffold(
               appBar: GameAppBar(
                 game: gameData.game,
-                actionButtonBar: IconButton(
-                  onPressed: () {
-                    BlocProvider.of<GameBloc>(context).add(RequestStats());
-                  },
-                  icon: Icon(Icons.query_stats_rounded),
-                ),
                 contentWidth: appBarWidth,
                 height: _appBarHeight,
               ),
@@ -191,8 +194,13 @@ class _GameLayout extends StatelessWidget {
     return (layoutWidth, layoutHeight, appBarWidth);
   }
 
-  void _displayStatisticsSheet(BuildContext layoutContext) {
-    if (_statsSheetPopupContext != null && _statsSheetPopupContext!.mounted) {
+  void _displaySheet(
+      BuildContext layoutContext,
+      BuildContext? sheetContext,
+      String sheetHeaderTitle,
+      Widget sheetContent,
+      bool isSheetContentCentered) {
+    if (sheetContext != null && sheetContext.mounted) {
       return;
     }
     showModalBottomSheet(
@@ -200,9 +208,21 @@ class _GameLayout extends StatelessWidget {
         enableDrag: true,
         isScrollControlled: true,
         builder: (BuildContext context) {
-          _statsSheetPopupContext = context;
+          sheetContext = context;
           var layoutConstraints = gameData.gameLayout.constraints;
-          return MultiRepositoryProvider(
+          return _createSheet(context, sheetHeaderTitle, sheetContent,
+              layoutConstraints, isSheetContentCentered);
+        }).whenComplete(() {
+      sheetContext = null;
+    });
+  }
+
+  void _displayStatisticsSheet(BuildContext layoutContext) {
+    _displaySheet(
+        layoutContext,
+        _statsSheetPopupContext,
+        'STATS',
+        MultiRepositoryProvider(
             providers: [
               RepositoryProvider(
                   create: (context) =>
@@ -211,67 +231,86 @@ class _GameLayout extends StatelessWidget {
                   create: (context) =>
                       RepositoryProvider.of<GameEngine>(layoutContext)),
             ],
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  constraints: BoxConstraints(
-                    minWidth: layoutConstraints.minWidth,
-                    maxWidth: layoutConstraints.maxWidth * 0.75,
-                    minHeight: _layoutHeight * 0.5,
-                    maxHeight: _layoutHeight * 0.75,
+            child: gameData.gameLayout
+                .buildStatsSheet(layoutContext, gameData.game)),
+        true);
+  }
+
+  Widget _createSheet(
+      BuildContext layoutContext,
+      String sheetHeaderTitle,
+      Widget sheetContent,
+      BoxConstraints layoutConstraints,
+      bool isSheetContentCentered) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          constraints: BoxConstraints(
+            minWidth: layoutConstraints.minWidth,
+            maxWidth: layoutConstraints.maxWidth * 0.75,
+            minHeight: _layoutHeight * 0.5,
+            maxHeight: _layoutHeight * 0.75,
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox.fromSize(
+                    size: const Size.fromHeight(_appBarHeight / 2),
                   ),
-                  child: SingleChildScrollView(
-                    child: _createStatsSheet(context),
-                  ),
-                ),
-                Positioned(
-                  top: -_appBarHeight / 2,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    width: _appBarHeight,
-                    height: _appBarHeight,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: AssetImage(
-                          gameData.game.imageAsset,
-                          // fit: BoxFit.cover,
-                        ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3.0),
+                      child: Text(
+                        sheetHeaderTitle,
+                        style: Theme.of(layoutContext)
+                            .textTheme
+                            .displaySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
+                  if (isSheetContentCentered)
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3.0),
+                        child: sheetContent,
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3.0),
+                      child: sheetContent,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: -_appBarHeight / 2,
+          left: 0,
+          right: 0,
+          child: Container(
+            width: _appBarHeight,
+            height: _appBarHeight,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                image: AssetImage(
+                  gameData.game.imageAsset,
+                  // fit: BoxFit.cover,
                 ),
-              ],
-            ),
-          );
-        }).whenComplete(() {
-      _statsSheetPopupContext = null;
-    });
-  }
-
-  Widget _createStatsSheet(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          SizedBox.fromSize(
-            size: Size.fromHeight(_appBarHeight / 2),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3.0),
-            child: Text(
-              'STATS',
-              style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3.0),
-            child: gameData.gameLayout.buildStatsSheet(context, gameData.game),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

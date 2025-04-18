@@ -33,10 +33,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return BlocProvider<AuthenticationBloc>(
       create: (context) => _authBloc,
-      child: Center(
+      child: const Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: _LoginPageForm(),
           ),
         ),
@@ -78,7 +78,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(_roundedCornerRadius)),
       ),
       child: FocusTraversalGroup(
@@ -89,7 +89,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
             _createTabBar(),
             const SizedBox(height: 16.0),
             FocusTraversalOrder(
-              order: NumericFocusOrder(1),
+              order: const NumericFocusOrder(1),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: _buildUserNamePasswordForm(),
@@ -97,7 +97,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
             ),
             const SizedBox(height: 24.0),
             FocusTraversalOrder(
-              order: NumericFocusOrder(2),
+              order: const NumericFocusOrder(2),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 200, minWidth: 150),
                 child: _buildSubmitButton(context),
@@ -175,7 +175,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
           context.addAuthenticationEvent(AuthenticateWithGoogle());
         },
         child: Ink.image(
-          image: AssetImage(_googleLogoAsset),
+          image: const AssetImage(_googleLogoAsset),
           fit: BoxFit.cover,
           height: 60,
           width: 60,
@@ -199,7 +199,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
             color: Theme.of(context).tabBarTheme.indicatorColor,
             borderRadius: BorderRadius.circular(_roundedCornerRadius),
           ),
-          tabs: [
+          tabs: const [
             Tab(text: 'Login'),
             Tab(text: 'Register'),
           ],
@@ -218,12 +218,12 @@ class _LoginPageFormState extends State<_LoginPageForm>
             child: Column(
               children: [
                 FocusTraversalOrder(
-                  order: NumericFocusOrder(1),
+                  order: const NumericFocusOrder(1),
                   child: _createUserNameField(state),
                 ),
                 const SizedBox(height: 16.0),
                 FocusTraversalOrder(
-                  order: NumericFocusOrder(2),
+                  order: const NumericFocusOrder(2),
                   child: _createPasswordField(state),
                 )
               ],
@@ -259,6 +259,19 @@ class _LoginPageFormState extends State<_LoginPageForm>
   }
 
   Widget _createUserNameField(AuthenticationState authState) {
+    String? errorText = _createErrorTextOnAuthFailure(authState);
+    return UsernameEditField(
+      textInputAction: TextInputAction.next,
+      controller: _usernameController,
+      inputDecoration: InputDecoration(
+        icon: const Icon(Icons.person_2_rounded),
+        labelText: 'UserName',
+        errorText: errorText,
+      ),
+    );
+  }
+
+  String? _createErrorTextOnAuthFailure(AuthenticationState authState) {
     String? errorText;
     if (authState is AuthenticationFailure) {
       if (authState.failureReason ==
@@ -270,14 +283,6 @@ class _LoginPageFormState extends State<_LoginPageForm>
         errorText = 'No such username exists. You can register with it instead';
       }
     }
-    return UsernameEditField(
-      textInputAction: TextInputAction.next,
-      controller: _usernameController,
-      inputDecoration: InputDecoration(
-        icon: const Icon(Icons.person_2_rounded),
-        labelText: 'UserName',
-        errorText: errorText,
-      ),
-    );
+    return errorText;
   }
 }

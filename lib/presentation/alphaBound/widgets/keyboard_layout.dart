@@ -119,7 +119,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         0,
         _buildActionInputKey(
             context,
-            Icon(
+            const Icon(
               Icons.backspace_rounded,
               size: 20,
             ),
@@ -127,7 +127,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             listenToPress ? widget.onBackspacePressed : null));
     thirdRowWidgets.add(_buildActionInputKey(
         context,
-        Text(
+        const Text(
           'Enter',
           style: TextStyle(color: Colors.white),
         ),
@@ -183,7 +183,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         onPressedColor: shouldHighlightLetter ? Colors.white60 : Colors.white38,
         content: Text(
           letter,
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
       ),
     );

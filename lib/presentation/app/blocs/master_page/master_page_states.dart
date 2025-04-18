@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
@@ -11,18 +10,6 @@ class LoadingAppDataRepository extends MasterPageState {}
 class LoadedAppDataRepository extends MasterPageState {
   final AppDataFacade appData;
   LoadedAppDataRepository({required this.appData});
-}
-
-class ActiveLanguageChanged extends MasterPageState {
-  String language;
-
-  ActiveLanguageChanged({required this.language});
-}
-
-class ActiveThemeModeChanged extends MasterPageState {
-  ThemeMode themeMode;
-
-  ActiveThemeModeChanged({required this.themeMode});
 }
 
 class ActiveUserChanged extends MasterPageState {

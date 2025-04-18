@@ -1,5 +1,5 @@
 final class AppConstants {
-  static const wordleGameIdentifier = 'Wordle';
-  static const spellingBeeGameIdentifier = 'Spelling-Bee';
+  static const wordsyGameIdentifier = 'Wordsy';
+  static const beeWiseGameIdentifier = 'BeeWise';
   static const alphaBoundGameIdentifier = 'AlphaBound';
 }

@@ -19,9 +19,9 @@ class AnimatedButton extends StatelessWidget {
       builder: (context, pressed, child) {
         return AnimatedScale(
           scale: pressed ? 0.9 : 1.0,
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 100),
+            duration: const Duration(milliseconds: 100),
             margin: const EdgeInsets.all(5),
             color: pressed ? onPressedColor : color,
             child: InkWell(

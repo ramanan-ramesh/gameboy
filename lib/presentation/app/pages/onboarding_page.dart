@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 class OnBoardingPage extends StatelessWidget {
   final VoidCallback? onNavigateToNextPage;
   final bool isBigLayout;
-
-  OnBoardingPage(
-      {super.key, this.onNavigateToNextPage, required this.isBigLayout});
-
   static const _appLogoAsset = 'assets/logos/app_logo_round.webp';
+
+  const OnBoardingPage(
+      {super.key, this.onNavigateToNextPage, required this.isBigLayout});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class OnBoardingPage extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8.0),
-                child: Image(
+                child: const Image(
                   image: AssetImage(_appLogoAsset),
                   fit: BoxFit.cover,
                 ),
@@ -42,7 +41,7 @@ class OnBoardingPage extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Container(
-            padding: EdgeInsets.only(right: 4),
+            padding: const EdgeInsets.only(right: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -50,8 +49,8 @@ class OnBoardingPage extends StatelessWidget {
                 if (!isBigLayout)
                   FloatingActionButton.large(
                     onPressed: onNavigateToNextPage,
-                    shape: CircleBorder(),
-                    child: Icon(
+                    shape: const CircleBorder(),
+                    child: const Icon(
                       Icons.navigate_next_rounded,
                       size: 75,
                     ),

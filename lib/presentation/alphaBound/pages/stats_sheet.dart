@@ -38,7 +38,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(),
+        const Divider(),
         Row(
           children: [
             Expanded(
@@ -50,7 +50,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
             ),
           ],
         ),
-        Divider(),
+        const Divider(),
         Row(
           children: [
             Expanded(
@@ -63,7 +63,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
             ),
           ],
         ),
-        Divider(),
+        const Divider(),
       ],
     );
   }
@@ -86,8 +86,8 @@ class AlphaBoundStatsSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 3.0),
           child: Text('WIN DISTRIBUTION'),
         ),
         ...guessDistributionWidgets,
@@ -144,7 +144,7 @@ class AlphaBoundStatsSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 3.0),
           child: Text(
             subtitle,
-            style: TextStyle(color: Colors.blue),
+            style: const TextStyle(color: Colors.blue),
           ),
         ),
       ],

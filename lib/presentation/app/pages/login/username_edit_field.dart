@@ -8,7 +8,7 @@ class UsernameEditField extends StatelessWidget {
   static const double _formElementSize = 15;
   static final _emailRegExValidator = RegExp('.*@.*.com');
 
-  UsernameEditField(
+  const UsernameEditField(
       {super.key,
       required this.controller,
       this.inputDecoration,
@@ -17,7 +17,7 @@ class UsernameEditField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      style: TextStyle(fontSize: _formElementSize),
+      style: const TextStyle(fontSize: _formElementSize),
       minLines: 1,
       textInputAction: textInputAction,
       controller: controller,

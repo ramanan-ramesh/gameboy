@@ -10,14 +10,13 @@ class WordsyGameEngineImpl extends WordsyGameEngineDriver {
   static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
   final List<String> _attemptedGuesses;
-  static final _firstDay = DateTime(2025, 4, 3);
+  static final _firstDay = DateTime(2025, 4, 28);
 
   static Future<WordsyGameEngineDriver> createEngine(
       List<String> attemptedGuessesToday) async {
     var allowedGuesses = await _getAllowedGuesses();
     var currentDayIndex = _firstDay.numberOfDaysInBetween(DateTime.now());
-    var wordOfTheDay =
-        allowedGuesses[allowedGuesses.length - currentDayIndex - 1];
+    var wordOfTheDay = allowedGuesses[currentDayIndex % allowedGuesses.length];
 
     var allGuessedLetters = <String, LetterMatchDescription>{};
     for (var attemptedGuess in attemptedGuessesToday) {
@@ -143,7 +142,7 @@ class WordsyGameEngineImpl extends WordsyGameEngineDriver {
 
   static Future<List<String>> _getAllowedGuesses() async {
     final String fileContent = await rootBundle.loadString(_pathToDictionary);
-    return fileContent.split('\r\n');
+    return fileContent.split('\r\n').reversed.toList();
   }
 
   static GuessWord _createGuessWord(

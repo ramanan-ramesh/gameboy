@@ -10,7 +10,7 @@ import 'package:gameboy/data/app/extensions.dart';
 class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
   static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _sortedDictionary;
-  static final _firstDay = DateTime(2025, 4, 3);
+  static final _firstDay = DateTime(2025, 4, 28);
   static const _defaultLowerBoundGuess = 'AAAAA';
   static const _defaultUpperBoundGuess = 'ZZZZZ';
 
@@ -22,7 +22,7 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
     var allowedGuesses = await _getAllowedGuesses();
 
     var currentDayIndex = _firstDay.numberOfDaysInBetween(DateTime.now());
-    var wordOfTheDay = allowedGuesses[currentDayIndex];
+    var wordOfTheDay = allowedGuesses[currentDayIndex % allowedGuesses.length];
 
     var displayUpperBoundGuess = upperBound ?? _defaultUpperBoundGuess,
         displayLowerBoundGuess = lowerBound ?? _defaultLowerBoundGuess;

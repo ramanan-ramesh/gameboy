@@ -7,6 +7,7 @@ import 'package:gameboy/presentation/app/blocs/master_page/master_page_states.da
 import 'package:gameboy/presentation/app/pages/games_list_view/games_list_view.dart';
 import 'package:gameboy/presentation/app/theming/dark_theme_data.dart';
 import 'package:rive/rive.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'startup_page.dart';
 
@@ -24,9 +25,11 @@ class MasterPage extends StatelessWidget {
       theme: createDarkThemeData(context),
       home: Material(
         child: SafeArea(
-          child: BlocProvider<MasterPageBloc>(
-            create: (context) => MasterPageBloc(),
-            child: const _AppDataRepositoryLoader(),
+          child: UpgradeAlert(
+            child: BlocProvider<MasterPageBloc>(
+              create: (context) => MasterPageBloc(),
+              child: const _AppDataRepositoryLoader(),
+            ),
           ),
         ),
       ),

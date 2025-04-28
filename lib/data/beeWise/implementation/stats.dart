@@ -17,7 +17,7 @@ class BeeWiseStatsRepo extends BeeWiseStatsModifier {
   static const _wordsSubmittedTodayField = 'lastGuessedWords';
   static const _longestSubmittedWordField = 'longestWord';
   static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
-  static final _firstDay = DateTime(2025, 3, 17);
+  static final _firstDay = DateTime(2025, 4, 28)
 
   static Future<BeeWiseStatsModifier> createRepository(String userId) async {
     var spellingBeeRootDBRef =

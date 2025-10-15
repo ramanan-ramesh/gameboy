@@ -42,6 +42,25 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --debug
 
+      - name: Install npm
+        run: |
+          brew install node
+
+      - name: Install Node.js dependencies for Firebase
+        run: |
+          cd scripts/release_management
+          npm install
+
+      - name: Update Firebase RemoteConfig
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+          MIN_VERSION: ${{ github.event.inputs.min_version || github.event.inputs.version }}
+          UPDATES: ${{ github.event.inputs.updates }}
+          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+        run: |
+          cd scripts/release_management
+          node update_firebase_remote_config.js
+
       - name: Update pubspec.yaml version and ReleaseHistory.md
         run: |
           # Update pubspec.yaml version
@@ -119,22 +138,3 @@ jobs:
           git push origin "${GITHUB_REF_NAME}"
           # Push tag explicitly
           git push origin "$VERSION"
-
-      - name: Install npm
-        run: |
-          brew install node
-
-      - name: Install Node.js dependencies for Firebase
-        run: |
-          cd scripts/release_management
-          npm install
-
-      - name: Update Firebase RemoteConfig
-        env:
-          VERSION: ${{ github.event.inputs.version }}
-          MIN_VERSION: ${{ github.event.inputs.min_version || github.event.inputs.version }}
-          UPDATES: ${{ github.event.inputs.updates }}
-          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
-        run: |
-          cd scripts/release_management
-          node update_firebase_remote_config.js

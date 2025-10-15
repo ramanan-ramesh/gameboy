@@ -108,12 +108,23 @@ jobs:
             ' ReleaseHistory.md > ReleaseHistory.tmp && mv ReleaseHistory.tmp ReleaseHistory.md
           fi
 
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "Ramanan Ramesh"
+          git config --global user.email "ramanan.ramesh@outlook.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          echo "Configured git identity: $(git config user.name) <$(git config user.email)>"
+
       - name: Commit, tag, and push changes
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+          # Reassert identity explicitly for this shell
+          git config user.name "Ramanan Ramesh"
+          git config user.email "ramanan.ramesh@outlook.com"
+          export GIT_AUTHOR_NAME="Ramanan Ramesh"
+          export GIT_AUTHOR_EMAIL="ramanan.ramesh@outlook.com"
+          export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+          export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
           git add pubspec.yaml ReleaseHistory.md
-          
           # Format updates for commit message
           UPDATES="${{ github.event.inputs.updates }}"
           FORMATTED_UPDATES=""
@@ -128,12 +139,13 @@ jobs:
               fi
             fi
           done
-          
           COMMIT_MSG=$(printf "Release version ${{ github.event.inputs.version }}\n\n%b" "$FORMATTED_UPDATES")
           git commit -m "$COMMIT_MSG"
           VERSION="${{ github.event.inputs.version }}"
-          # Create annotated tag with message
-          git tag -a "$VERSION" -m "${VERSION}"
+          # Create annotated tag with correct identity
+          GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL" \
+            GIT_AUTHOR_NAME="$GIT_AUTHOR_NAME" GIT_AUTHOR_EMAIL="$GIT_AUTHOR_EMAIL" \
+            git tag -a "$VERSION" -m "$VERSION"
           # Push branch first
           git push origin "${GITHUB_REF_NAME}"
           # Push tag explicitly

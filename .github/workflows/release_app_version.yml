@@ -1,0 +1,140 @@
+name: Flutter Multi-Platform Release & Version Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to set in pubspec.yaml'
+        required: true
+        type: string
+      min_version:
+        description: 'Minimum version required (optional)'
+        required: false
+        type: string
+      updates:
+        description: 'Description of updates in this version'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate Android debug keystore if missing
+        run: |
+          if [ ! -f ~/.android/debug.keystore ]; then
+            mkdir -p ~/.android
+            keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -keypass android -alias androiddebugkey -dname "CN=RareApps Debug,O=RareApps,C=IN" -keyalg RSA -keysize 2048 -validity 1
+          fi
+          echo "Debug keystore ensured."
+
+      - name: Build Flutter APK (Android)
+        run: flutter build apk --debug
+
+      - name: Build Flutter Web
+        run: flutter build web --debug
+
+      - name: Update pubspec.yaml version and ReleaseHistory.md
+        run: |
+          # Update pubspec.yaml version
+          sed -i '' "s/^version: .*/version: ${{ github.event.inputs.version }}/" pubspec.yaml
+
+          # Ensure min_version includes build number
+          RAW_MIN_VERSION="${{ github.event.inputs.min_version }}"
+          RAW_VERSION="${{ github.event.inputs.version }}"
+          if [[ "$RAW_MIN_VERSION" == *+* ]]; then
+            MIN_VERSION="$RAW_MIN_VERSION"
+          else
+            BUILD_NUMBER="$(echo "$RAW_VERSION" | awk -F'+' '{print $2}')"
+            if [ -n "$BUILD_NUMBER" ]; then
+              MIN_VERSION="$RAW_MIN_VERSION+$BUILD_NUMBER"
+            else
+              MIN_VERSION="$RAW_MIN_VERSION"
+            fi
+          fi
+
+          # Prepare ReleaseHistory.md entry
+          SECTION_HEADER="## Release History"
+          VERSION=$(echo "$RAW_VERSION" | cut -d'+' -f1)
+          UPDATES="${{ github.event.inputs.updates }}"
+          # Split updates on '||', trim whitespace, and format as markdown list
+          UPDATE_LIST=""
+          IFS='||' read -ra UPDATE_ITEMS <<< "$UPDATES"
+          for item in "${UPDATE_ITEMS[@]}"; do
+            TRIMMED_ITEM=$(echo "$item" | awk '{$1=$1;print}')
+            if [ -n "$TRIMMED_ITEM" ]; then
+              UPDATE_LIST+="  - $TRIMMED_ITEM\n"
+            fi
+          done
+          # Get latest commit hash
+          COMMIT_HASH=$(git rev-parse HEAD)
+          ENTRY="- Version $VERSION (Commit: $COMMIT_HASH)\n$UPDATE_LIST"
+          if [ ! -f ReleaseHistory.md ]; then
+            echo -e "$SECTION_HEADER\n$ENTRY" > ReleaseHistory.md
+          elif ! grep -q "$SECTION_HEADER" ReleaseHistory.md; then
+            echo -e "\n$SECTION_HEADER\n$ENTRY" >> ReleaseHistory.md
+          else
+            awk -v entry="$ENTRY" -v header="$SECTION_HEADER" '
+              BEGIN {added=0}
+              {print}
+              $0==header && !added {print entry; added=1}
+            ' ReleaseHistory.md > ReleaseHistory.tmp && mv ReleaseHistory.tmp ReleaseHistory.md
+          fi
+
+      - name: Commit, tag, and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add pubspec.yaml ReleaseHistory.md
+          
+          # Format updates for commit message
+          UPDATES="${{ github.event.inputs.updates }}"
+          FORMATTED_UPDATES=""
+          IFS='||' read -ra UPDATE_ITEMS <<< "$UPDATES"
+          for item in "${UPDATE_ITEMS[@]}"; do
+            TRIMMED_ITEM=$(echo "$item" | awk '{$1=$1;print}')
+            if [ -n "$TRIMMED_ITEM" ]; then
+              if [ -n "$FORMATTED_UPDATES" ]; then
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}\n- ${TRIMMED_ITEM}"
+              else
+                FORMATTED_UPDATES="- ${TRIMMED_ITEM}"
+              fi
+            fi
+          done
+          
+          COMMIT_MSG=$(printf "Release version ${{ github.event.inputs.version }}\n\n%b" "$FORMATTED_UPDATES")
+          git commit -m "$COMMIT_MSG"
+          VERSION="${{ github.event.inputs.version }}"
+          # Create annotated tag with message
+          git tag -a "$VERSION" -m "${VERSION}"
+          # Push branch first
+          git push origin "${GITHUB_REF_NAME}"
+          # Push tag explicitly
+          git push origin "$VERSION"
+
+      - name: Install npm
+        run: |
+          brew install node
+
+      - name: Install Node.js dependencies for Firebase
+        run: |
+          cd scripts/release_management
+          npm install
+
+      - name: Update Firebase RemoteConfig
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+          MIN_VERSION: ${{ github.event.inputs.min_version || github.event.inputs.version }}
+          UPDATES: ${{ github.event.inputs.updates }}
+          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+        run: |
+          cd scripts/release_management
+          node update_firebase_remote_config.js

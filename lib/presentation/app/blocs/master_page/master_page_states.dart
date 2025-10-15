@@ -23,3 +23,21 @@ class LoadedGame<TGameBloc extends GameBloc> extends MasterPageState {
 
   LoadedGame({required this.gameData});
 }
+
+class UpdateAvailable extends MasterPageState {
+  final UpdateInfo updateInfo;
+
+  UpdateAvailable({required this.updateInfo});
+}
+
+class UpdateInfo {
+  final String latestVersion;
+  final bool isForceUpdate;
+  final String releaseNotes;
+
+  UpdateInfo({
+    required this.latestVersion,
+    required this.isForceUpdate,
+    required this.releaseNotes,
+  });
+}

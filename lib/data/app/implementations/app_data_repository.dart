@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:gameboy/data/app/constants.dart';
-import 'package:gameboy/data/app/implementations/firebase_options.dart';
 import 'package:gameboy/data/app/implementations/user_management.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/data/app/models/game.dart';
@@ -26,9 +24,6 @@ class AppDataRepository extends AppDataModifier {
     if (_appDataRepository != null) {
       return _appDataRepository!;
     }
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
     var appConfigReference =
         FirebaseDatabase.instance.ref().child(_appConfigDBField);
     var googleWebClientIdField =

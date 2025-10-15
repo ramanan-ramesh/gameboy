@@ -5,11 +5,11 @@ import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_bloc.dart';
 import 'package:gameboy/presentation/app/blocs/master_page/master_page_states.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/games_list_view.dart';
+import 'package:gameboy/presentation/app/pages/master_page/update_dialog.dart';
 import 'package:gameboy/presentation/app/theming/dark_theme_data.dart';
 import 'package:rive/rive.dart';
-import 'package:upgrader/upgrader.dart';
 
-import 'startup_page.dart';
+import '../startup_page.dart';
 
 class MasterPage extends StatelessWidget {
   static const String _appTitle = 'gameboy';
@@ -25,11 +25,9 @@ class MasterPage extends StatelessWidget {
       theme: createDarkThemeData(context),
       home: Material(
         child: SafeArea(
-          child: UpgradeAlert(
-            child: BlocProvider<MasterPageBloc>(
-              create: (context) => MasterPageBloc(),
-              child: const _AppDataRepositoryLoader(),
-            ),
+          child: BlocProvider<MasterPageBloc>(
+            create: (context) => MasterPageBloc(),
+            child: const _AppDataRepositoryLoader(),
           ),
         ),
       ),
@@ -77,6 +75,8 @@ class _AppDataRepositoryLoaderState extends State<_AppDataRepositoryLoader> {
       listener: (BuildContext context, MasterPageState state) {
         if (state is LoadingAppDataRepository) {
           _tryStartLoadingAnimation();
+        } else if (state is UpdateAvailable) {
+          _showUpdateDialog(context, state);
         }
       },
     );
@@ -109,6 +109,18 @@ class _AppDataRepositoryLoaderState extends State<_AppDataRepositoryLoader> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showUpdateDialog(BuildContext context, UpdateAvailable state) {
+    showDialog(
+      context: context,
+      barrierDismissible: !state.updateInfo.isForceUpdate,
+      builder: (BuildContext dialogContext) {
+        return UpdateDialog(
+          updateInfo: state.updateInfo,
+        );
+      },
     );
   }
 

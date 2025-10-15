@@ -27,7 +27,7 @@ android {
     }
     namespace = "com.rareapps.gameboy"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.1.13356709"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -40,7 +40,7 @@ android {
 
     defaultConfig {
         applicationId = "com.rareapps.gameboy"
-        minSdk = 23 // firebase-auth requires minSdkVersion 23.
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -48,10 +48,12 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled true // fix Failed to transform firebase-auth-22.3.1.aar
+            debuggable true
+            jniDebuggable true
             signingConfig = signingConfigs.debug
         }
         release {
+            debuggable false
             signingConfig = signingConfigs.release
         }
     }
@@ -59,9 +61,11 @@ android {
 
 dependencies {
     // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:33.12.0')
+    implementation platform('com.google.firebase:firebase-bom:34.4.0')
 }
 
 flutter {
     source = "../.."
 }
+
+apply plugin: 'com.google.gms.google-services'

@@ -25,12 +25,10 @@ ThemeData createDarkThemeData(BuildContext context) {
       selectedTileColor: Colors.black,
       selectedColor: Colors.green,
     ),
-    cardTheme: CardTheme(
-      data: CardThemeData(
-        color: Colors.black26,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
-        ),
+    cardTheme: CardThemeData(
+      color: Colors.black26,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
       ),
     ),
     dividerTheme: const DividerThemeData(
@@ -51,7 +49,7 @@ ThemeData createDarkThemeData(BuildContext context) {
       backgroundColor: Colors.black,
       foregroundColor: Colors.green,
     ),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       indicator: BoxDecoration(
         borderRadius: BorderRadius.circular(Constants.tabIndicatorRadius),
         border: Border.all(color: Colors.green),

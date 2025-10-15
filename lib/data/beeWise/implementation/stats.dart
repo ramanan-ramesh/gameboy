@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 class BeeWiseStatsRepo extends BeeWiseStatsModifier {
   static const _beeWiseRootField = 'beeWise';
   static const _lettersOfTheDayField = 'lettersOfTheDay';
+  static const _lettersOfTheDayLengthField = 'lettersOfTheDayLength';
   static const _userDataField = 'userData';
   static const _numberOfGamesPlayedField = 'played';
   static const _numberOfPangramsField = 'pangramCount';
@@ -193,16 +194,22 @@ class BeeWiseStatsRepo extends BeeWiseStatsModifier {
 
   static Future<String> _getLettersOfTheDay(
       DateTime initializedDateTime) async {
-    final daysDifference = initializedDateTime.numberOfDaysInBetween(_firstDay);
+    final daysDifference = _firstDay.numberOfDaysInBetween(initializedDateTime);
+    final rootRef = FirebaseDatabase.instance.ref().child(_beeWiseRootField);
+    final lettersRef = rootRef.child(_lettersOfTheDayField);
 
-    var lettersOfTheDayDbRef = FirebaseDatabase.instance
-        .ref()
-        .child(_beeWiseRootField)
-        .child(_lettersOfTheDayField)
-        .child(daysDifference.toString());
-    var lettersOfTheDayDoc = await lettersOfTheDayDbRef.get();
-
-    return lettersOfTheDayDoc.value as String;
+    final lengthSnap = await rootRef.child(_lettersOfTheDayLengthField).get();
+    final dynamic val = lengthSnap.value;
+    final length =
+        (val is int) ? val : (val is String ? int.tryParse(val) : null);
+    final effectiveIndex = daysDifference % length!;
+    final targetSnap = await lettersRef.child(effectiveIndex.toString()).get();
+    if (targetSnap.exists && targetSnap.value is String) {
+      return targetSnap.value as String;
+    }
+    // If target missing, attempt index 0 then fallback to full map.
+    final zeroSnap = await lettersRef.child('0').get();
+    return zeroSnap.value as String;
   }
 
   BeeWiseStatsRepo._(

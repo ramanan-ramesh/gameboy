@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -34,8 +36,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+        }
     }
 
     defaultConfig {
@@ -60,7 +64,6 @@ android {
 }
 
 dependencies {
-    // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:34.4.0')
 }
 

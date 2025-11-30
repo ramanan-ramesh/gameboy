@@ -185,8 +185,7 @@ class _BoundaryGuessWord extends StatelessWidget {
   final String boundaryGuessWord;
   final Iterable<GlobalKey> slotContexts;
   const _BoundaryGuessWord(
-      {super.key,
-      required this.letterSize,
+      {required this.letterSize,
       required this.boundaryGuessWord,
       required this.slotContexts});
 
@@ -213,8 +212,7 @@ class _AttemptedGuessWord extends StatelessWidget {
   final ValueNotifier<String> guessWordNotifier;
   final Iterable<GlobalKey> guessLetterSlotKeys;
   const _AttemptedGuessWord(
-      {super.key,
-      required this.letterSize,
+      {required this.letterSize,
       required this.guessWordNotifier,
       required this.guessLetterSlotKeys});
 

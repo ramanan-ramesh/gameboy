@@ -107,7 +107,7 @@ class GuessRow extends StatelessWidget {
 class _FlippedGuessWords extends StatefulWidget {
   final GuessWord guessWord;
 
-  const _FlippedGuessWords({super.key, required this.guessWord});
+  const _FlippedGuessWords({required this.guessWord});
 
   @override
   State<_FlippedGuessWords> createState() => _FlippedGuessWordsState();
@@ -143,7 +143,7 @@ class _FlippedGuessWordsState extends State<_FlippedGuessWords> {
 class _DancingGuessWord extends StatefulWidget {
   final GuessWord guessWord;
 
-  const _DancingGuessWord({super.key, required this.guessWord});
+  const _DancingGuessWord({required this.guessWord});
 
   @override
   State<_DancingGuessWord> createState() => _DancingGuessWordState();
@@ -179,7 +179,7 @@ class _DancingGuessWordState extends State<_DancingGuessWord> {
 class _ShakingGuessWord extends StatefulWidget {
   final GuessWord guessWord;
 
-  const _ShakingGuessWord({super.key, required this.guessWord});
+  const _ShakingGuessWord({required this.guessWord});
 
   @override
   State<_ShakingGuessWord> createState() => _ShakingGuessWordState();
@@ -215,7 +215,7 @@ class _ShakingGuessWordState extends State<_ShakingGuessWord> {
 class _FlippedGuessWordsWithDance extends StatefulWidget {
   final GuessWord guessWord;
 
-  const _FlippedGuessWordsWithDance({super.key, required this.guessWord});
+  const _FlippedGuessWordsWithDance({required this.guessWord});
 
   @override
   State<_FlippedGuessWordsWithDance> createState() =>
@@ -265,7 +265,7 @@ class _FlippedGuessWordsWithDanceState
 class _FlippedGuessWordsWithShake extends StatefulWidget {
   final GuessWord guessWord;
 
-  const _FlippedGuessWordsWithShake({super.key, required this.guessWord});
+  const _FlippedGuessWordsWithShake({required this.guessWord});
 
   @override
   State<_FlippedGuessWordsWithShake> createState() =>

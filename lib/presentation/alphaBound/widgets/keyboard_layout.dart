@@ -61,7 +61,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
         keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp('[A-Z]'))) {
       widget.onLetterPressed.call(keyEvent.logicalKey.keyLabel);
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
       widget.onBackspacePressed.call();
@@ -132,7 +132,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         ),
         20,
         listenToPress ? widget.onEnterPressed : null));
-    return Container(
+    return ColoredBox(
       color: Colors.white12,
       child: Column(
         children: [

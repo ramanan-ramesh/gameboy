@@ -26,7 +26,7 @@ class _LetterInputLayoutState extends State<LetterInputLayout> {
     return SizedBox(
       height: widget.sizeOfCell * 3,
       child: Stack(
-          alignment: const Alignment(0, 0),
+          alignment: Alignment.center,
           fit: StackFit.loose,
           children: <Widget>[
             Positioned(
@@ -56,12 +56,7 @@ class _LetterInputLayoutState extends State<LetterInputLayout> {
   Widget _buildLetterKeyRow(String letters) {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: letters
-            .split("")
-            .map((c) => _buildLetterKey(
-                  c,
-                ))
-            .toList());
+        children: letters.split("").map(_buildLetterKey).toList());
   }
 
   Widget _buildLetterKey(String letter, {bool isCentered = false}) {
@@ -69,7 +64,7 @@ class _LetterInputLayoutState extends State<LetterInputLayout> {
       letter: letter,
       isCentered: isCentered,
       size: widget.sizeOfCell,
-      onLetterPressed: () => widget.onLetterPressed(letter),
+      onLetterPressed: widget.onLetterPressed,
     );
   }
 }
@@ -78,11 +73,10 @@ class _LetterKey extends StatefulWidget {
   final String letter;
   final bool isCentered;
   final double size;
-  final VoidCallback onLetterPressed;
+  final void Function(String) onLetterPressed;
 
   const _LetterKey(
-      {super.key,
-      required this.letter,
+      {required this.letter,
       this.isCentered = false,
       required this.size,
       required this.onLetterPressed});
@@ -152,7 +146,7 @@ class _LetterKeyState extends State<_LetterKey>
                   side: BorderSide.none,
                 ),
                 child: ElevatedButton(
-                  onPressed: widget.onLetterPressed,
+                  onPressed: () => widget.onLetterPressed(widget.letter),
                   style: ButtonStyle(
                     overlayColor: const WidgetStatePropertyAll(Colors.black12),
                     backgroundColor: WidgetStatePropertyAll(

@@ -25,16 +25,16 @@ class _DancingGuessLetterState extends State<DancingGuessLetter>
 
     _animation = TweenSequence<Offset>([
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, 0), end: const Offset(0, -0.80)),
+          tween: Tween(begin: Offset.zero, end: const Offset(0, -0.80)),
           weight: 15),
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, -0.80), end: const Offset(0, 0)),
+          tween: Tween(begin: const Offset(0, -0.80), end: Offset.zero),
           weight: 10),
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, 0), end: const Offset(0, -0.30)),
+          tween: Tween(begin: Offset.zero, end: const Offset(0, -0.30)),
           weight: 12),
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, -0.30), end: const Offset(0, 0)),
+          tween: Tween(begin: const Offset(0, -0.30), end: Offset.zero),
           weight: 8),
     ]).animate(
         CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine));

@@ -84,7 +84,7 @@ class _GamesListViewState extends State<GamesListView> {
 class _GameCard extends StatelessWidget {
   final Game game;
 
-  const _GameCard({super.key, required this.game});
+  const _GameCard({required this.game});
 
   @override
   Widget build(BuildContext context) {

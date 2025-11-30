@@ -169,9 +169,7 @@ class MinimizedGameResults extends StatelessWidget {
 
   Widget _buildExpander(IconData icon) {
     return IconButton(
-      onPressed: () {
-        onGameResultsSizeToggled();
-      },
+      onPressed: onGameResultsSizeToggled,
       icon: Icon(icon),
     );
   }

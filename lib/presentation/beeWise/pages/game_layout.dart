@@ -55,7 +55,7 @@ class BeeWiseLayout implements GameLayout {
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
         keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp('[A-Z]'))) {
       guessWordNotifier.value += keyEvent.logicalKey.keyLabel;
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
       if (guessWordNotifier.value.isNotEmpty) {

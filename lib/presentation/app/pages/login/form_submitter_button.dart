@@ -9,9 +9,9 @@ class LoginFormSubmitterButton extends StatefulWidget {
   final Color? iconColor;
   final GlobalKey<FormState>? formState;
   final bool isEnabledInitially;
-  bool isSubmitted;
+  final bool isSubmittedInitially;
 
-  LoginFormSubmitterButton(
+  const LoginFormSubmitterButton(
       {super.key,
       required this.icon,
       required this.context,
@@ -20,7 +20,7 @@ class LoginFormSubmitterButton extends StatefulWidget {
       this.formState,
       this.validationFailureCallback,
       this.validationSuccessCallback,
-      this.isSubmitted = false,
+      this.isSubmittedInitially = false,
       this.isEnabledInitially = false});
 
   @override
@@ -29,6 +29,14 @@ class LoginFormSubmitterButton extends StatefulWidget {
 }
 
 class _LoginFormSubmitterButtonState extends State<LoginFormSubmitterButton> {
+  late bool _isSubmitted;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSubmitted = widget.isSubmittedInitially;
+  }
+
   bool get _isCallbackNull => widget.formState != null
       ? (widget.validationSuccessCallback == null)
       : widget.callback == null;
@@ -37,12 +45,11 @@ class _LoginFormSubmitterButtonState extends State<LoginFormSubmitterButton> {
   Widget build(BuildContext context) {
     var canEnable = !_isCallbackNull && widget.isEnabledInitially;
     return FloatingActionButton(
-      onPressed: widget.isSubmitted || !canEnable ? () {} : _onPressed,
+      onPressed: _isSubmitted || !canEnable ? () {} : _onPressed,
       splashColor: !canEnable ? Colors.white30 : null,
       backgroundColor: !canEnable ? Colors.white10 : null,
-      child: widget.isSubmitted
-          ? const CircularProgressIndicator()
-          : Icon(widget.icon),
+      child:
+          _isSubmitted ? const CircularProgressIndicator() : Icon(widget.icon),
     );
   }
 
@@ -56,14 +63,14 @@ class _LoginFormSubmitterButtonState extends State<LoginFormSubmitterButton> {
           widget.validationSuccessCallback?.call();
         } else {
           widget.validationFailureCallback?.call();
-          widget.isSubmitted = false;
+          _isSubmitted = false;
           setState(() {});
         }
       }
       return;
     }
     setState(() {
-      widget.isSubmitted = true;
+      _isSubmitted = true;
       widget.callback!();
     });
   }

@@ -10,7 +10,7 @@ class Game extends Equatable {
             '$_logoAssetPath/${_convertGameNameToAssetName(name)}.webp';
 
   static String _convertGameNameToAssetName(String input) {
-    final words = input.split(RegExp(r'[^a-zA-Z0-9]+'));
+    final words = input.split(RegExp('[^a-zA-Z0-9]+'));
 
     return words.asMap().entries.map((entry) {
       final index = entry.key;

@@ -77,7 +77,7 @@ class BeeWiseGameEngineImpl implements BeeWiseGameEngineDriver {
       if (word.length == 4) {
         score += 1;
       } else if (word.split('').toSet().length == 7) {
-        score += (word.length + 7);
+        score += word.length + 7;
       } else if (word.length > 4) {
         score += word.length;
       }

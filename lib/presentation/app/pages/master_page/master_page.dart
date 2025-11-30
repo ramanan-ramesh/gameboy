@@ -36,7 +36,7 @@ class MasterPage extends StatelessWidget {
 }
 
 class _AppDataRepositoryLoader extends StatefulWidget {
-  const _AppDataRepositoryLoader({super.key});
+  const _AppDataRepositoryLoader();
 
   @override
   State<_AppDataRepositoryLoader> createState() =>

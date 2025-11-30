@@ -62,7 +62,7 @@ ThemeData createDarkThemeData(BuildContext context) {
       unselectedLabelColor: Colors.grey,
     ),
     appBarTheme: const AppBarTheme(
-      color: Colors.teal,
+      backgroundColor: Colors.teal,
       foregroundColor: Colors.black,
     ),
     textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),

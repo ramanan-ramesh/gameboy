@@ -84,12 +84,10 @@ class PolygonBorder extends OutlinedBorder {
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     switch (side.style) {
       case BorderStyle.none:
-        break;
       case BorderStyle.solid:
         var radius = (rect.shortestSide - side.width) / 2.0;
         var path = _getPath(rect, radius);
         canvas.drawPath(path, side.toPaint());
-        break;
     }
   }
 

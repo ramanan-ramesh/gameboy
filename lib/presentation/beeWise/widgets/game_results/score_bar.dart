@@ -58,7 +58,7 @@ class ScoreBar extends StatelessWidget {
                   backgroundColor: Colors.yellow,
                   child: i == score.rankIndex
                       ? Text(
-                          (score.score).toString(),
+                          score.score.toString(),
                           style: const TextStyle(
                               color: Colors.black, fontSize: 12),
                         )

@@ -27,7 +27,6 @@ class GameContentPage extends StatelessWidget {
 
 class _GameContentPageLoader extends StatefulWidget {
   const _GameContentPageLoader({
-    super.key,
     required this.gameData,
   });
 
@@ -114,12 +113,18 @@ class _GameContentPageLoaderState extends State<_GameContentPageLoader> {
 
 const _appBarHeight = 80.0;
 
-class _GameLayout extends StatelessWidget {
+class _GameLayout extends StatefulWidget {
   final GameData gameData;
+  const _GameLayout({required this.gameData});
+
+  @override
+  State<_GameLayout> createState() => _GameLayoutState();
+}
+
+class _GameLayoutState extends State<_GameLayout> {
   late double _layoutHeight;
   BuildContext? _statsSheetPopupContext;
   BuildContext? _tutorialSheetPopupContext;
-  _GameLayout({super.key, required this.gameData});
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +140,8 @@ class _GameLayout extends StatelessWidget {
                 layoutContext,
                 _tutorialSheetPopupContext,
                 'How To Play',
-                gameData.gameLayout.buildTutorialSheet(context, gameData.game),
+                widget.gameData.gameLayout
+                    .buildTutorialSheet(context, widget.gameData.game),
                 false);
           }
         },
@@ -150,7 +156,7 @@ class _GameLayout extends StatelessWidget {
             _layoutHeight = layoutHeight;
             return Scaffold(
               appBar: GameAppBar(
-                game: gameData.game,
+                game: widget.gameData.game,
                 contentWidth: appBarWidth,
                 height: _appBarHeight,
               ),
@@ -159,7 +165,7 @@ class _GameLayout extends StatelessWidget {
                   child: SizedBox(
                     width: layoutWidth,
                     height: layoutHeight,
-                    child: gameData.gameLayout
+                    child: widget.gameData.gameLayout
                         .buildGameLayout(context, layoutWidth, layoutHeight),
                   ),
                 ),
@@ -175,20 +181,20 @@ class _GameLayout extends StatelessWidget {
       _calculateLayoutConstraints(double incomingWidth, double incomingHeight) {
     double layoutWidth;
     double? appBarWidth;
-    if (incomingWidth > gameData.gameLayout.constraints.maxWidth) {
-      layoutWidth = gameData.gameLayout.constraints.maxWidth;
-      appBarWidth = gameData.gameLayout.constraints.maxWidth;
+    if (incomingWidth > widget.gameData.gameLayout.constraints.maxWidth) {
+      layoutWidth = widget.gameData.gameLayout.constraints.maxWidth;
+      appBarWidth = widget.gameData.gameLayout.constraints.maxWidth;
     } else {
       layoutWidth =
-          max(incomingWidth, gameData.gameLayout.constraints.minWidth);
+          max(incomingWidth, widget.gameData.gameLayout.constraints.minWidth);
     }
     double layoutHeight;
-    if (incomingHeight > gameData.gameLayout.constraints.maxHeight) {
-      layoutHeight = gameData.gameLayout.constraints.maxHeight;
+    if (incomingHeight > widget.gameData.gameLayout.constraints.maxHeight) {
+      layoutHeight = widget.gameData.gameLayout.constraints.maxHeight;
       layoutHeight -= _appBarHeight;
     } else {
       layoutHeight = max(incomingHeight - _appBarHeight,
-          gameData.gameLayout.constraints.minHeight);
+          widget.gameData.gameLayout.constraints.minHeight);
     }
 
     return (layoutWidth, layoutHeight, appBarWidth);
@@ -209,7 +215,7 @@ class _GameLayout extends StatelessWidget {
         isScrollControlled: true,
         builder: (BuildContext context) {
           sheetContext = context;
-          var layoutConstraints = gameData.gameLayout.constraints;
+          var layoutConstraints = widget.gameData.gameLayout.constraints;
           return _createSheet(context, sheetHeaderTitle, sheetContent,
               layoutConstraints, isSheetContentCentered);
         }).whenComplete(() {
@@ -231,8 +237,8 @@ class _GameLayout extends StatelessWidget {
                   create: (context) =>
                       RepositoryProvider.of<GameEngine>(layoutContext)),
             ],
-            child: gameData.gameLayout
-                .buildStatsSheet(layoutContext, gameData.game)),
+            child: widget.gameData.gameLayout
+                .buildStatsSheet(layoutContext, widget.gameData.game)),
         true);
   }
 
@@ -303,8 +309,7 @@ class _GameLayout extends StatelessWidget {
               shape: BoxShape.circle,
               image: DecorationImage(
                 image: AssetImage(
-                  gameData.game.imageAsset,
-                  // fit: BoxFit.cover,
+                  widget.gameData.game.imageAsset,
                 ),
               ),
             ),

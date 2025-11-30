@@ -30,7 +30,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
         keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp('[A-Z]'))) {
       context.addGameEvent(SubmitLetter(letter: keyEvent.logicalKey.keyLabel));
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
       context.addGameEvent(RemoveLetter());
@@ -91,7 +91,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             });
           }
         },
-        child: Container(
+        child: ColoredBox(
           color: Colors.white12,
           child: Column(
             children: [

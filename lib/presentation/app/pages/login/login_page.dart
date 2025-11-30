@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class _LoginPageForm extends StatefulWidget {
-  const _LoginPageForm({super.key});
+  const _LoginPageForm();
 
   @override
   State<_LoginPageForm> createState() => _LoginPageFormState();
@@ -122,7 +122,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
         }
         return LoginFormSubmitterButton(
           icon: Icons.login_rounded,
-          isSubmitted: isSubmitted,
+          isSubmittedInitially: isSubmitted,
           context: context,
           formState: _formKey,
           isEnabledInitially: true,
@@ -188,7 +188,7 @@ class _LoginPageFormState extends State<_LoginPageForm>
     return ClipRRect(
       borderRadius: BorderRadius.circular(_roundedCornerRadius),
       clipBehavior: Clip.hardEdge,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(_roundedCornerRadius),
           border: Border.all(color: Colors.green),

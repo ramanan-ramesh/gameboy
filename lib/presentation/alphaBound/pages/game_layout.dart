@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/bloc/alphaBound/events.dart';
+import 'package:gameboy/blocs/alphaBound/events.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/models/game.dart';

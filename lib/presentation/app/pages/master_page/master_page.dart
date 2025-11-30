@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/bloc/app/master_page_bloc.dart';
-import 'package:gameboy/bloc/app/master_page_states.dart';
+import 'package:gameboy/blocs/app/master_page_bloc.dart';
+import 'package:gameboy/blocs/app/master_page_states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/games_list_view.dart';

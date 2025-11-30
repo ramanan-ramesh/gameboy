@@ -1,4 +1,4 @@
-import 'package:gameboy/bloc/game/states.dart';
+import 'package:gameboy/blocs/game/states.dart';
 
 abstract class WordsyState extends GameState {}
 

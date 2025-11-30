@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/bloc/app/master_page_events.dart';
-import 'package:gameboy/bloc/authentication/auth_bloc.dart';
-import 'package:gameboy/bloc/authentication/auth_events.dart';
-import 'package:gameboy/bloc/authentication/auth_states.dart';
-import 'package:gameboy/bloc/bloc_extensions.dart';
+import 'package:gameboy/blocs/app/master_page_events.dart';
+import 'package:gameboy/blocs/authentication/auth_bloc.dart';
+import 'package:gameboy/blocs/authentication/auth_events.dart';
+import 'package:gameboy/blocs/authentication/auth_states.dart';
+import 'package:gameboy/blocs/bloc_extensions.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';
 import 'package:gameboy/presentation/app/extensions.dart';
 import 'package:gameboy/presentation/app/pages/login/username_edit_field.dart';

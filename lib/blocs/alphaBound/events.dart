@@ -1,4 +1,4 @@
-import 'package:gameboy/bloc/game/events.dart';
+import 'package:gameboy/blocs/game/events.dart';
 
 class SubmitGuessWord extends GameEvent {
   String guessWord;

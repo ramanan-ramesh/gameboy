@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/bloc/game/bloc.dart';
-import 'package:gameboy/bloc/game/events.dart';
-import 'package:gameboy/bloc/game/states.dart' as appGameState;
-import 'package:gameboy/bloc/wordsy/states.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/events.dart';
+import 'package:gameboy/blocs/game/states.dart' as appGameState;
+import 'package:gameboy/blocs/wordsy/states.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';

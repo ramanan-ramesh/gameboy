@@ -1,4 +1,4 @@
-import 'package:gameboy/bloc/game/states.dart';
+import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 
 class AlphaBoundGameState extends GameState {

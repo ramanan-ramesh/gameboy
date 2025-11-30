@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/bloc/alphaBound/bloc.dart';
-import 'package:gameboy/bloc/beeWise/bloc.dart';
-import 'package:gameboy/bloc/game/game_data.dart';
-import 'package:gameboy/bloc/wordsy/bloc.dart';
+import 'package:gameboy/blocs/alphaBound/bloc.dart';
+import 'package:gameboy/blocs/beeWise/bloc.dart';
+import 'package:gameboy/blocs/game/game_data.dart';
+import 'package:gameboy/blocs/wordsy/bloc.dart';
 import 'package:gameboy/data/app/constants.dart';
 import 'package:gameboy/data/app/implementations/app_data_repository.dart';
 import 'package:gameboy/data/app/models/app_data_modifier.dart';

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/bloc/game/bloc.dart';
-import 'package:gameboy/bloc/game/states.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordsy/constants.dart';
 import 'package:gameboy/data/wordsy/implementation/game_engine.dart';

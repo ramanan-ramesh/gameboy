@@ -1,5 +1,5 @@
-import 'package:gameboy/bloc/game/bloc.dart';
-import 'package:gameboy/bloc/game/game_data.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/game_data.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/app/models/platform_user.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/bloc/alphaBound/bloc.dart';
-import 'package:gameboy/bloc/game/bloc.dart';
-import 'package:gameboy/bloc/game/events.dart';
+import 'package:gameboy/blocs/alphaBound/bloc.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/events.dart';
 import 'package:gameboy/data/alphaBound/models/game_engine.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/alphaBound/models/stats.dart';

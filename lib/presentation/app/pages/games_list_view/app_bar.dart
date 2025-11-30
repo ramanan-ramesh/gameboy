@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
-import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
+import 'package:gameboy/bloc/app/master_page_events.dart';
+import 'package:gameboy/bloc/bloc_extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   static const String _appLogoAsset = 'assets/logos/app_logo_round.webp';

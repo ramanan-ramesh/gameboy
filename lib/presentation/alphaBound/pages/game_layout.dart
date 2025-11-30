@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/bloc/alphaBound/events.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/guesses_layout.dart';

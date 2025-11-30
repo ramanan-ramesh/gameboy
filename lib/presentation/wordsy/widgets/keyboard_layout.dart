@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/game/bloc.dart';
+import 'package:gameboy/bloc/game/states.dart';
+import 'package:gameboy/bloc/wordsy/events.dart';
+import 'package:gameboy/bloc/wordsy/states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordsy/models/guess_letter.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/widgets/button.dart';
-import 'package:gameboy/presentation/wordsy/bloc/events.dart';
-import 'package:gameboy/presentation/wordsy/bloc/states.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';
 import 'package:gameboy/presentation/wordsy/widgets/extensions.dart';
 

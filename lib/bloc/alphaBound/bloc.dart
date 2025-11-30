@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/alphaBound/events.dart';
+import 'package:gameboy/bloc/alphaBound/states.dart';
+import 'package:gameboy/bloc/game/bloc.dart';
+import 'package:gameboy/bloc/game/events.dart';
+import 'package:gameboy/bloc/game/states.dart';
 import 'package:gameboy/data/alphaBound/implementation/game_engine.dart';
 import 'package:gameboy/data/alphaBound/implementation/stats.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/game_engine.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/alphaBound/models/stats.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/events.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/events.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 class AlphaBoundBloc extends GameBloc<GameEvent, GameState,
     AlphaBoundStatsModifier, AlphaBoundGameEngineDriver> {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/app/master_page_bloc.dart';
+import 'package:gameboy/bloc/app/master_page_events.dart';
+import 'package:gameboy/bloc/app/master_page_states.dart';
+import 'package:gameboy/bloc/bloc_extensions.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/app/blocs/bloc_extensions.dart';
-import 'package:gameboy/presentation/app/blocs/master_page/master_page_bloc.dart';
-import 'package:gameboy/presentation/app/blocs/master_page/master_page_events.dart';
-import 'package:gameboy/presentation/app/blocs/master_page/master_page_states.dart';
 import 'package:gameboy/presentation/app/extensions.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_content_page.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/app_bar.dart';

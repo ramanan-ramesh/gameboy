@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/beeWise/events.dart';
+import 'package:gameboy/bloc/beeWise/states.dart';
+import 'package:gameboy/bloc/game/bloc.dart';
+import 'package:gameboy/bloc/game/states.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
-import 'package:gameboy/presentation/beeWise/bloc/events.dart';
-import 'package:gameboy/presentation/beeWise/bloc/states.dart';
 import 'package:gameboy/presentation/beeWise/extensions.dart';
 import 'package:gameboy/presentation/beeWise/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/beeWise/widgets/game_results/animated_guess_result.dart';

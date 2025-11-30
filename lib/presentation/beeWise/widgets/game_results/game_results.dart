@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/beeWise/states.dart';
+import 'package:gameboy/bloc/game/bloc.dart';
+import 'package:gameboy/bloc/game/states.dart';
 import 'package:gameboy/data/beeWise/models/guessed_word_state.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
-import 'package:gameboy/presentation/beeWise/bloc/states.dart';
 import 'package:gameboy/presentation/beeWise/extensions.dart';
 import 'package:gameboy/presentation/beeWise/widgets/game_results/guess_words_display.dart';
 import 'package:gameboy/presentation/beeWise/widgets/game_results/score_bar.dart';

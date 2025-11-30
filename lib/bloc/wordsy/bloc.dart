@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/game/bloc.dart';
+import 'package:gameboy/bloc/game/states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordsy/constants.dart';
 import 'package:gameboy/data/wordsy/implementation/game_engine.dart';
 import 'package:gameboy/data/wordsy/implementation/stats_repository.dart';
 import 'package:gameboy/data/wordsy/models/game_engine_driver.dart';
 import 'package:gameboy/data/wordsy/models/stat_modifier.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 import 'events.dart';
 import 'states.dart';

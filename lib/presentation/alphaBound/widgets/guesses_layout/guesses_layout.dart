@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/bloc/alphaBound/states.dart';
+import 'package:gameboy/bloc/game/bloc.dart';
+import 'package:gameboy/bloc/game/states.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guess_letter_range/guess_letter_range_layout.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/animated_guess_word_state.dart';
 import 'package:gameboy/presentation/alphaBound/widgets/guesses_layout/guess_word_range_layout.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 class GuessesLayout extends StatelessWidget {
   final double letterSize;

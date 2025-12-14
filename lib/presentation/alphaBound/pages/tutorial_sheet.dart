@@ -204,7 +204,6 @@ class _WordRangeLayout extends StatelessWidget {
   final double letterSize;
   final bool isGuessedWordEqualToWordOfTheDay;
   const _WordRangeLayout({
-    super.key,
     required this.lowerBound,
     required this.guessedWord,
     required this.upperBound,

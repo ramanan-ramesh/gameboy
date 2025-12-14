@@ -1,21 +1,19 @@
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/game_data.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
-import 'package:gameboy/data/app/models/platform_user.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game_data.dart';
+import 'package:gameboy/data/auth/models/status.dart';
 
 abstract class MasterPageState {}
-
-class LoadingAppDataRepository extends MasterPageState {}
 
 class LoadedAppDataRepository extends MasterPageState {
   final AppDataFacade appData;
   LoadedAppDataRepository({required this.appData});
 }
 
-class ActiveUserChanged extends MasterPageState {
-  PlatformUser? user;
+class AuthStateChanged extends MasterPageState {
+  final AuthStatus authStatus;
 
-  ActiveUserChanged({required this.user});
+  AuthStateChanged({required this.authStatus});
 }
 
 class LoadedGame<TGameBloc extends GameBloc> extends MasterPageState {

@@ -1,4 +1,4 @@
-import 'package:gameboy/presentation/app/blocs/game/events.dart';
+import 'package:gameboy/blocs/game/events.dart';
 
 abstract class WordsyEvent extends GameEvent {}
 

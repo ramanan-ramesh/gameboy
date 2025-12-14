@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/events.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/events.dart';
 
 class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? contentWidth;

@@ -37,7 +37,7 @@ class PolygonPathDrawer {
     return path;
   }
 
-  _drawLine(Path path, double currentAngle, double radius, bool move) {
+  void _drawLine(Path path, double currentAngle, double radius, bool move) {
     Offset current = _getOffset(currentAngle, radius);
 
     if (move) {
@@ -47,7 +47,7 @@ class PolygonPathDrawer {
     }
   }
 
-  _drawLineAndArc(Path path, double currentAngle, double radius,
+  void _drawLineAndArc(Path path, double currentAngle, double radius,
       double arcLength, bool isFirst) {
     double prevAngle = currentAngle - specs.halfBorderRadiusAngle;
     double nextAngle = currentAngle + specs.halfBorderRadiusAngle;

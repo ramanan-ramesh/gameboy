@@ -2,23 +2,25 @@ import 'dart:async';
 
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/alphaBound/bloc.dart';
+import 'package:gameboy/blocs/beeWise/bloc.dart';
+import 'package:gameboy/blocs/game/game_data.dart';
+import 'package:gameboy/blocs/wordsy/bloc.dart';
 import 'package:gameboy/data/app/constants.dart';
 import 'package:gameboy/data/app/implementations/app_data_repository.dart';
-import 'package:gameboy/data/app/models/app_data_modifier.dart';
+import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/bloc.dart';
+import 'package:gameboy/data/auth/models/status.dart';
 import 'package:gameboy/presentation/alphaBound/pages/game_layout.dart';
-import 'package:gameboy/presentation/app/blocs/game_data.dart';
-import 'package:gameboy/presentation/beeWise/bloc/bloc.dart';
 import 'package:gameboy/presentation/beeWise/pages/game_layout.dart';
-import 'package:gameboy/presentation/wordsy/bloc/bloc.dart';
 import 'package:gameboy/presentation/wordsy/pages/game_layout.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'master_page_events.dart';
-import 'master_page_states.dart';
+import 'events.dart';
+import 'states.dart';
 
-class _LoadRepository extends MasterPageEvent {}
+class _StartupInternal extends MasterPageEvent {}
 
 class _UpdateAvailableInternal extends MasterPageEvent {
   final UpdateInfo updateInfo;
@@ -30,16 +32,20 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
   AppDataModifier? _appDataRepository;
   late final StreamSubscription _updateRemoteConfigSubscription;
 
-  MasterPageBloc() : super(LoadingAppDataRepository()) {
-    on<ChangeUser>(_onUserChange);
+  MasterPageBloc(SharedPreferences sharedPreferences)
+      : super(LoadedAppDataRepository(
+            appData: AppDataRepository.create(sharedPreferences))) {
+    on<_StartupInternal>(_onStartupInternal);
+    on<AuthenticateWithGoogle>(_onAuthenticateWithGoogle);
     on<Logout>(_onLogout);
     on<LoadGame>(_onLoadGame);
-    on<_LoadRepository>(_onLoadRepository);
     on<_UpdateAvailableInternal>((event, emit) {
       emit(UpdateAvailable(updateInfo: event.updateInfo));
     });
 
-    add(_LoadRepository());
+    _appDataRepository =
+        (state as LoadedAppDataRepository).appData as AppDataModifier;
+    add(_StartupInternal());
   }
 
   @override
@@ -48,32 +54,39 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
     return super.close();
   }
 
-  FutureOr<void> _onLoadRepository(
-      _LoadRepository event, Emitter<MasterPageState> emit) async {
+  FutureOr<void> _onStartupInternal(
+      _StartupInternal event, Emitter<MasterPageState> emit) async {
     var updateInfo = await _checkForUpdate();
     if (updateInfo != null && updateInfo.isForceUpdate) {
       emit(UpdateAvailable(updateInfo: updateInfo));
       return;
     }
-    _appDataRepository ??= await AppDataRepository.create();
-    emit(LoadedAppDataRepository(appData: _appDataRepository!));
     if (updateInfo != null) {
       emit(UpdateAvailable(updateInfo: updateInfo));
     }
     await _initUpdateListener();
   }
 
-  FutureOr<void> _onUserChange(
-      ChangeUser event, Emitter<MasterPageState> emit) async {
-    if (event.authProviderUser != null) {
-      await _appDataRepository!.updateActiveUser(event.authProviderUser!);
-      emit(ActiveUserChanged(user: _appDataRepository!.activeUser));
+  FutureOr<void> _onAuthenticateWithGoogle(
+      AuthenticateWithGoogle event, Emitter<MasterPageState> emit) async {
+    emit(AuthStateChanged(authStatus: AuthStatus.authenticating));
+    var authStatus =
+        await _appDataRepository!.userManagement.trySignInWithGoogle();
+    if (authStatus == AuthStatus.loggedIn) {
+      emit(AuthStateChanged(authStatus: AuthStatus.loggedIn));
+    } else {
+      emit(AuthStateChanged(authStatus: AuthStatus.undefined));
     }
   }
 
   FutureOr<void> _onLogout(Logout event, Emitter<MasterPageState> emit) async {
-    await _appDataRepository!.updateActiveUser(null);
-    emit(ActiveUserChanged(user: null));
+    emit(AuthStateChanged(authStatus: AuthStatus.authenticating));
+    var didLogout = await _appDataRepository!.userManagement.trySignOut();
+    if (didLogout) {
+      emit(AuthStateChanged(authStatus: AuthStatus.loggedOut));
+    } else {
+      emit(AuthStateChanged(authStatus: AuthStatus.undefined));
+    }
   }
 
   FutureOr<void> _onLoadGame(LoadGame event, Emitter<MasterPageState> emit) {

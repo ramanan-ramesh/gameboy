@@ -1,7 +1,7 @@
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
 
-import 'game/bloc.dart';
+import 'bloc.dart';
 
 class GameData<TGameBloc extends GameBloc> {
   TGameBloc gameBloc;

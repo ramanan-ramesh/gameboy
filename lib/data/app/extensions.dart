@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
-import 'package:gameboy/data/app/models/platform_user.dart';
+import 'package:gameboy/data/auth/models/platform_user.dart';
 
 extension DateTimeExt on DateTime {
   int numberOfDaysInBetween(DateTime other) {

@@ -192,7 +192,7 @@ class _AnimatedGuessLetterShakerState extends State<AnimatedGuessLetterShaker>
 
     _animation = TweenSequence<Offset>([
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, 0), end: const Offset(-50, 0)),
+          tween: Tween(begin: Offset.zero, end: const Offset(-50, 0)),
           weight: 15),
       TweenSequenceItem(
           tween: Tween(begin: const Offset(-50, 0), end: const Offset(50, 0)),
@@ -204,7 +204,7 @@ class _AnimatedGuessLetterShakerState extends State<AnimatedGuessLetterShaker>
           tween: Tween(begin: const Offset(-30, 0), end: const Offset(30, 0)),
           weight: 8),
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(30, 0), end: const Offset(00, 0)),
+          tween: Tween(begin: const Offset(30, 0), end: Offset.zero),
           weight: 8),
     ]).animate(
         CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine));
@@ -277,7 +277,7 @@ class _ShakingGuessLetterState extends State<ShakingGuessLetter>
 
     _animation = TweenSequence<Offset>([
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(0, 0), end: const Offset(0.3, 0)),
+          tween: Tween(begin: Offset.zero, end: const Offset(0.3, 0)),
           weight: 15),
       TweenSequenceItem(
           tween: Tween(begin: const Offset(0.3, 0), end: const Offset(-0.3, 0)),
@@ -297,7 +297,7 @@ class _ShakingGuessLetterState extends State<ShakingGuessLetter>
               Tween(begin: const Offset(0.06, 0), end: const Offset(-0.06, 0)),
           weight: 8),
       TweenSequenceItem(
-          tween: Tween(begin: const Offset(-0.06, 0), end: const Offset(0, 0)),
+          tween: Tween(begin: const Offset(-0.06, 0), end: Offset.zero),
           weight: 8),
     ]).animate(
         CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine));

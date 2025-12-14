@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/alphaBound/states.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/states.dart' as gameAppState;
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart'
-    as gameAppState;
 import 'package:gameboy/presentation/app/widgets/button.dart';
 
 class KeyboardLayout extends StatefulWidget {
@@ -62,7 +61,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
         keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp('[A-Z]'))) {
       widget.onLetterPressed.call(keyEvent.logicalKey.keyLabel);
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
       widget.onBackspacePressed.call();
@@ -133,7 +132,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
         ),
         20,
         listenToPress ? widget.onEnterPressed : null));
-    return Container(
+    return ColoredBox(
       color: Colors.white12,
       child: Column(
         children: [

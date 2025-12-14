@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/alphaBound/states.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/states.dart' as appGameState;
 import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
-import 'package:gameboy/presentation/alphaBound/bloc/states.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart'
-    as appGameState;
 
 import 'animated_guess_letters.dart';
 
@@ -186,8 +185,7 @@ class _BoundaryGuessWord extends StatelessWidget {
   final String boundaryGuessWord;
   final Iterable<GlobalKey> slotContexts;
   const _BoundaryGuessWord(
-      {super.key,
-      required this.letterSize,
+      {required this.letterSize,
       required this.boundaryGuessWord,
       required this.slotContexts});
 
@@ -214,8 +212,7 @@ class _AttemptedGuessWord extends StatelessWidget {
   final ValueNotifier<String> guessWordNotifier;
   final Iterable<GlobalKey> guessLetterSlotKeys;
   const _AttemptedGuessWord(
-      {super.key,
-      required this.letterSize,
+      {required this.letterSize,
       required this.guessWordNotifier,
       required this.guessLetterSlotKeys});
 

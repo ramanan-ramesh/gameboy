@@ -1,5 +1,5 @@
+import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/beeWise/models/guessed_word_state.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 
 abstract class BeeWiseState extends GameState {}
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/beeWise/states.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/beeWise/models/guessed_word_state.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/widgets/text_animations.dart';
-import 'package:gameboy/presentation/beeWise/bloc/states.dart';
 import 'package:gameboy/presentation/beeWise/extensions.dart';
 
 class AnimatedGuessedWordResult extends StatefulWidget {

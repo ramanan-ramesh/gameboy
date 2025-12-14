@@ -2,15 +2,16 @@ import 'package:equatable/equatable.dart';
 
 class Game extends Equatable {
   final String name;
+  final String description;
   final String imageAsset;
   static const _logoAssetPath = 'assets/logos';
 
-  Game({required this.name})
+  Game({required this.name, required this.description})
       : imageAsset =
             '$_logoAssetPath/${_convertGameNameToAssetName(name)}.webp';
 
   static String _convertGameNameToAssetName(String input) {
-    final words = input.split(RegExp(r'[^a-zA-Z0-9]+'));
+    final words = input.split(RegExp('[^a-zA-Z0-9]+'));
 
     return words.asMap().entries.map((entry) {
       final index = entry.key;
@@ -25,5 +26,5 @@ class Game extends Equatable {
   }
 
   @override
-  List<Object?> get props => [name, imageAsset];
+  List<Object?> get props => [name, description, imageAsset];
 }

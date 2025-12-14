@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:gameboy/presentation/app/blocs/master_page/master_page_states.dart';
+import 'package:gameboy/blocs/app/states.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 

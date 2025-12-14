@@ -148,8 +148,7 @@ class BeeWiseStatsRepo extends BeeWiseStatsModifier {
     var didSubmitWord = false;
     var isLongestGuess = word.length > (_longestGuessedWord?.length ?? 0);
     var uniqueLettersInWord = word.split('').toSet();
-    var isPangram = uniqueLettersInWord.every(
-            (uniqueLetter) => lettersOfTheDay.doesContain(uniqueLetter)) &&
+    var isPangram = uniqueLettersInWord.every(lettersOfTheDay.doesContain) &&
         uniqueLettersInWord.length == BeeWiseConstants.numberOfLetters;
     await _userDataReference.update({
       _wordsSubmittedTodayField: wordsSubmittedToday.toList()

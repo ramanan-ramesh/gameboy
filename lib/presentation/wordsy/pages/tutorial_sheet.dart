@@ -161,9 +161,7 @@ class WordsyTutorialSheet extends StatelessWidget {
       children: [
         Row(
           children: [
-            ...(guessWord.guessLetters.map((guessLetter) {
-              return _createLetterBox(guessLetter);
-            })),
+            ...(guessWord.guessLetters.map(_createLetterBox)),
           ],
         ),
         if (guessLettersInCorrectPosition.isNotEmpty)

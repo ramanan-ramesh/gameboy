@@ -61,7 +61,7 @@ class BeeWiseTutorialSheet extends StatelessWidget {
   Widget _createInstructions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _gameInstructions.map((e) => _createInstruction(e)).toList(),
+      children: _gameInstructions.map(_createInstruction).toList(),
     );
   }
 
@@ -76,7 +76,7 @@ class BeeWiseTutorialSheet extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        ..._scoreSystemDescriptions.map((e) => _createInstruction(e)),
+        ..._scoreSystemDescriptions.map(_createInstruction),
       ],
     );
   }

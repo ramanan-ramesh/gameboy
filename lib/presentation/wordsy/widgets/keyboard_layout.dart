@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/states.dart';
+import 'package:gameboy/blocs/wordsy/events.dart';
+import 'package:gameboy/blocs/wordsy/states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordsy/models/guess_letter.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/widgets/button.dart';
-import 'package:gameboy/presentation/wordsy/bloc/events.dart';
-import 'package:gameboy/presentation/wordsy/bloc/states.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';
 import 'package:gameboy/presentation/wordsy/widgets/extensions.dart';
 
@@ -30,7 +30,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
         keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp('[A-Z]'))) {
       context.addGameEvent(SubmitLetter(letter: keyEvent.logicalKey.keyLabel));
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
       context.addGameEvent(RemoveLetter());
@@ -91,7 +91,7 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             });
           }
         },
-        child: Container(
+        child: ColoredBox(
           color: Colors.white12,
           child: Column(
             children: [

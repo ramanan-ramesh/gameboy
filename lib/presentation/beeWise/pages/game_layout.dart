@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/blocs/beeWise/events.dart';
+import 'package:gameboy/blocs/beeWise/states.dart';
+import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/app/models/game.dart';
-import 'package:gameboy/presentation/app/blocs/game/bloc.dart';
-import 'package:gameboy/presentation/app/blocs/game/states.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
-import 'package:gameboy/presentation/beeWise/bloc/events.dart';
-import 'package:gameboy/presentation/beeWise/bloc/states.dart';
 import 'package:gameboy/presentation/beeWise/extensions.dart';
 import 'package:gameboy/presentation/beeWise/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/beeWise/widgets/game_results/animated_guess_result.dart';
@@ -55,7 +55,7 @@ class BeeWiseLayout implements GameLayout {
     }
     if (keyEvent.logicalKey.keyLabel.isNotEmpty &&
         keyEvent.logicalKey.keyLabel.length == 1 &&
-        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp(r'[A-Z]'))) {
+        keyEvent.logicalKey.keyLabel.toUpperCase().contains(RegExp('[A-Z]'))) {
       guessWordNotifier.value += keyEvent.logicalKey.keyLabel;
     } else if (keyEvent.logicalKey == LogicalKeyboardKey.backspace) {
       if (guessWordNotifier.value.isNotEmpty) {

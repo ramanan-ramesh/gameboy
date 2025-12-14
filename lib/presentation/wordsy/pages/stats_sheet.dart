@@ -137,8 +137,7 @@ class _WinDistribution extends StatelessWidget {
   final int index;
   final double winPercentage;
 
-  const _WinDistribution(
-      {super.key, required this.index, required this.winPercentage});
+  const _WinDistribution({required this.index, required this.winPercentage});
 
   @override
   Widget build(BuildContext context) {

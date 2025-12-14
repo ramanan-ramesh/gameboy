@@ -1,29 +1,14 @@
 import 'package:equatable/equatable.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
+import 'package:gameboy/asset_manager/extension.dart';
 
 class Game extends Equatable {
   final String name;
   final String description;
-  final String imageAsset;
-  static const _logoAssetPath = 'assets/logos';
-
+  final AssetGenImage imageAsset;
   Game({required this.name, required this.description})
-      : imageAsset =
-            '$_logoAssetPath/${_convertGameNameToAssetName(name)}.webp';
-
-  static String _convertGameNameToAssetName(String input) {
-    final words = input.split(RegExp('[^a-zA-Z0-9]+'));
-
-    return words.asMap().entries.map((entry) {
-      final index = entry.key;
-      final word = entry.value;
-
-      if (index == 0) {
-        return word[0].toLowerCase() + word.substring(1);
-      } else {
-        return word[0].toUpperCase() + word.substring(1).toLowerCase();
-      }
-    }).join();
-  }
+      : imageAsset = Assets.logos.values.singleWhere((logoAsset) =>
+            logoAsset.fileName.toLowerCase() == name.toLowerCase());
 
   @override
   List<Object?> get props => [name, description, imageAsset];

@@ -83,11 +83,7 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Image.asset(
-            game.imageAsset,
-            width: 50,
-            height: 50,
-          ),
+          child: game.imageAsset.image(width: 50, height: 50),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),

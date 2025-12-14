@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui'; // Required for ImageFilter
 
 import 'package:flutter/material.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
 import 'package:gameboy/blocs/app/events.dart';
 import 'package:gameboy/blocs/bloc_extensions.dart';
 import 'package:gameboy/data/app/models/game.dart';
@@ -329,12 +330,8 @@ class GlassGameCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           child: ClipOval(
-            child: Image.asset(
-              game.imageAsset,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            ),
+            child:
+                game.imageAsset.image(width: 60, height: 60, fit: BoxFit.cover),
           ),
         ),
         const SizedBox(height: 8),
@@ -427,8 +424,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(2),
                       ),
-                      child: Image.asset(
-                        'assets/logos/google.webp',
+                      child: Assets.logos.google.image(
                         width: 18 * widget.scale,
                         height: 18 * widget.scale,
                         fit: BoxFit.contain,
@@ -462,8 +458,7 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      'assets/logos/app_logo_round.webp',
+    return Assets.logos.app.image(
       height: fontSize * 2,
       width: fontSize * 2,
       fit: BoxFit.contain,

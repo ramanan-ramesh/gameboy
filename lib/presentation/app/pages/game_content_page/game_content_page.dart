@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
 import 'package:gameboy/blocs/game/bloc.dart';
 import 'package:gameboy/blocs/game/events.dart';
 import 'package:gameboy/blocs/game/game_data.dart';
@@ -76,7 +77,7 @@ class _GameContentPageLoaderState extends State<_GameContentPageLoader> {
         child: Stack(
           children: [
             RiveAnimation.asset(
-              'assets/game_loading.riv',
+              Assets.gameLoading,
               fit: BoxFit.fitHeight,
               controllers: [
                 _animationController,
@@ -308,9 +309,7 @@ class _GameLayoutState extends State<_GameLayout> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage(
-                  widget.gameData.game.imageAsset,
-                ),
+                image: widget.gameData.game.imageAsset.provider(),
               ),
             ),
           ),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
 import 'package:gameboy/blocs/app/events.dart';
 import 'package:gameboy/blocs/bloc_extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  static const String _appLogoAsset = 'assets/logos/app_logo_round.webp';
-
   const HomeAppBar({super.key});
 
   @override
@@ -28,8 +27,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              _appLogoAsset,
+            child: Assets.logos.app.image(
               width: 80,
               height: 80,
               fit: BoxFit.contain,

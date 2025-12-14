@@ -107,12 +107,8 @@ class _GameCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: Image.asset(
-                game.imageAsset,
-                height: 175,
-                width: 175,
-                fit: BoxFit.cover,
-              ),
+              child: game.imageAsset
+                  .image(height: 175, width: 175, fit: BoxFit.cover),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),

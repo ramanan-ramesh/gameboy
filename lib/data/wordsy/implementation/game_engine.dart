@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordsy/constants.dart';
 import 'package:gameboy/data/wordsy/models/game_engine_driver.dart';
@@ -7,7 +8,6 @@ import 'package:gameboy/data/wordsy/models/guess_word.dart';
 import 'package:gameboy/data/wordsy/models/letter_match_description.dart';
 
 class WordsyGameEngineImpl extends WordsyGameEngineDriver {
-  static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
   final List<String> _attemptedGuesses;
   static final _firstDay = DateTime(2025, 4, 28);
@@ -141,7 +141,8 @@ class WordsyGameEngineImpl extends WordsyGameEngineDriver {
   }
 
   static Future<List<String>> _getAllowedGuesses() async {
-    final String fileContent = await rootBundle.loadString(_pathToDictionary);
+    final String fileContent =
+        await rootBundle.loadString(Assets.fiveLetterWordDictionary);
     return fileContent.split('\r\n').reversed.toList();
   }
 

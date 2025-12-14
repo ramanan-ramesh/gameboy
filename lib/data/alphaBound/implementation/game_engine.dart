@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/game_engine.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 
 class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
-  static const _pathToDictionary = 'assets/fiveLetterWordDictionary.txt';
   final List<String> _sortedDictionary;
   static final _firstDay = DateTime(2025, 4, 28);
   static const _defaultLowerBoundGuess = 'AAAAA';
@@ -136,7 +136,8 @@ class AlphaBoundGameEngineImpl extends AlphaBoundGameEngineDriver {
   }
 
   static Future<List<String>> _getAllowedGuesses() async {
-    final String fileContent = await rootBundle.loadString(_pathToDictionary);
+    final String fileContent =
+        await rootBundle.loadString(Assets.fiveLetterWordDictionary);
     return fileContent.split('\r\n');
   }
 

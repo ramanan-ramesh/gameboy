@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:gameboy/asset_manager/assets.gen.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/beeWise/models/constants.dart';
 import 'package:gameboy/data/beeWise/models/game_engine.dart';
@@ -6,8 +7,6 @@ import 'package:gameboy/data/beeWise/models/guessed_word_state.dart';
 import 'package:gameboy/data/beeWise/models/score.dart';
 
 class BeeWiseGameEngineImpl implements BeeWiseGameEngineDriver {
-  static const _allowedGuessesPath =
-      'assets/atleastFourLetterWordDictionary.txt';
   final List<String> _allowedGuesses;
 
   static Future<BeeWiseGameEngineDriver> createEngine(
@@ -58,7 +57,8 @@ class BeeWiseGameEngineImpl implements BeeWiseGameEngineDriver {
   }
 
   static Future<List<String>> _getAllowedGuesses() async {
-    final String fileContent = await rootBundle.loadString(_allowedGuessesPath);
+    final String fileContent =
+        await rootBundle.loadString(Assets.atleastFourLetterWordDictionary);
     return fileContent.split('\n');
   }
 

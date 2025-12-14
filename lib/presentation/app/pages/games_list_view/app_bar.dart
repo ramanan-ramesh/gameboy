@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gameboy/blocs/app/master_page_events.dart';
+import 'package:gameboy/blocs/app/events.dart';
 import 'package:gameboy/blocs/bloc_extensions.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {

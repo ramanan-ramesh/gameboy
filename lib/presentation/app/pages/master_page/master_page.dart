@@ -1,114 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gameboy/blocs/app/master_page_bloc.dart';
-import 'package:gameboy/blocs/app/master_page_states.dart';
+import 'package:gameboy/blocs/app/bloc.dart';
+import 'package:gameboy/blocs/app/states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
+import 'package:gameboy/data/auth/models/status.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/games_list_view.dart';
-import 'package:gameboy/presentation/app/pages/master_page/update_dialog.dart';
+import 'package:gameboy/presentation/app/pages/startup_page.dart'
+    hide GamesListView;
 import 'package:gameboy/presentation/app/theming/dark_theme_data.dart';
-import 'package:rive/rive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../startup_page.dart';
+import 'update_dialog.dart';
 
 class MasterPage extends StatelessWidget {
+  final SharedPreferences sharedPreferences;
+
+  const MasterPage(this.sharedPreferences);
+
+  @override
+  Widget build(BuildContext context) => BlocProvider<MasterPageBloc>(
+        create: (context) => MasterPageBloc(sharedPreferences),
+        child: RepositoryProvider<AppDataFacade>(
+          create: (BuildContext context) =>
+              (BlocProvider.of<MasterPageBloc>(context).state
+                      as LoadedAppDataRepository)
+                  .appData,
+          child: _ContentPageRouter(),
+        ),
+      );
+}
+
+class _ContentPageRouter extends StatefulWidget {
+  const _ContentPageRouter();
+
+  @override
+  State<_ContentPageRouter> createState() => _ContentPageLoader();
+}
+
+class _ContentPageLoader extends State<_ContentPageRouter> {
   static const String _appTitle = 'gameboy';
-  const MasterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: _appTitle,
-      debugShowCheckedModeBanner: false,
-      darkTheme: createDarkThemeData(context),
-      themeMode: ThemeMode.dark,
-      theme: createDarkThemeData(context),
-      home: Material(
-        child: SafeArea(
-          child: BlocProvider<MasterPageBloc>(
-            create: (context) => MasterPageBloc(),
-            child: const _AppDataRepositoryLoader(),
+    return BlocConsumer<MasterPageBloc, MasterPageState>(
+      builder: (BuildContext pageContext, MasterPageState state) {
+        return MaterialApp(
+          title: _appTitle,
+          debugShowCheckedModeBanner: false,
+          darkTheme: createDarkThemeData(context),
+          themeMode: ThemeMode.dark,
+          theme: createDarkThemeData(context),
+          home: _ContentPage(),
+        );
+      },
+      buildWhen: (previousState, currentState) =>
+          currentState is AuthStateChanged,
+      listener: (BuildContext context, MasterPageState state) {},
+    );
+  }
+}
+
+class _ContentPage extends StatelessWidget {
+  const _ContentPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<MasterPageBloc, MasterPageState>(
+      builder: (BuildContext pageContext, MasterPageState state) => Material(
+        child: DropdownButtonHideUnderline(
+          child: SafeArea(
+            child: context.activeUser == null
+                ? const StartupPage()
+                : const GamesListView(),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _AppDataRepositoryLoader extends StatefulWidget {
-  const _AppDataRepositoryLoader();
-
-  @override
-  State<_AppDataRepositoryLoader> createState() =>
-      _AppDataRepositoryLoaderState();
-}
-
-class _AppDataRepositoryLoaderState extends State<_AppDataRepositoryLoader> {
-  var _hasMinimumAnimationTimePassed = false;
-  static final _animationController = SimpleAnimation('Hover');
-  static const _minimumAnimationTime = Duration(seconds: 2);
-
-  @override
-  Widget build(BuildContext context) {
-    if (BlocProvider.of<MasterPageBloc>(context).state
-        is LoadingAppDataRepository) {
-      if (!_hasMinimumAnimationTimePassed) {
-        _tryStartLoadingAnimation();
-      }
-    }
-    return BlocConsumer<MasterPageBloc, MasterPageState>(
-      builder: (BuildContext context, MasterPageState state) {
-        if (state is LoadedAppDataRepository &&
-            _hasMinimumAnimationTimePassed) {
-          return RepositoryProvider<AppDataFacade>(
-            create: (BuildContext context) => state.appData,
-            child: const _ContentPage(),
-          );
-        }
-        return _createAnimatedLoadingScreen(context);
-      },
-      buildWhen: (previousState, currentState) {
-        return previousState != currentState &&
-                currentState is LoadedAppDataRepository ||
-            currentState is LoadingAppDataRepository;
-      },
+      buildWhen: (previousState, currentState) =>
+          currentState is AuthStateChanged &&
+          (currentState.authStatus == AuthStatus.loggedIn ||
+              currentState.authStatus == AuthStatus.loggedOut),
+      listenWhen: (previousState, currentState) =>
+          currentState is UpdateAvailable,
       listener: (BuildContext context, MasterPageState state) {
-        if (state is LoadingAppDataRepository) {
-          _tryStartLoadingAnimation();
-        } else if (state is UpdateAvailable) {
+        if (state is UpdateAvailable) {
           _showUpdateDialog(context, state);
         }
       },
-    );
-  }
-
-  Widget _createAnimatedLoadingScreen(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Stack(
-        children: [
-          RiveAnimation.asset(
-            'assets/game_loading.riv',
-            fit: BoxFit.fitHeight,
-            controllers: [
-              _animationController,
-            ],
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: Text(
-                'Loading user data and theme',
-                style: TextStyle(
-                  fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -121,34 +99,6 @@ class _AppDataRepositoryLoaderState extends State<_AppDataRepositoryLoader> {
           updateInfo: state.updateInfo,
         );
       },
-    );
-  }
-
-  void _tryStartLoadingAnimation() {
-    _hasMinimumAnimationTimePassed = false;
-    Future.delayed(_minimumAnimationTime, () {
-      setState(() {
-        _hasMinimumAnimationTimePassed = true;
-      });
-    });
-  }
-}
-
-class _ContentPage extends StatelessWidget {
-  const _ContentPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocConsumer<MasterPageBloc, MasterPageState>(
-      builder: (BuildContext context, MasterPageState state) {
-        return context.activeUser == null
-            ? const StartupPage()
-            : const GamesListView();
-      },
-      buildWhen: (previousState, currentState) {
-        return currentState is ActiveUserChanged;
-      },
-      listener: (BuildContext context, MasterPageState state) {},
     );
   }
 }

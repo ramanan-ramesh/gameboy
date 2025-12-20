@@ -7,6 +7,7 @@ import 'package:gameboy/blocs/game/states.dart' as gameAppState;
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/app/widgets/button.dart';
 
 class KeyboardLayout extends StatefulWidget {
@@ -126,14 +127,20 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             listenToPress ? widget.onBackspacePressed : null));
     thirdRowWidgets.add(_buildActionInputKey(
         context,
-        const Text(
+        Text(
           'Enter',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         20,
         listenToPress ? widget.onEnterPressed : null));
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final keyboardBg =
+        isDark ? const Color(0xFF1A1A2E) : const Color(0xFFF0F0F5);
+
     return ColoredBox(
-      color: Colors.white12,
+      color: keyboardBg,
       child: Column(
         children: [
           Expanded(
@@ -167,6 +174,17 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
 
   Widget _buildLetterInputKey(BuildContext context, String letter, int flex,
       String lowerBoundWord, String upperBoundWord, bool listenToPress) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final highlightedColor =
+        isDark ? const Color(0xFF2D2D44) : const Color(0xFFE0E0E8);
+    final highlightedPressedColor =
+        isDark ? const Color(0xFF3D3D54) : const Color(0xFFD0D0D8);
+    final dimmedColor =
+        isDark ? const Color(0xFF1A1A2E) : const Color(0xFFF0F0F5);
+    final dimmedPressedColor =
+        isDark ? const Color(0xFF2D2D44) : const Color(0xFFE0E0E8);
+
     var shouldHighlightLetter =
         letter.comparedTo(lowerBoundWord[0], false) >= 0 ||
             letter.comparedTo(upperBoundWord[0], false) <= 0;
@@ -178,11 +196,19 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
                 widget.onLetterPressed(letter);
               }
             : null,
-        color: shouldHighlightLetter ? Colors.white38 : Colors.white12,
-        onPressedColor: shouldHighlightLetter ? Colors.white60 : Colors.white38,
+        color: shouldHighlightLetter ? highlightedColor : dimmedColor,
+        onPressedColor: shouldHighlightLetter
+            ? highlightedPressedColor
+            : dimmedPressedColor,
         content: Text(
           letter,
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: shouldHighlightLetter
+                ? GameColors.alphaBoundPrimary
+                : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            fontWeight:
+                shouldHighlightLetter ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
       ),
     );
@@ -190,12 +216,21 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
 
   Widget _buildActionInputKey(
       BuildContext context, Widget key, int flex, VoidCallback? callBack) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final actionKeyColor = isDark
+        ? GameColors.alphaBoundPrimary.withValues(alpha: 0.3)
+        : GameColors.alphaBoundPrimary.withValues(alpha: 0.2);
+    final actionPressedColor = isDark
+        ? GameColors.alphaBoundPrimary.withValues(alpha: 0.5)
+        : GameColors.alphaBoundPrimary.withValues(alpha: 0.4);
+
     return Expanded(
       flex: flex,
       child: AnimatedButton(
           onPressed: callBack,
-          color: Colors.white12,
-          onPressedColor: Colors.white38,
+          color: actionKeyColor,
+          onPressedColor: actionPressedColor,
           content: key),
     );
   }

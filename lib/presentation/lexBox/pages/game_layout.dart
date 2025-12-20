@@ -8,6 +8,7 @@ import 'package:gameboy/blocs/lexBox/states.dart' as lexBoxStates;
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/lexBox/models/guessed_word_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/lexBox/extensions.dart';
 import 'package:gameboy/presentation/lexBox/widgets/letter_box_widget.dart';
 import 'package:gameboy/presentation/lexBox/widgets/words_list_widget.dart';
@@ -171,25 +172,16 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
             flex: 2,
             child: WordsListWidget(
               words: guessedWords,
-              currentWord: _currentWord,
+              currentWord: null, // Current word shown in indicator instead
               onEraseLastWord:
                   guessedWords.isNotEmpty ? _onEraseLastWord : null,
             ),
           ),
-          // Current word display (simple text, no buttons)
-          if (_currentWord.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                _currentWord.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF6C63FF),
-                  letterSpacing: 4,
-                ),
-              ),
-            ),
+          // Current word display - always visible
+          _CurrentWordIndicator(
+            currentWord: _currentWord,
+            isValid: _currentWord.length >= 3,
+          ),
           // Letter box
           Expanded(
             flex: 5,
@@ -211,22 +203,93 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   }
 }
 
+class _CurrentWordIndicator extends StatelessWidget {
+  final String currentWord;
+  final bool isValid;
+
+  const _CurrentWordIndicator({
+    required this.currentWord,
+    required this.isValid,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gameColor = GameColors.lexBoxPrimary;
+    final hasWord = currentWord.isNotEmpty;
+
+    return Container(
+      height: 60,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(DesignConstants.borderRadiusMedium),
+        border: Border.all(
+          color: !hasWord
+              ? theme.colorScheme.outline
+              : (isValid
+                  ? gameColor
+                  : theme.colorScheme.error.withValues(alpha: 0.5)),
+          width: hasWord && isValid ? 2 : 1,
+        ),
+      ),
+      child: Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.8, end: 1.0).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: hasWord
+              ? Text(
+                  currentWord.toUpperCase(),
+                  key: ValueKey(currentWord),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: isValid
+                        ? gameColor
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    letterSpacing: 6,
+                  ),
+                )
+              : Text(
+                  'Drag to connect letters...',
+                  key: const ValueKey('placeholder'),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+}
+
 class _LexBoxStatsSheet extends StatelessWidget {
   const _LexBoxStatsSheet();
 
   @override
   Widget build(BuildContext context) {
     final stats = context.getStatsRepository();
+    final theme = Theme.of(context);
+    final gameColor = GameColors.lexBoxPrimary;
 
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+          Text(
             'Statistics',
-            style: TextStyle(
-              fontSize: 24,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -237,31 +300,15 @@ class _LexBoxStatsSheet extends StatelessWidget {
               _StatItem(
                 value: stats.winCount.toString(),
                 label: 'Wins',
+                color: gameColor,
               ),
               _StatItem(
                 value: stats.wordsSubmittedToday.length.toString(),
                 label: 'Words Today',
+                color: gameColor,
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          if (stats.wordsSubmittedToday.isNotEmpty) ...[
-            const Text(
-              'Today\'s Words',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: stats.wordsSubmittedToday
-                  .map((w) => Chip(label: Text(w.toUpperCase())))
-                  .toList(),
-            ),
-          ],
         ],
       ),
     );
@@ -271,28 +318,31 @@ class _LexBoxStatsSheet extends StatelessWidget {
 class _StatItem extends StatelessWidget {
   final String value;
   final String label;
+  final Color color;
 
   const _StatItem({
     required this.value,
     required this.label,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 36,
+          style: theme.textTheme.displaySmall?.copyWith(
             fontWeight: FontWeight.bold,
+            color: color,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -305,6 +355,9 @@ class _LexBoxTutorialSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gameColor = GameColors.lexBoxPrimary;
+
     return Container(
       padding: const EdgeInsets.all(24),
       child: SingleChildScrollView(
@@ -312,50 +365,61 @@ class _LexBoxTutorialSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Center(
+            Center(
               child: Text(
                 'How to Play',
-                style: TextStyle(
-                  fontSize: 24,
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const SizedBox(height: 24),
             _buildRule(
+              context,
               icon: Icons.gesture,
               title: 'Connect Letters',
               description:
                   'Drag your finger to connect letters around the square to spell words.',
+              gameColor: gameColor,
             ),
             _buildRule(
+              context,
               icon: Icons.text_fields,
               title: 'Word Length',
               description: 'Words must be at least 3 letters long.',
+              gameColor: gameColor,
             ),
             _buildRule(
+              context,
               icon: Icons.block,
               title: 'No Same Side',
               description:
                   'Consecutive letters cannot be from the same side of the square.',
+              gameColor: gameColor,
             ),
             _buildRule(
+              context,
               icon: Icons.repeat,
               title: 'No Repeats',
               description:
                   'The same letter cannot be used consecutively (but can be reused later).',
+              gameColor: gameColor,
             ),
             _buildRule(
+              context,
               icon: Icons.link,
               title: 'Chain Words',
               description:
                   'The last letter of each word becomes the first letter of the next word.',
+              gameColor: gameColor,
             ),
             _buildRule(
+              context,
               icon: Icons.check_circle,
               title: 'Goal',
               description:
                   'Use all 12 letters in as few words as possible to complete the puzzle.',
+              gameColor: gameColor,
             ),
           ],
         ),
@@ -363,17 +427,21 @@ class _LexBoxTutorialSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildRule({
+  Widget _buildRule(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String description,
+    required Color gameColor,
   }) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 24, color: const Color(0xFF6C63FF)),
+          Icon(icon, size: 24, color: gameColor),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -381,17 +449,15 @@ class _LexBoxTutorialSheet extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],

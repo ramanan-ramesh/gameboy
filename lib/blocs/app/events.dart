@@ -11,3 +11,5 @@ class LoadGame extends MasterPageEvent {
 
   LoadGame(this.game);
 }
+
+class ToggleThemeMode extends MasterPageEvent {}

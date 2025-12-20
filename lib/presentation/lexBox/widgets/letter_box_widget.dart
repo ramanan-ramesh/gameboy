@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 /// Position data for each letter on the square
 class LetterPosition {
@@ -80,6 +81,9 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = math.min(constraints.maxWidth, constraints.maxHeight);
@@ -108,6 +112,7 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
                 indicatorRadius: indicatorRadius,
                 squareSize: squareSize,
                 padding: padding,
+                isDark: isDark,
               ),
               child: Stack(
                 children: _letterPositions.map((lp) {
@@ -195,6 +200,8 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
           _tempWordIndices.add(hitIndex);
           _currentPointer = details.localPosition;
         });
+        // Notify parent about current word being formed
+        widget.onCurrentWordChanged(_tempWordIndices);
         HapticFeedback.lightImpact();
       }
     }
@@ -213,6 +220,8 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
         setState(() {
           _tempWordIndices.add(hitIndex);
         });
+        // Notify parent about current word being formed
+        widget.onCurrentWordChanged(_tempWordIndices);
         HapticFeedback.selectionClick();
       }
     }
@@ -229,6 +238,9 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
     // Auto-submit if word has 3+ letters
     if (_tempWordIndices.length >= 3) {
       widget.onWordComplete(_tempWordIndices);
+    } else {
+      // Clear the current word display if less than 3 letters
+      widget.onCurrentWordChanged([]);
     }
     _tempWordIndices = List.from(widget.currentWordIndices);
   }
@@ -277,14 +289,16 @@ class _LetterText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color textColor;
+    final theme = Theme.of(context);
+    final gameColor = GameColors.lexBoxPrimary;
 
+    Color textColor;
     if (isInCurrentWord) {
-      textColor = const Color(0xFF6C63FF);
+      textColor = gameColor;
     } else if (isUsed) {
-      textColor = Colors.white54;
+      textColor = theme.colorScheme.onSurface.withValues(alpha: 0.4);
     } else {
-      textColor = Colors.white;
+      textColor = theme.colorScheme.onSurface;
     }
 
     return SizedBox(
@@ -312,6 +326,7 @@ class _LetterBoxPainter extends CustomPainter {
   final double indicatorRadius;
   final double squareSize;
   final double padding;
+  final bool isDark;
 
   _LetterBoxPainter({
     required this.letterPositions,
@@ -321,13 +336,18 @@ class _LetterBoxPainter extends CustomPainter {
     required this.indicatorRadius,
     required this.squareSize,
     required this.padding,
+    required this.isDark,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    final squareColor = isDark ? Colors.white : Colors.black87;
+    final usedColor = isDark ? Colors.white54 : Colors.black38;
+    final unusedColor = isDark ? Colors.white : Colors.black87;
+
     // Draw square border
     final squarePaint = Paint()
-      ..color = Colors.white
+      ..color = squareColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -346,11 +366,11 @@ class _LetterBoxPainter extends CustomPainter {
         ..strokeWidth = 1.5;
 
       if (isInCurrentWord) {
-        indicatorPaint.color = const Color(0xFF6C63FF);
+        indicatorPaint.color = GameColors.lexBoxPrimary;
       } else if (isUsed) {
-        indicatorPaint.color = Colors.white54;
+        indicatorPaint.color = usedColor;
       } else {
-        indicatorPaint.color = Colors.white;
+        indicatorPaint.color = unusedColor;
       }
 
       canvas.drawCircle(lp.indicatorCenter, indicatorRadius, indicatorPaint);
@@ -359,7 +379,7 @@ class _LetterBoxPainter extends CustomPainter {
     // Draw connecting lines for current word
     if (currentWordIndices.isNotEmpty) {
       final linePaint = Paint()
-        ..color = const Color(0xFF6C63FF)
+        ..color = GameColors.lexBoxPrimary
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3
         ..strokeCap = StrokeCap.round;
@@ -378,7 +398,7 @@ class _LetterBoxPainter extends CustomPainter {
         final lastPos = letterPositions
             .firstWhere((lp) => lp.index == currentWordIndices.last);
         final pointerPaint = Paint()
-          ..color = const Color(0xFF6C63FF).withValues(alpha: 0.5)
+          ..color = GameColors.lexBoxPrimary.withValues(alpha: 0.5)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2
           ..strokeCap = StrokeCap.round;
@@ -391,6 +411,7 @@ class _LetterBoxPainter extends CustomPainter {
   bool shouldRepaint(covariant _LetterBoxPainter oldDelegate) {
     return oldDelegate.currentWordIndices != currentWordIndices ||
         oldDelegate.currentPointer != currentPointer ||
-        oldDelegate.usedLetterIndices != usedLetterIndices;
+        oldDelegate.usedLetterIndices != usedLetterIndices ||
+        oldDelegate.isDark != isDark;
   }
 }

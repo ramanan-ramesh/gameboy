@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class WordsListWidget extends StatelessWidget {
   final List<String> words;
@@ -14,6 +15,8 @@ class WordsListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -24,22 +27,35 @@ class WordsListWidget extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Words (${words.length})',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white70,
-                      ),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
               if (words.isNotEmpty && onEraseLastWord != null)
-                IconButton(
-                  onPressed: onEraseLastWord,
-                  icon: const Icon(Icons.undo),
-                  color: Colors.white70,
-                  tooltip: 'Erase last word',
-                  iconSize: 20,
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onEraseLastWord,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: theme.colorScheme.surfaceContainerHighest,
+                      ),
+                      child: Icon(
+                        Icons.undo_rounded,
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        size: 20,
+                      ),
+                    ),
+                  ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Expanded(
             child: SingleChildScrollView(
               child: Wrap(
@@ -71,20 +87,35 @@ class _WordChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gameColor = GameColors.lexBoxPrimary;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: isSubmitted ? const Color(0xFF6C63FF) : Colors.grey.shade700,
-        borderRadius: BorderRadius.circular(16),
-        border:
-            isSubmitted ? null : Border.all(color: Colors.white38, width: 1),
+        color:
+            isSubmitted ? gameColor : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+        border: isSubmitted
+            ? null
+            : Border.all(color: theme.colorScheme.outline, width: 1),
+        boxShadow: isSubmitted
+            ? [
+                BoxShadow(
+                  color: gameColor.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Text(
         word.toUpperCase(),
         style: TextStyle(
-          color: Colors.white,
+          color: isSubmitted ? Colors.white : theme.colorScheme.onSurface,
           fontSize: 14,
-          fontWeight: isSubmitted ? FontWeight.bold : FontWeight.normal,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1,
         ),
       ),
     );
@@ -103,11 +134,18 @@ class LettersProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final progress = usedCount / totalCount;
     final isComplete = usedCount == totalCount;
+    final gameColor = GameColors.lexBoxPrimary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(DesignConstants.borderRadiusMedium),
+      ),
       child: Column(
         children: [
           Row(
@@ -115,24 +153,30 @@ class LettersProgressIndicator extends StatelessWidget {
             children: [
               Text(
                 '$usedCount / $totalCount letters used',
-                style: TextStyle(
-                  color: isComplete ? const Color(0xFF4CAF50) : Colors.white70,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isComplete
+                      ? AppColors.success
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: isComplete ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
               if (isComplete) ...[
                 const SizedBox(width: 8),
                 const Icon(Icons.check_circle,
-                    color: Color(0xFF4CAF50), size: 18),
+                    color: AppColors.success, size: 18),
               ],
             ],
           ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.white24,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              isComplete ? const Color(0xFF4CAF50) : const Color(0xFF6C63FF),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.3),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isComplete ? AppColors.success : gameColor,
+              ),
+              minHeight: 6,
             ),
           ),
         ],

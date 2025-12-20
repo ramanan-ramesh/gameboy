@@ -7,6 +7,7 @@ import 'package:gameboy/blocs/wordsy/events.dart';
 import 'package:gameboy/blocs/wordsy/states.dart';
 import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/wordsy/models/guess_letter.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/app/widgets/button.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';
 import 'package:gameboy/presentation/wordsy/widgets/extensions.dart';
@@ -91,36 +92,45 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
             });
           }
         },
-        child: ColoredBox(
-          color: Colors.white12,
-          child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: firstRowWidgets,
+        child: Builder(
+          builder: (context) {
+            final theme = Theme.of(context);
+            final isDark = theme.brightness == Brightness.dark;
+            final keyboardBg =
+                isDark ? const Color(0xFF1A1A2E) : const Color(0xFFF0F0F5);
+
+            return ColoredBox(
+              color: keyboardBg,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: firstRowWidgets,
+                      ),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: secondRowWidgets,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: thirdRowWidgets,
+                      ),
+                    ),
+                  )
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: secondRowWidgets,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: thirdRowWidgets,
-                  ),
-                ),
-              )
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -152,6 +162,14 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
 
   Widget _buildLetterInputKey(BuildContext context, String letter, int flex,
       Iterable<GuessLetter> allGuessLetters) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final defaultKeyColor =
+        isDark ? const Color(0xFF2D2D44) : const Color(0xFFE0E0E8);
+    final defaultPressedColor =
+        isDark ? const Color(0xFF3D3D54) : const Color(0xFFD0D0D8);
+    final defaultTextColor = theme.colorScheme.onSurface;
+
     var alreadyGuessedLetter = allGuessLetters
         .where((guessLetter) => guessLetter.guessLetter.isEqualTo(letter))
         .firstOrNull;
@@ -159,16 +177,16 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
       flex: flex,
       child: AnimatedButton(
         color: alreadyGuessedLetter == null
-            ? Colors.white38
+            ? defaultKeyColor
             : alreadyGuessedLetter.getKeyboardTileBackgroundColor(),
         onPressedColor: alreadyGuessedLetter == null
-            ? Colors.white60
+            ? defaultPressedColor
             : alreadyGuessedLetter.getKeyboardTilePressedColor(),
         content: Text(
           letter,
           style: TextStyle(
               color: alreadyGuessedLetter == null
-                  ? Colors.white
+                  ? defaultTextColor
                   : alreadyGuessedLetter.getTextColor()),
         ),
         onPressed: () {
@@ -180,12 +198,21 @@ class _KeyboardLayoutState extends State<KeyboardLayout> {
 
   Widget _buildActionInputKey(
       BuildContext context, WordsyEvent actionEvent, Widget key, int flex) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final actionKeyColor = isDark
+        ? GameColors.wordsyPrimary.withValues(alpha: 0.3)
+        : GameColors.wordsyPrimary.withValues(alpha: 0.2);
+    final actionPressedColor = isDark
+        ? GameColors.wordsyPrimary.withValues(alpha: 0.5)
+        : GameColors.wordsyPrimary.withValues(alpha: 0.4);
+
     return Expanded(
       flex: flex,
       child: AnimatedButton(
         content: key,
-        color: Colors.white12,
-        onPressedColor: Colors.white38,
+        color: actionKeyColor,
+        onPressedColor: actionPressedColor,
         onPressed: () {
           context.addGameEvent(actionEvent);
         },

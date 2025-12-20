@@ -6,4 +6,6 @@ extension RepositoryExt on BuildContext {
   AppDataFacade getAppData() {
     return RepositoryProvider.of<AppDataFacade>(this);
   }
+
+  bool get isDarkMode => getAppData().activeThemeMode == ThemeMode.dark;
 }

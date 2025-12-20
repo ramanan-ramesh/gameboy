@@ -8,6 +8,7 @@ import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/extensions.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_content_page.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/app_bar.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class GamesListView extends StatefulWidget {
   const GamesListView({super.key});
@@ -54,7 +55,16 @@ class _GamesListViewState extends State<GamesListView> {
       },
       child: LayoutBuilder(builder: (context, constraints) {
         var isBigLayout = constraints.minWidth > 1000;
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        // Scaffold background distinct from app bar
+        final scaffoldBackground = isDark
+            ? AppColors.darkBackground // Pure dark background
+            : const Color(0xFFF8F8FC); // Very light gray-purple
+
         return Scaffold(
+          backgroundColor: scaffoldBackground,
           appBar: const HomeAppBar(),
           body: Center(
             child: PageView.builder(
@@ -88,6 +98,10 @@ class _GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gameColor = GameColors.getPrimaryColor(game.name);
+    final gameColorLight = GameColors.getSecondaryColor(game.name);
+
     return SizedBox(
       width: 320,
       height: 420,
@@ -100,7 +114,21 @@ class _GameCard extends StatelessWidget {
             height: 280,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.green, width: 2),
+              gradient: RadialGradient(
+                colors: [
+                  gameColor.withValues(alpha: 0.1),
+                  Colors.transparent,
+                ],
+                stops: const [0.5, 1.0],
+              ),
+              border: Border.all(color: gameColor, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: gameColor.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: Material(
               color: Colors.transparent,
@@ -108,7 +136,8 @@ class _GameCard extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 customBorder: const CircleBorder(),
-                splashColor: Colors.white60,
+                splashColor: gameColorLight.withValues(alpha: 0.3),
+                highlightColor: gameColor.withValues(alpha: 0.1),
                 onTap: () {
                   context.addMasterPageEvent(LoadGame(game));
                 },
@@ -118,7 +147,7 @@ class _GameCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: game.imageAsset
-                          .image(height: 150, width: 150, fit: BoxFit.cover),
+                          .image(height: 140, width: 140, fit: BoxFit.cover),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -126,7 +155,10 @@ class _GameCard extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         child: Text(
                           game.name,
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: gameColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -136,14 +168,14 @@ class _GameCard extends StatelessWidget {
             ),
           ),
           // Description outside the circle
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
               game.description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                  ),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,

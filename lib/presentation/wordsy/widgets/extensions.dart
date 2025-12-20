@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/wordsy/models/guess_letter.dart';
 import 'package:gameboy/data/wordsy/models/letter_match_description.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 extension GuessLetterExt on GuessLetter {
   Color getTextColor() {
@@ -20,9 +21,9 @@ extension GuessLetterExt on GuessLetter {
       case LetterMatchDescription.notInWord:
         return Colors.white12;
       case LetterMatchDescription.rightPositionInWord:
-        return Colors.green;
+        return GameColors.wordsyPrimary;
       case LetterMatchDescription.wrongPositionInWord:
-        return Colors.yellow;
+        return GameColors.beeWisePrimary; // Yellow/amber for wrong position
     }
   }
 
@@ -31,11 +32,11 @@ extension GuessLetterExt on GuessLetter {
       case LetterMatchDescription.notYetMatched:
         return Colors.white12;
       case LetterMatchDescription.notInWord:
-        return Colors.black12;
+        return Colors.black26;
       case LetterMatchDescription.rightPositionInWord:
-        return Colors.green;
+        return GameColors.wordsyPrimary;
       case LetterMatchDescription.wrongPositionInWord:
-        return Colors.yellow;
+        return GameColors.beeWisePrimary;
     }
   }
 
@@ -46,9 +47,9 @@ extension GuessLetterExt on GuessLetter {
       case LetterMatchDescription.notInWord:
         return Colors.white12;
       case LetterMatchDescription.rightPositionInWord:
-        return Colors.green.shade300;
+        return GameColors.wordsySecondary;
       case LetterMatchDescription.wrongPositionInWord:
-        return Colors.yellow.shade300;
+        return GameColors.beeWiseSecondary;
     }
   }
 }

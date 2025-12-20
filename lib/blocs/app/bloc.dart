@@ -41,6 +41,7 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
     on<AuthenticateWithGoogle>(_onAuthenticateWithGoogle);
     on<Logout>(_onLogout);
     on<LoadGame>(_onLoadGame);
+    on<ToggleThemeMode>(_onToggleThemeMode);
     on<_UpdateAvailableInternal>((event, emit) {
       emit(UpdateAvailable(updateInfo: event.updateInfo));
     });
@@ -96,6 +97,12 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
     if (gameData != null) {
       emit(LoadedGame(gameData: gameData));
     }
+  }
+
+  FutureOr<void> _onToggleThemeMode(
+      ToggleThemeMode event, Emitter<MasterPageState> emit) async {
+    await _appDataRepository!.toggleThemeMode();
+    emit(ThemeModeToggled());
   }
 
   Future<void> _initUpdateListener() async {

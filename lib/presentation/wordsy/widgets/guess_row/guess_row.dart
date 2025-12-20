@@ -6,6 +6,7 @@ import 'package:gameboy/blocs/wordsy/states.dart';
 import 'package:gameboy/data/wordsy/constants.dart';
 import 'package:gameboy/data/wordsy/models/guess_letter.dart';
 import 'package:gameboy/data/wordsy/models/guess_word.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';
 import 'package:gameboy/presentation/wordsy/widgets/extensions.dart';
 import 'package:gameboy/presentation/wordsy/widgets/guess_row/dancing_guess_letter.dart';
@@ -88,16 +89,40 @@ class GuessRow extends StatelessWidget {
     BuildContext context,
     GuessLetter guessLetter,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final emptyTileBg =
+        isDark ? const Color(0xFF2D2D44) : const Color(0xFFE8E8F0);
+    final emptyTileBorder = isDark
+        ? GameColors.wordsyPrimary.withValues(alpha: 0.3)
+        : GameColors.wordsyPrimary.withValues(alpha: 0.2);
+
     var letterValue = guessLetter.guessLetter.isEmpty
         ? ' '
         : guessLetter.guessLetter.toUpperCase();
+    var bgColor = guessLetter.getGuessTileBackgroundColor();
+    var isEmptyTile = bgColor == Colors.white12;
+
     return Container(
-      color: guessLetter.getGuessTileBackgroundColor(),
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: isEmptyTile ? emptyTileBg : bgColor,
+        borderRadius: BorderRadius.circular(DesignConstants.borderRadiusSmall),
+        border: Border.all(
+          color: isEmptyTile ? emptyTileBorder : bgColor,
+          width: 2,
+        ),
+      ),
       child: Center(
         child: Text(
           letterValue,
-          style: TextStyle(color: guessLetter.getTextColor()),
+          style: TextStyle(
+            color: isEmptyTile
+                ? theme.colorScheme.onSurface
+                : guessLetter.getTextColor(),
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
       ),
     );

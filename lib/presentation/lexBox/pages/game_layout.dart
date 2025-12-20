@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/blocs/game/bloc.dart';
-import 'package:gameboy/blocs/game/events.dart';
 import 'package:gameboy/blocs/game/states.dart' as appGameState;
 import 'package:gameboy/blocs/lexBox/events.dart' as lexBoxEvents;
 import 'package:gameboy/blocs/lexBox/states.dart' as lexBoxStates;
@@ -11,6 +10,7 @@ import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dar
 import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/lexBox/extensions.dart';
 import 'package:gameboy/presentation/lexBox/widgets/letter_box_widget.dart';
+import 'package:gameboy/presentation/lexBox/widgets/win_celebration.dart';
 import 'package:gameboy/presentation/lexBox/widgets/words_list_widget.dart';
 
 class LexBoxLayout implements GameLayout {
@@ -50,11 +50,29 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   List<int> _currentWordIndices = [];
   Set<int> _usedLetterIndices = {};
   String _currentWord = '';
+  bool _hasWon = false;
+  bool _showCelebration = false;
+  bool _hasShownInitialCelebration = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateUsedLetters();
+    // Show celebration on initial load if already won
+    if (!_hasShownInitialCelebration) {
+      _checkWinStateOnInit();
+    }
+  }
+
+  void _checkWinStateOnInit() {
+    // Check if already won (all 12 letters used) on initial load
+    if (_usedLetterIndices.length == 12) {
+      setState(() {
+        _hasWon = true;
+        _showCelebration = true;
+        _hasShownInitialCelebration = true;
+      });
+    }
   }
 
   void _updateUsedLetters() {
@@ -71,12 +89,25 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
         }
       }
     }
+
+    final wasWon = _hasWon;
     setState(() {
       _usedLetterIndices = used;
+      _hasWon = used.length == 12;
     });
+
+    // If just won (wasn't won before, but now is), show celebration
+    if (!wasWon && _hasWon) {
+      setState(() {
+        _showCelebration = true;
+      });
+    }
   }
 
   void _onWordComplete(List<int> indices) {
+    // Don't allow new words if already won
+    if (_hasWon) return;
+
     final gameEngine = context.getGameEngineData();
     final letters = gameEngine.lettersOfTheDay;
     final word = indices.map((i) => letters[i]).join();
@@ -92,6 +123,9 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   }
 
   void _onCurrentWordChanged(List<int> indices) {
+    // Don't allow new words if already won
+    if (_hasWon) return;
+
     final gameEngine = context.getGameEngineData();
     final letters = gameEngine.lettersOfTheDay;
 
@@ -110,6 +144,12 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
 
   void _onEraseLastWord() {
     context.addGameEvent(lexBoxEvents.EraseLastWord());
+  }
+
+  void _onCelebrationComplete() {
+    setState(() {
+      _showCelebration = false;
+    });
   }
 
   void _showSnackBar(String message) {
@@ -134,18 +174,23 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
         if (state is lexBoxStates.WordErased) {
           _showSnackBar('Erased: ${state.erasedWord.toUpperCase()}');
           _updateUsedLetters();
+          // Reset celebration if word is erased and no longer won
+          if (_usedLetterIndices.length < 12) {
+            setState(() {
+              _hasWon = false;
+              _showCelebration = false;
+            });
+          }
         } else if (state is lexBoxStates.GuessedWordResult) {
           switch (state.guessedWordState) {
             case LexBoxGuessedWordState.valid:
               _showSnackBar('Word accepted!');
               _updateUsedLetters();
             case LexBoxGuessedWordState.win:
-              _showSnackBar('Congratulations! You solved it!');
               _updateUsedLetters();
-              Future.delayed(const Duration(seconds: 2), () {
-                if (mounted) {
-                  context.addGameEvent(RequestStats());
-                }
+              setState(() {
+                _hasWon = true;
+                _showCelebration = true;
               });
             case LexBoxGuessedWordState.tooShort:
               _showSnackBar('Word is too short');
@@ -159,44 +204,85 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
           }
         }
       },
-      child: Column(
+      child: Stack(
         children: [
-          // Progress indicator
-          LettersProgressIndicator(
-            usedCount: _usedLetterIndices.length,
-            totalCount: 12,
+          // Main game content
+          Column(
+            children: [
+              // Progress indicator
+              LettersProgressIndicator(
+                usedCount: _usedLetterIndices.length,
+                totalCount: 12,
+              ),
+              const SizedBox(height: 8),
+              // Win badge (shown after celebration)
+              if (_hasWon && !_showCelebration)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: LexBoxWinBadge(),
+                ),
+              // Words list with erase button
+              Expanded(
+                flex: 2,
+                child: WordsListWidget(
+                  words: guessedWords,
+                  currentWord: null, // Current word shown in indicator instead
+                  onEraseLastWord:
+                      guessedWords.isNotEmpty ? _onEraseLastWord : null,
+                ),
+              ),
+              // Current word display - show disabled state if won
+              _CurrentWordIndicator(
+                currentWord: _currentWord,
+                isValid: _currentWord.length >= 3,
+                isDisabled: _hasWon,
+              ),
+              // Letter box
+              Expanded(
+                flex: 5,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: IgnorePointer(
+                    ignoring: _hasWon,
+                    child: Opacity(
+                      opacity: _hasWon ? 0.5 : 1.0,
+                      child: LetterBoxWidget(
+                        lettersOfTheDay: letters,
+                        currentWordIndices: _currentWordIndices,
+                        usedLetterIndices: _usedLetterIndices,
+                        onWordComplete: _onWordComplete,
+                        onWordCancelled: _onClearWord,
+                        onCurrentWordChanged: _onCurrentWordChanged,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          // Words list with erase button
-          Expanded(
-            flex: 2,
-            child: WordsListWidget(
-              words: guessedWords,
-              currentWord: null, // Current word shown in indicator instead
-              onEraseLastWord:
-                  guessedWords.isNotEmpty ? _onEraseLastWord : null,
-            ),
-          ),
-          // Current word display - always visible
-          _CurrentWordIndicator(
-            currentWord: _currentWord,
-            isValid: _currentWord.length >= 3,
-          ),
-          // Letter box
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: LetterBoxWidget(
-                lettersOfTheDay: letters,
-                currentWordIndices: _currentWordIndices,
-                usedLetterIndices: _usedLetterIndices,
-                onWordComplete: _onWordComplete,
-                onWordCancelled: _onClearWord,
-                onCurrentWordChanged: _onCurrentWordChanged,
+          // Win celebration overlay
+          if (_showCelebration)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _onCelebrationComplete,
+                child: ColoredBox(
+                  color: Theme.of(context)
+                      .scaffoldBackgroundColor
+                      .withValues(alpha: 0.9),
+                  child: LexBoxWinCelebration(
+                    lettersOfTheDay: letters,
+                    onAnimationComplete: () {
+                      // Auto-dismiss after 3 seconds
+                      Future.delayed(const Duration(seconds: 3), () {
+                        if (mounted && _showCelebration) {
+                          _onCelebrationComplete();
+                        }
+                      });
+                    },
+                  ),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -206,10 +292,12 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
 class _CurrentWordIndicator extends StatelessWidget {
   final String currentWord;
   final bool isValid;
+  final bool isDisabled;
 
   const _CurrentWordIndicator({
     required this.currentWord,
     required this.isValid,
+    this.isDisabled = false,
   });
 
   @override
@@ -217,6 +305,44 @@ class _CurrentWordIndicator extends StatelessWidget {
     final theme = Theme.of(context);
     final gameColor = GameColors.lexBoxPrimary;
     final hasWord = currentWord.isNotEmpty;
+
+    // Show "Puzzle Solved!" when disabled (won)
+    if (isDisabled) {
+      return Container(
+        height: 60,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: gameColor.withValues(alpha: 0.1),
+          borderRadius:
+              BorderRadius.circular(DesignConstants.borderRadiusMedium),
+          border: Border.all(
+            color: gameColor.withValues(alpha: 0.5),
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle_rounded,
+                color: gameColor,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Puzzle Solved! Erase to continue.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: gameColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Container(
       height: 60,

@@ -215,8 +215,11 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
     });
 
     final hitIndex = _findLetterAtPosition(details.localPosition);
-    if (hitIndex != null && !_tempWordIndices.contains(hitIndex)) {
-      if (_canSelectLetter(hitIndex)) {
+    if (hitIndex != null) {
+      // Allow same letter if it's not the last one (not consecutive)
+      final isLastLetter =
+          _tempWordIndices.isNotEmpty && _tempWordIndices.last == hitIndex;
+      if (!isLastLetter && _canSelectLetter(hitIndex)) {
         setState(() {
           _tempWordIndices.add(hitIndex);
         });
@@ -246,11 +249,17 @@ class _LetterBoxWidgetState extends State<LetterBoxWidget> {
   }
 
   int? _findLetterAtPosition(Offset position) {
-    const hitRadius = 40.0;
+    // Use smaller hit radius - user must actually reach the letter/indicator
+    const letterHitRadius = 25.0;
+    const indicatorHitRadius = 20.0;
+
     for (var lp in _letterPositions) {
-      // Check both letter center and indicator center
-      if ((lp.center - position).distance < hitRadius ||
-          (lp.indicatorCenter - position).distance < hitRadius) {
+      // Check if user has reached the letter text position
+      if ((lp.center - position).distance < letterHitRadius) {
+        return lp.index;
+      }
+      // Check if user has reached the indicator circle on the square
+      if ((lp.indicatorCenter - position).distance < indicatorHitRadius) {
         return lp.index;
       }
     }

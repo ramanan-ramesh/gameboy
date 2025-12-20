@@ -42,5 +42,9 @@ class AppDataRepository extends AppDataModifier {
           Game(
               name: AppConstants.alphaBoundGameIdentifier,
               description: 'Navigate the dictionary to find the secret word'),
+          Game(
+              name: AppConstants.lexBoxGameIdentifier,
+              description:
+                  'Make words by connecting letters on a square\'s sides. Use all 12 letters to win.'),
         ];
 }

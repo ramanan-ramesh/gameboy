@@ -88,40 +88,68 @@ class _GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.green, width: 2),
-      ),
-      child: InkResponse(
-        splashColor: Colors.white60,
-        containedInkWell: true,
-        customBorder: const CircleBorder(),
-        onTap: () {
-          context.addMasterPageEvent(LoadGame(game));
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: game.imageAsset
-                  .image(height: 175, width: 175, fit: BoxFit.cover),
+    return SizedBox(
+      width: 320,
+      height: 420,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Clickable circle with image and name only
+          Container(
+            width: 280,
+            height: 280,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.green, width: 2),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Text(
-                  game.name,
-                  style: Theme.of(context).textTheme.displaySmall,
+            child: Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                splashColor: Colors.white60,
+                onTap: () {
+                  context.addMasterPageEvent(LoadGame(game));
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: game.imageAsset
+                          .image(height: 150, width: 150, fit: BoxFit.cover),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          game.name,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          // Description outside the circle
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              game.description,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white70,
+                  ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -79,7 +79,9 @@ class _GamesListViewState extends State<GamesListView> {
                   scale: scaleFactor,
                   child: FittedBox(
                     fit: BoxFit.contain,
-                    child: _GameCard(game: gamesData.elementAt(index)),
+                    child: _GameCard(
+                        game: gamesData.elementAt(index),
+                        isBigLayout: isBigLayout),
                   ),
                 );
               },
@@ -93,8 +95,9 @@ class _GamesListViewState extends State<GamesListView> {
 
 class _GameCard extends StatelessWidget {
   final Game game;
+  final bool isBigLayout;
 
-  const _GameCard({required this.game});
+  const _GameCard({required this.game, required this.isBigLayout});
 
   @override
   Widget build(BuildContext context) {
@@ -102,16 +105,21 @@ class _GameCard extends StatelessWidget {
     final gameColor = GameColors.getPrimaryColor(game.name);
     final gameColorLight = GameColors.getSecondaryColor(game.name);
 
+    final cardWidth = isBigLayout ? 320.0 : 700.0;
+    final cardHeight = isBigLayout ? 420.0 : 850.0;
+    final circleSize = isBigLayout ? 280.0 : 650.0;
+    final imageSize = isBigLayout ? 140.0 : 420.0;
+
     return SizedBox(
-      width: 320,
-      height: 420,
+      width: cardWidth,
+      height: cardHeight,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Clickable circle with image and name only
           Container(
-            width: 280,
-            height: 280,
+            width: circleSize,
+            height: circleSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
@@ -146,8 +154,10 @@ class _GameCard extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: game.imageAsset
-                          .image(height: 140, width: 140, fit: BoxFit.cover),
+                      child: game.imageAsset.image(
+                          height: imageSize,
+                          width: imageSize,
+                          fit: BoxFit.cover),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -155,7 +165,10 @@ class _GameCard extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         child: Text(
                           game.name,
-                          style: theme.textTheme.headlineSmall?.copyWith(
+                          style: (isBigLayout
+                                  ? theme.textTheme.headlineSmall
+                                  : theme.textTheme.displayLarge)
+                              ?.copyWith(
                             color: gameColor,
                             fontWeight: FontWeight.bold,
                           ),
@@ -168,14 +181,19 @@ class _GameCard extends StatelessWidget {
             ),
           ),
           // Description outside the circle
-          const SizedBox(height: 16),
+          SizedBox(height: isBigLayout ? 16 : 24),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding:
+                EdgeInsets.symmetric(horizontal: isBigLayout ? 24.0 : 40.0),
             child: Text(
               game.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
+              style: isBigLayout
+                  ? theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    )
+                  : theme.textTheme.headlineLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,

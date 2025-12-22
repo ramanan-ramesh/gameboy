@@ -6,6 +6,7 @@ abstract class LexBoxGameEngine extends GameEngine {
   String get lettersOfTheDay;
   Iterable<String> get guessedWords;
   int get currentWordCount => guessedWords.length;
+  bool get isWon;
 }
 
 abstract class LexBoxGameEngineDriver extends LexBoxGameEngine {

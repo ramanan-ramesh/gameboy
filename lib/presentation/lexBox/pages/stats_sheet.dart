@@ -8,7 +8,6 @@ class LexBoxStatsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stats = context.getStatsRepository();
-    final theme = Theme.of(context);
     final gameColor = GameColors.lexBoxPrimary;
 
     return Container(
@@ -16,43 +15,42 @@ class LexBoxStatsSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'Statistics',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
           // First row: Wins and Current Streak
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _StatItem(
-                value: stats.winCount.toString(),
-                label: 'Wins',
-                color: gameColor,
+              Expanded(
+                child: _StatItem(
+                  value: stats.winCount.toString(),
+                  label: 'Wins',
+                  color: gameColor,
+                ),
               ),
-              _StatItem(
-                value: stats.currentStreak.toString(),
-                label: 'Current Streak',
-                color: gameColor,
+              Expanded(
+                child: _StatItem(
+                  value: stats.currentStreak.toString(),
+                  label: 'Current Streak',
+                  color: gameColor,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 24),
           // Second row: Max Streak and Words Today
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _StatItem(
-                value: stats.maximumStreak.toString(),
-                label: 'Max Streak',
-                color: gameColor,
+              Expanded(
+                child: _StatItem(
+                  value: stats.maximumStreak.toString(),
+                  label: 'Max Streak',
+                  color: gameColor,
+                ),
               ),
-              _StatItem(
-                value: stats.wordsSubmittedToday.length.toString(),
-                label: 'Words Today',
-                color: gameColor,
+              Expanded(
+                child: _StatItem(
+                  value: stats.wordsSubmittedToday.length.toString(),
+                  label: 'Words Today',
+                  color: gameColor,
+                ),
               ),
             ],
           ),

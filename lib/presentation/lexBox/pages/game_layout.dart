@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/events.dart' as gameEvents;
 import 'package:gameboy/blocs/game/states.dart' as appGameState;
 import 'package:gameboy/blocs/lexBox/events.dart' as lexBoxEvents;
 import 'package:gameboy/blocs/lexBox/states.dart' as lexBoxStates;
@@ -55,27 +56,11 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   String _currentWord = '';
   bool _hasWon = false;
   bool _showCelebration = false;
-  bool _hasShownInitialCelebration = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateUsedLetters();
-    // Show celebration on initial load if already won
-    if (!_hasShownInitialCelebration) {
-      _checkWinStateOnInit();
-    }
-  }
-
-  void _checkWinStateOnInit() {
-    // Check if already won (all 12 letters used) on initial load
-    if (_usedLetterIndices.length == 12) {
-      setState(() {
-        _hasWon = true;
-        _showCelebration = true;
-        _hasShownInitialCelebration = true;
-      });
-    }
   }
 
   void _updateUsedLetters() {
@@ -149,10 +134,12 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
     context.addGameEvent(lexBoxEvents.EraseLastWord());
   }
 
-  void _onCelebrationComplete() {
+  void _onCelebrationComplete(BuildContext context) {
     setState(() {
       _showCelebration = false;
     });
+    // Show stats sheet after celebration
+    context.addGameEvent(gameEvents.RequestStats());
   }
 
   void _showSnackBar(String message) {
@@ -174,7 +161,14 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
 
     return BlocListener<GameBloc, appGameState.GameState>(
       listener: (context, state) {
-        if (state is lexBoxStates.WordErased) {
+        if (state is lexBoxStates.LexBoxWinOnStartup) {
+          // Show celebration on startup if already won
+          _updateUsedLetters();
+          setState(() {
+            _hasWon = true;
+            _showCelebration = true;
+          });
+        } else if (state is lexBoxStates.WordErased) {
           _showSnackBar('Erased: ${state.erasedWord.toUpperCase()}');
           _updateUsedLetters();
           // Reset celebration if word is erased and no longer won
@@ -267,7 +261,7 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
           if (_showCelebration)
             Positioned.fill(
               child: GestureDetector(
-                onTap: _onCelebrationComplete,
+                onTap: () => _onCelebrationComplete(context),
                 child: ColoredBox(
                   color: Theme.of(context)
                       .scaffoldBackgroundColor
@@ -275,10 +269,10 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
                   child: LexBoxWinCelebration(
                     lettersOfTheDay: letters,
                     onAnimationComplete: () {
-                      // Auto-dismiss after 3 seconds
+                      // Auto-dismiss after 3 seconds and show stats
                       Future.delayed(const Duration(seconds: 3), () {
                         if (mounted && _showCelebration) {
-                          _onCelebrationComplete();
+                          _onCelebrationComplete(context);
                         }
                       });
                     },

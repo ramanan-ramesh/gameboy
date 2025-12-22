@@ -26,6 +26,9 @@ class LexBoxGameEngineImpl implements LexBoxGameEngineDriver {
   int get currentWordCount => guessedWords.length;
 
   @override
+  bool get isWon => _isWin(guessedWords);
+
+  @override
   Future<LexBoxGuessedWordState> trySubmitWord(String word) async {
     word = word.toLowerCase();
     if (word.length < 3) {

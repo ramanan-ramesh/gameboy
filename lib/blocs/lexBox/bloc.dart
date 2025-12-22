@@ -32,6 +32,9 @@ class LexBoxBloc extends GameBloc<LexBoxEvent, LexBoxState, LexBoxStatsModifier,
 
   @override
   FutureOr<LexBoxState?> getGameStateOnStartup() {
+    if (gameEngine.isWon) {
+      return LexBoxWinOnStartup();
+    }
     return null;
   }
 

@@ -92,7 +92,8 @@ class UserManagement implements UserManagementModifier {
       String userName) async {
     var userQuery = FirebaseDatabase.instance
         .ref(_usersDBCollectionName)
-        .equalTo(userName, key: _userNameField);
+        .orderByChild(_userNameField)
+        .equalTo(userName);
     var userQuerySnapshot = await userQuery.get();
     var userDocuments = userQuerySnapshot.children;
     if (userDocuments.isNotEmpty) {

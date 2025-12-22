@@ -4,6 +4,8 @@ abstract class LexBoxStatistics extends Statistics {
   Iterable<String> get wordsSubmittedToday;
   String get lettersOfTheDay;
   int get winCount;
+  int get currentStreak;
+  int get maximumStreak;
 }
 
 abstract class LexBoxStatsModifier extends LexBoxStatistics {

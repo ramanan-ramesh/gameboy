@@ -6,6 +6,7 @@ import 'package:gameboy/blocs/game/states.dart' as appGameState;
 import 'package:gameboy/blocs/wordsy/states.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
+import 'package:gameboy/presentation/app/pages/game_content_page/snackbar_service.dart';
 import 'package:gameboy/presentation/wordsy/extensions.dart';
 import 'package:gameboy/presentation/wordsy/pages/stats_sheet.dart';
 import 'package:gameboy/presentation/wordsy/widgets/guesses_layout.dart';
@@ -69,16 +70,11 @@ class WordsyLayout implements GameLayout {
   }
 
   void _onGameWon(GameWon gameWon, BuildContext context) {
-    Future.delayed(Duration(seconds: gameWon.isStartup ? 2 : 6), () {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_getWinMessage(gameWon.guessedIndex)),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
-    });
+    context.showGameSnackBarDelayed(
+      _getWinMessage(gameWon.guessedIndex),
+      delay: Duration(seconds: gameWon.isStartup ? 2 : 6),
+      duration: const Duration(seconds: 1),
+    );
     Future.delayed(Duration(seconds: gameWon.isStartup ? 4 : 9), () {
       if (context.mounted) {
         context.addGameEvent(RequestStats());
@@ -88,16 +84,11 @@ class WordsyLayout implements GameLayout {
 
   void _onGameLost(GameLost gameLost, BuildContext context) {
     var wordOfTheDay = context.getGameEngineData().wordOfTheDay.toUpperCase();
-    Future.delayed(Duration(seconds: gameLost.isStartup ? 2 : 6), () {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('You lost! The word was $wordOfTheDay'),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
-    });
+    context.showGameSnackBarDelayed(
+      'You lost! The word was $wordOfTheDay',
+      delay: Duration(seconds: gameLost.isStartup ? 2 : 6),
+      duration: const Duration(seconds: 1),
+    );
 
     Future.delayed(Duration(milliseconds: gameLost.isStartup ? 4000 : 7520),
         () {

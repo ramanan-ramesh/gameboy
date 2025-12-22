@@ -55,10 +55,13 @@ class LexBoxBloc extends GameBloc<LexBoxEvent, LexBoxState, LexBoxStatsModifier,
 
   FutureOr<void> _onEraseLastWord(
       EraseLastWord event, Emitter<GameState> emit) async {
-    final erasedWord = gameEngine.eraseLastWord();
-    if (erasedWord != null) {
-      await stats.eraseLastWord();
-      emit(WordErased(erasedWord));
+    var didWinAlready = gameEngine.isWon;
+    if (!didWinAlready) {
+      final erasedWord = gameEngine.eraseLastWord();
+      if (erasedWord != null) {
+        await stats.eraseLastWord();
+        emit(WordErased(erasedWord));
+      }
     }
   }
 }

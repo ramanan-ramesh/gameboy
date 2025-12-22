@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/blocs/game/bloc.dart';
-import 'package:gameboy/blocs/game/events.dart' as gameEvents;
-import 'package:gameboy/blocs/game/states.dart' as appGameState;
-import 'package:gameboy/blocs/lexBox/events.dart' as lexBoxEvents;
-import 'package:gameboy/blocs/lexBox/states.dart' as lexBoxStates;
+import 'package:gameboy/blocs/game/events.dart';
+import 'package:gameboy/blocs/game/states.dart';
+import 'package:gameboy/blocs/lexBox/events.dart';
+import 'package:gameboy/blocs/lexBox/states.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/lexBox/models/guessed_word_state.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_layout.dart';
+import 'package:gameboy/presentation/app/pages/game_content_page/snackbar_service.dart';
 import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/lexBox/extensions.dart';
 import 'package:gameboy/presentation/lexBox/widgets/letter_box_widget.dart';
@@ -101,7 +102,7 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
     final word = indices.map((i) => letters[i]).join();
 
     if (word.length >= 3) {
-      context.addGameEvent(lexBoxEvents.SubmitWord(word));
+      context.addGameEvent(SubmitWord(word));
     }
 
     setState(() {
@@ -131,7 +132,7 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   }
 
   void _onEraseLastWord() {
-    context.addGameEvent(lexBoxEvents.EraseLastWord());
+    context.addGameEvent(EraseLastWord());
   }
 
   void _onCelebrationComplete(BuildContext context) {
@@ -139,17 +140,12 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
       _showCelebration = false;
     });
     // Show stats sheet after celebration
-    context.addGameEvent(gameEvents.RequestStats());
+    context.addGameEvent(RequestStats());
   }
 
   void _showSnackBar(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      context.showGameSnackBar(message);
     }
   }
 
@@ -159,16 +155,16 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
     final letters = gameEngine.lettersOfTheDay;
     final guessedWords = gameEngine.guessedWords.toList();
 
-    return BlocListener<GameBloc, appGameState.GameState>(
+    return BlocListener<GameBloc, GameState>(
       listener: (context, state) {
-        if (state is lexBoxStates.LexBoxWinOnStartup) {
+        if (state is LexBoxWinOnStartup) {
           // Show celebration on startup if already won
           _updateUsedLetters();
           setState(() {
             _hasWon = true;
             _showCelebration = true;
           });
-        } else if (state is lexBoxStates.WordErased) {
+        } else if (state is WordErased) {
           _showSnackBar('Erased: ${state.erasedWord.toUpperCase()}');
           _updateUsedLetters();
           // Reset celebration if word is erased and no longer won
@@ -178,7 +174,7 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
               _showCelebration = false;
             });
           }
-        } else if (state is lexBoxStates.GuessedWordResult) {
+        } else if (state is GuessedWordResult) {
           switch (state.guessedWordState) {
             case LexBoxGuessedWordState.valid:
               _showSnackBar('Word accepted!');
@@ -224,8 +220,9 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
                 child: WordsListWidget(
                   words: guessedWords,
                   currentWord: null, // Current word shown in indicator instead
-                  onEraseLastWord:
-                      guessedWords.isNotEmpty ? _onEraseLastWord : null,
+                  onEraseLastWord: guessedWords.isNotEmpty && !_hasWon
+                      ? _onEraseLastWord
+                      : null,
                 ),
               ),
               // Current word display - show disabled state if won
@@ -329,7 +326,7 @@ class _CurrentWordIndicator extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Puzzle Solved! Erase to continue.',
+                'Puzzle Solved!',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: gameColor,
                   fontWeight: FontWeight.w600,

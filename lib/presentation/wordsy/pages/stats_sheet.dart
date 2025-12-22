@@ -142,7 +142,8 @@ class _WinDistribution extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Text('$index', style: Theme.of(context).textTheme.titleLarge!),
+      leading:
+          Text('${index + 1}', style: Theme.of(context).textTheme.titleLarge!),
       title: winPercentage == 0
           ? const SizedBox.shrink()
           : LinearProgressIndicator(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gameboy/data/beeWise/models/constants.dart';
 import 'package:gameboy/data/beeWise/models/score.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 import 'package:gameboy/presentation/beeWise/extensions.dart';
 
 class ScoreBar extends StatelessWidget {
@@ -17,7 +18,13 @@ class ScoreBar extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(currentScore.rank),
+          child: Text(
+            currentScore.rank,
+            style: TextStyle(
+              color: GameColors.beeWisePrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         Expanded(
           child: Padding(
@@ -33,7 +40,10 @@ class ScoreBar extends StatelessWidget {
   }
 
   Widget _buildRankIndicators(Score score, BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     var numberOfRanks = BeeWiseConstants.ranks.length;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         double availableWidth = constraints.maxWidth;
@@ -47,7 +57,7 @@ class ScoreBar extends StatelessWidget {
           children: [
             Container(
               height: 2,
-              color: Colors.white,
+              color: isDark ? Colors.white24 : Colors.black26,
               width: availableWidth,
             ),
             for (int i = 0; i <= numberOfRanks; i++)
@@ -55,12 +65,18 @@ class ScoreBar extends StatelessWidget {
                 left: (_rankIndicatorDiameter + averageEmptySpacing) * i,
                 child: CircleAvatar(
                   radius: _rankIndicatorRadius,
-                  backgroundColor: Colors.yellow,
+                  backgroundColor: i <= score.rankIndex
+                      ? GameColors.beeWisePrimary
+                      : (isDark
+                          ? const Color(0xFF3D3D54)
+                          : const Color(0xFFE0E0E8)),
                   child: i == score.rankIndex
                       ? Text(
                           score.score.toString(),
                           style: const TextStyle(
-                              color: Colors.black, fontSize: 12),
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold),
                         )
                       : null,
                 ),

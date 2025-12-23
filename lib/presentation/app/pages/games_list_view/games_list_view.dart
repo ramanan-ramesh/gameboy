@@ -8,6 +8,7 @@ import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/extensions.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_content_page.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/app_bar.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class GamesListView extends StatefulWidget {
   const GamesListView({super.key});
@@ -54,7 +55,16 @@ class _GamesListViewState extends State<GamesListView> {
       },
       child: LayoutBuilder(builder: (context, constraints) {
         var isBigLayout = constraints.minWidth > 1000;
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        // Scaffold background distinct from app bar
+        final scaffoldBackground = isDark
+            ? AppColors.darkBackground // Pure dark background
+            : const Color(0xFFF8F8FC); // Very light gray-purple
+
         return Scaffold(
+          backgroundColor: scaffoldBackground,
           appBar: const HomeAppBar(),
           body: Center(
             child: PageView.builder(
@@ -69,7 +79,9 @@ class _GamesListViewState extends State<GamesListView> {
                   scale: scaleFactor,
                   child: FittedBox(
                     fit: BoxFit.contain,
-                    child: _GameCard(game: gamesData.elementAt(index)),
+                    child: _GameCard(
+                        game: gamesData.elementAt(index),
+                        isBigLayout: isBigLayout),
                   ),
                 );
               },
@@ -83,45 +95,111 @@ class _GamesListViewState extends State<GamesListView> {
 
 class _GameCard extends StatelessWidget {
   final Game game;
+  final bool isBigLayout;
 
-  const _GameCard({required this.game});
+  const _GameCard({required this.game, required this.isBigLayout});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      height: 300,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.green, width: 2),
-      ),
-      child: InkResponse(
-        splashColor: Colors.white60,
-        containedInkWell: true,
-        customBorder: const CircleBorder(),
-        onTap: () {
-          context.addMasterPageEvent(LoadGame(game));
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: game.imageAsset
-                  .image(height: 175, width: 175, fit: BoxFit.cover),
+    final theme = Theme.of(context);
+    final gameColor = GameColors.getPrimaryColor(game.name);
+    final gameColorLight = GameColors.getSecondaryColor(game.name);
+
+    final cardWidth = isBigLayout ? 320.0 : 700.0;
+    final cardHeight = isBigLayout ? 420.0 : 850.0;
+    final circleSize = isBigLayout ? 280.0 : 650.0;
+    final imageSize = isBigLayout ? 140.0 : 420.0;
+
+    return SizedBox(
+      width: cardWidth,
+      height: cardHeight,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Clickable circle with image and name only
+          Container(
+            width: circleSize,
+            height: circleSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  gameColor.withValues(alpha: 0.1),
+                  Colors.transparent,
+                ],
+                stops: const [0.5, 1.0],
+              ),
+              border: Border.all(color: gameColor, width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: gameColor.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5.0),
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Text(
-                  game.name,
-                  style: Theme.of(context).textTheme.displaySmall,
+            child: Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                splashColor: gameColorLight.withValues(alpha: 0.3),
+                highlightColor: gameColor.withValues(alpha: 0.1),
+                onTap: () {
+                  context.addMasterPageEvent(LoadGame(game));
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: game.imageAsset.image(
+                          height: imageSize,
+                          width: imageSize,
+                          fit: BoxFit.cover),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          game.name,
+                          style: (isBigLayout
+                                  ? theme.textTheme.headlineSmall
+                                  : theme.textTheme.displayLarge)
+                              ?.copyWith(
+                            color: gameColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          // Description outside the circle
+          SizedBox(height: isBigLayout ? 16 : 24),
+          Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: isBigLayout ? 24.0 : 40.0),
+            child: Text(
+              game.description,
+              style: isBigLayout
+                  ? theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    )
+                  : theme.textTheme.headlineLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

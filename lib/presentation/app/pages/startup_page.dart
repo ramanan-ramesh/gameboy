@@ -7,6 +7,7 @@ import 'package:gameboy/blocs/app/events.dart';
 import 'package:gameboy/blocs/bloc_extensions.dart';
 import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/presentation/app/extensions.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class _BackgroundLetterData {
   final String char;
@@ -92,9 +93,9 @@ class _StartupPageState extends State<StartupPage> {
               children: [
                 const AppLogo(fontSize: 60),
                 const Spacer(),
-                _buildHeroHeadline(fontSize: 80),
+                _buildHeroHeadline(context, fontSize: 80),
                 const SizedBox(height: 24),
-                _buildHeroSubtitle(fontSize: 20),
+                _buildHeroSubtitle(context, fontSize: 20),
                 const SizedBox(height: 48),
                 const GoogleSignInButton(scale: 1.2),
                 const Spacer(),
@@ -118,7 +119,7 @@ class _StartupPageState extends State<StartupPage> {
             child: Center(
               child: SizedBox(
                 height: 400,
-                child: GamesListView(cardWidth: 280, cardHeight: 350),
+                child: _GamesListView(cardWidth: 280, cardHeight: 350),
               ),
             ),
           ),
@@ -137,23 +138,23 @@ class _StartupPageState extends State<StartupPage> {
           children: [
             const AppLogo(fontSize: 40),
             const Spacer(),
-            _buildHeroHeadline(fontSize: 42),
+            _buildHeroHeadline(context, fontSize: 42),
             const SizedBox(height: 16),
-            _buildHeroSubtitle(fontSize: 16),
+            _buildHeroSubtitle(context, fontSize: 16),
             const SizedBox(height: 32),
             const Center(child: GoogleSignInButton(scale: 1.0)),
             const Spacer(),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12.0),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
               child: Text("TRENDING GAMES",
                   style: TextStyle(
-                      color: Colors.cyanAccent,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2)),
             ),
             const SizedBox(
               height: 230,
-              child: GamesListView(cardWidth: 140, cardHeight: 160),
+              child: _GamesListView(cardWidth: 140, cardHeight: 160),
             ),
           ],
         ),
@@ -161,26 +162,34 @@ class _StartupPageState extends State<StartupPage> {
     );
   }
 
-  Widget _buildHeroHeadline({required double fontSize}) {
+  Widget _buildHeroHeadline(BuildContext context, {required double fontSize}) {
+    final theme = Theme.of(context);
     return Text(
       "PLAY\nSPELL\nCONQUER",
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.w900,
         height: 0.95,
-        color: Colors.white,
-        shadows: const [
+        color: theme.colorScheme.onSurface,
+        shadows: [
           Shadow(
-              color: Color(0xFF6C63FF), offset: Offset(4, 4), blurRadius: 10),
+              color: AppColors.brandPrimary,
+              offset: const Offset(4, 4),
+              blurRadius: 10),
         ],
       ),
     );
   }
 
-  Widget _buildHeroSubtitle({required double fontSize}) {
+  Widget _buildHeroSubtitle(BuildContext context, {required double fontSize}) {
+    final theme = Theme.of(context);
     return Text(
       "Compete, solve, and dominate the leaderboard.\nThe ultimate arcade for word puzzle lovers.",
-      style: TextStyle(fontSize: fontSize, color: Colors.white60, height: 1.5),
+      style: TextStyle(
+        fontSize: fontSize,
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        height: 1.5,
+      ),
     );
   }
 }
@@ -193,23 +202,27 @@ class ScatteredLettersBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get total screen size to calculate relative positions
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final Size screenSize = MediaQuery.of(context).size;
 
     return DecoratedBox(
-      // Black-based gradient base
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF000000), // Pure Black
-            Color(0xFF121212), // Very deep charcoal
-          ],
+          colors: isDark
+              ? [
+                  const Color(0xFF0A0A0A),
+                  const Color(0xFF121212),
+                ]
+              : [
+                  const Color(0xFFF5F5F5),
+                  const Color(0xFFE8E8E8),
+                ],
         ),
       ),
       child: Stack(
-        // Map the generated letter data into Positioned widgets
         children: letters.map((data) {
           return Positioned(
             left: data.xPosRatio * screenSize.width,
@@ -221,8 +234,8 @@ class ScatteredLettersBackground extends StatelessWidget {
                 style: TextStyle(
                   fontSize: data.size,
                   fontWeight: FontWeight.w900,
-                  // Very low opacity white for subtle background noise
-                  color: Colors.white.withValues(alpha: data.opacity),
+                  color: theme.colorScheme.onSurface
+                      .withValues(alpha: data.opacity),
                 ),
               ),
             ),
@@ -233,12 +246,11 @@ class ScatteredLettersBackground extends StatelessWidget {
   }
 }
 
-class GamesListView extends StatelessWidget {
+class _GamesListView extends StatelessWidget {
   final double cardWidth;
   final double cardHeight;
 
-  const GamesListView(
-      {super.key, required this.cardWidth, required this.cardHeight});
+  const _GamesListView({required this.cardWidth, required this.cardHeight});
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +290,9 @@ class GlassGameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gameColor = GameColors.getPrimaryColor(game.name);
+
     return Container(
       width: width,
       margin: const EdgeInsets.only(right: 20),
@@ -290,12 +305,12 @@ class GlassGameCard extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                      alpha:
-                          0.05), // Slightly more transparent for darker theme
+                  color: theme.colorScheme.surface.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(24),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  border: Border.all(
+                    color: gameColor.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
                 ),
               ),
             ),
@@ -305,13 +320,13 @@ class GlassGameCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _createGameLogoWithName(),
+                  _createGameLogoWithName(context, gameColor),
                   const Spacer(),
                   Text(
                     description,
                     style: TextStyle(
                       fontSize: width * 0.08,
-                      color: Colors.white70,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       height: 1.2,
                     ),
                   ),
@@ -324,7 +339,7 @@ class GlassGameCard extends StatelessWidget {
     );
   }
 
-  Widget _createGameLogoWithName() {
+  Widget _createGameLogoWithName(BuildContext context, Color gameColor) {
     return Column(
       children: [
         Container(
@@ -340,7 +355,7 @@ class GlassGameCard extends StatelessWidget {
           style: TextStyle(
             fontSize: width * 0.12,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: gameColor,
           ),
         ),
       ],

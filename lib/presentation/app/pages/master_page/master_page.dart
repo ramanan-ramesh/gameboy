@@ -6,11 +6,11 @@ import 'package:gameboy/data/app/extensions.dart';
 import 'package:gameboy/data/app/models/app_data.dart';
 import 'package:gameboy/data/auth/models/status.dart';
 import 'package:gameboy/presentation/app/pages/games_list_view/games_list_view.dart';
-import 'package:gameboy/presentation/app/pages/startup_page.dart'
-    hide GamesListView;
-import 'package:gameboy/presentation/app/theming/dark_theme_data.dart';
+import 'package:gameboy/presentation/app/pages/startup_page.dart';
+import 'package:gameboy/presentation/app/theming/light_theme_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../theming/dark_theme_data.dart';
 import 'update_dialog.dart';
 
 class MasterPage extends StatelessWidget {
@@ -45,17 +45,19 @@ class _ContentPageLoader extends State<_ContentPageRouter> {
   Widget build(BuildContext context) {
     return BlocConsumer<MasterPageBloc, MasterPageState>(
       builder: (BuildContext pageContext, MasterPageState state) {
+        var appLevelData = context.appDataRepository;
+        var currentTheme = appLevelData.activeThemeMode;
         return MaterialApp(
           title: _appTitle,
           debugShowCheckedModeBanner: false,
-          darkTheme: createDarkThemeData(context),
-          themeMode: ThemeMode.dark,
-          theme: createDarkThemeData(context),
+          darkTheme: createDarkThemeData(),
+          themeMode: currentTheme,
+          theme: createLightThemeData(),
           home: _ContentPage(),
         );
       },
       buildWhen: (previousState, currentState) =>
-          currentState is AuthStateChanged,
+          currentState is ThemeModeToggled,
       listener: (BuildContext context, MasterPageState state) {},
     );
   }
@@ -68,12 +70,10 @@ class _ContentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<MasterPageBloc, MasterPageState>(
       builder: (BuildContext pageContext, MasterPageState state) => Material(
-        child: DropdownButtonHideUnderline(
-          child: SafeArea(
-            child: context.activeUser == null
-                ? const StartupPage()
-                : const GamesListView(),
-          ),
+        child: SafeArea(
+          child: context.activeUser == null
+              ? const StartupPage()
+              : const GamesListView(),
         ),
       ),
       buildWhen: (previousState, currentState) =>

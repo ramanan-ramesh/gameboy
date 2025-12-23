@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/blocs/alphaBound/states.dart';
 import 'package:gameboy/blocs/game/bloc.dart';
+import 'package:gameboy/blocs/game/events.dart' as gameEvents;
 import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
@@ -65,6 +66,14 @@ class GuessesLayout extends StatelessWidget {
   Widget _createGuessLetterRangeLayout() {
     return BlocConsumer<GameBloc, GameState>(
       builder: (BuildContext context, GameState state) {
+        // Show stats after a delay for win/loss
+        if (state is AlphaBoundGameState && state.isStartup) {
+          if (state.gameStatus is GameWon || state.gameStatus is GameLost) {
+            Future.delayed(const Duration(seconds: 3), () {
+              context.read<GameBloc>().add(gameEvents.RequestStats());
+            });
+          }
+        }
         var currentGameState = context.getGameEngineData().currentState;
         var lowerBoundStartLetters = currentGameState.lowerBound[0];
         var upperBoundStartLetters = currentGameState.upperBound[0];

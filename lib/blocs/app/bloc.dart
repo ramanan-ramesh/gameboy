@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/blocs/alphaBound/bloc.dart';
 import 'package:gameboy/blocs/beeWise/bloc.dart';
 import 'package:gameboy/blocs/game/game_data.dart';
+import 'package:gameboy/blocs/lexBox/bloc.dart';
 import 'package:gameboy/blocs/wordsy/bloc.dart';
 import 'package:gameboy/data/app/constants.dart';
 import 'package:gameboy/data/app/implementations/app_data_repository.dart';
@@ -13,6 +14,7 @@ import 'package:gameboy/data/app/models/game.dart';
 import 'package:gameboy/data/auth/models/status.dart';
 import 'package:gameboy/presentation/alphaBound/pages/game_layout.dart';
 import 'package:gameboy/presentation/beeWise/pages/game_layout.dart';
+import 'package:gameboy/presentation/lexBox/pages/game_layout.dart';
 import 'package:gameboy/presentation/wordsy/pages/game_layout.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,6 +41,7 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
     on<AuthenticateWithGoogle>(_onAuthenticateWithGoogle);
     on<Logout>(_onLogout);
     on<LoadGame>(_onLoadGame);
+    on<ToggleThemeMode>(_onToggleThemeMode);
     on<_UpdateAvailableInternal>((event, emit) {
       emit(UpdateAvailable(updateInfo: event.updateInfo));
     });
@@ -94,6 +97,12 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
     if (gameData != null) {
       emit(LoadedGame(gameData: gameData));
     }
+  }
+
+  FutureOr<void> _onToggleThemeMode(
+      ToggleThemeMode event, Emitter<MasterPageState> emit) async {
+    await _appDataRepository!.toggleThemeMode();
+    emit(ThemeModeToggled());
   }
 
   Future<void> _initUpdateListener() async {
@@ -155,6 +164,11 @@ class MasterPageBloc extends Bloc<MasterPageEvent, MasterPageState> {
         return GameData<AlphaBoundBloc>(
             gameBloc: AlphaBoundBloc(userId),
             gameLayout: AlphaBoundLayout(),
+            game: game);
+      case AppConstants.lexBoxGameIdentifier:
+        return GameData<LexBoxBloc>(
+            gameBloc: LexBoxBloc(userId),
+            gameLayout: LexBoxLayout(),
             game: game);
       default:
         return null;

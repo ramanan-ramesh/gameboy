@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class GuessWordsDisplay extends StatelessWidget {
   final List<String> words;
@@ -8,47 +9,37 @@ class GuessWordsDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate the height of each word item (e.g., Text with padding)
-        const double itemHeight = 32.0; // Adjust based on your design
-        final itemsPerColumn = (constraints.maxHeight / itemHeight).floor();
+    final theme = Theme.of(context);
 
-        // Divide words into sublists based on dynamic itemsPerColumn
-        List<List<String>> columns = [];
-        for (var i = 0; i < words.length; i += itemsPerColumn) {
-          columns.add(words.sublist(
-            i,
-            i + itemsPerColumn > words.length
-                ? words.length
-                : i + itemsPerColumn,
-          ));
-        }
+    if (words.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: columns.map((columnWords) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Column(
-                  children: columnWords.map((word) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        word.toUpperCase(),
-                        style: const TextStyle(
-                            fontSize: 16, decoration: TextDecoration.underline),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
+    return SingleChildScrollView(
+      child: Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
+        children: words.map((word) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: GameColors.beeWisePrimary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: GameColors.beeWisePrimary.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              word.toUpperCase(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }

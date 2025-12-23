@@ -35,7 +35,7 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
         return Container(
           child: _animationComplete
               ? null
-              : _createAnimatedGuessWordState(gameEngineData),
+              : _createAnimatedGuessWordState(context, gameEngineData),
         );
       },
       buildWhen: (previousState, currentState) {
@@ -46,7 +46,8 @@ class _AnimatedGuessWordStateState extends State<AnimatedGuessWordState> {
     );
   }
 
-  Widget? _createAnimatedGuessWordState(AlphaBoundGameEngine gameEngineData) {
+  Widget? _createAnimatedGuessWordState(
+      BuildContext context, AlphaBoundGameEngine gameEngineData) {
     final textStyle = Theme.of(context).textTheme.headlineLarge!.copyWith(
       color: Colors.red,
       shadows: [

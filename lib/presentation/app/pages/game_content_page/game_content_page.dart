@@ -10,6 +10,7 @@ import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/app/models/game_engine.dart';
 import 'package:gameboy/data/app/models/stats.dart';
 import 'package:gameboy/presentation/app/pages/game_content_page/game_app_bar.dart';
+import 'package:gameboy/presentation/app/pages/game_content_page/snackbar_service.dart';
 import 'package:rive/rive.dart';
 
 class GameContentPage extends StatelessWidget {
@@ -126,6 +127,13 @@ class _GameLayoutState extends State<_GameLayout> {
   late double _layoutHeight;
   BuildContext? _statsSheetPopupContext;
   BuildContext? _tutorialSheetPopupContext;
+  final SnackBarService _snackBarService = SnackBarService();
+
+  @override
+  void dispose() {
+    _snackBarService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,20 +163,28 @@ class _GameLayoutState extends State<_GameLayout> {
                 _calculateLayoutConstraints(
                     constraints.maxWidth, constraints.maxHeight);
             _layoutHeight = layoutHeight;
-            return Scaffold(
-              appBar: GameAppBar(
-                game: widget.gameData.game,
-                contentWidth: appBarWidth,
-                height: _appBarHeight,
-              ),
-              body: SingleChildScrollView(
-                child: Center(
-                  child: SizedBox(
-                    width: layoutWidth,
-                    height: layoutHeight,
-                    child: widget.gameData.gameLayout
-                        .buildGameLayout(context, layoutWidth, layoutHeight),
-                  ),
+            return SnackBarServiceProvider(
+              service: _snackBarService,
+              child: Scaffold(
+                appBar: GameAppBar(
+                  game: widget.gameData.game,
+                  contentWidth: appBarWidth,
+                  height: _appBarHeight,
+                ),
+                body: Builder(
+                  builder: (scaffoldContext) {
+                    _snackBarService.setScaffoldContext(scaffoldContext);
+                    return SingleChildScrollView(
+                      child: Center(
+                        child: SizedBox(
+                          width: layoutWidth,
+                          height: layoutHeight,
+                          child: widget.gameData.gameLayout.buildGameLayout(
+                              scaffoldContext, layoutWidth, layoutHeight),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             );

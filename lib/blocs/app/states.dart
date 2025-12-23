@@ -28,6 +28,8 @@ class UpdateAvailable extends MasterPageState {
   UpdateAvailable({required this.updateInfo});
 }
 
+class ThemeModeToggled extends MasterPageState {}
+
 class UpdateInfo {
   final String latestVersion;
   final bool isForceUpdate;

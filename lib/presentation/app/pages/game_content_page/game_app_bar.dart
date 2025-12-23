@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gameboy/blocs/game/bloc.dart';
 import 'package:gameboy/blocs/game/events.dart';
 import 'package:gameboy/data/app/models/game.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? contentWidth;
@@ -12,36 +13,69 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => Size.fromHeight(height);
 
-  const GameAppBar(
-      {super.key, this.contentWidth, required this.game, required this.height});
+  const GameAppBar({
+    super.key,
+    this.contentWidth,
+    required this.game,
+    required this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final gameColor = GameColors.getPrimaryColor(game.name);
+
+    // Distinct app bar colors for game page
+    final appBarBackground = isDark
+        ? const Color(0xFF1A1A2E) // Deep navy for dark mode
+        : Colors.white;
+    final controlBackground = isDark
+        ? const Color(0xFF2D2D44) // Slightly lighter for controls
+        : const Color(0xFFF0F0F5);
+    final iconColor = isDark ? gameColor : gameColor;
+
+    return Container(
       height: height,
-      child: AppBar(
-        leading: null,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Center(
+      decoration: BoxDecoration(
+        color: appBarBackground,
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border(
+          bottom: BorderSide(
+            color: gameColor.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        child: Center(
           child: SizedBox(
             width: contentWidth,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Close button
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.close_rounded),
+                  child: _GameAppBarButton(
+                    icon: Icons.close_rounded,
+                    onPressed: () => Navigator.pop(context),
+                    controlBackground: controlBackground,
+                    iconColor: iconColor,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: _buildGameLogo(),
-                ),
-                _createActionButtonBar(context),
+                // Game logo and name
+                _buildGameLogo(context, gameColor),
+                // Action buttons
+                _createActionButtonBar(context, controlBackground, iconColor),
               ],
             ),
           ),
@@ -50,49 +84,111 @@ class GameAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _createActionButtonBar(BuildContext context) {
-    var actionButtons = [
-      IconButton(
-        onPressed: () {
-          BlocProvider.of<GameBloc>(context).add(RequestTutorial());
-        },
-        icon: const Icon(Icons.help_rounded),
-      ),
-      IconButton(
-        onPressed: () {
-          BlocProvider.of<GameBloc>(context).add(RequestStats());
-        },
-        icon: const Icon(Icons.query_stats_rounded),
-      ),
-    ];
+  Widget _createActionButtonBar(
+    BuildContext context,
+    Color controlBackground,
+    Color iconColor,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ...actionButtons.map((button) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3.0),
-            child: button,
-          );
-        }),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: _GameAppBarButton(
+            icon: Icons.help_outline_rounded,
+            onPressed: () {
+              BlocProvider.of<GameBloc>(context).add(RequestTutorial());
+            },
+            controlBackground: controlBackground,
+            iconColor: iconColor,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: _GameAppBarButton(
+            icon: Icons.bar_chart_rounded,
+            onPressed: () {
+              BlocProvider.of<GameBloc>(context).add(RequestStats());
+            },
+            controlBackground: controlBackground,
+            iconColor: iconColor,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildGameLogo() {
+  Widget _buildGameLogo(BuildContext context, Color gameColor) {
+    final theme = Theme.of(context);
+
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: game.imageAsset.image(width: 50, height: 50),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            game.name.toUpperCase(),
-            style: const TextStyle(fontSize: 20),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: gameColor.withValues(alpha: 0.3),
+              width: 2,
+            ),
           ),
-        )
+          child: ClipOval(
+            child:
+                game.imageAsset.image(width: 40, height: 40, fit: BoxFit.cover),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          game.name.toUpperCase(),
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: gameColor,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _GameAppBarButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color controlBackground;
+  final Color iconColor;
+
+  const _GameAppBarButton({
+    required this.icon,
+    required this.onPressed,
+    required this.controlBackground,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: controlBackground,
+            border: Border.all(
+              color: iconColor.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Icon(
+            icon,
+            color: iconColor,
+            size: 22,
+          ),
+        ),
+      ),
     );
   }
 }

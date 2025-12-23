@@ -27,11 +27,15 @@ class $AssetsLogosGen {
   /// File path: assets/logos/google.webp
   AssetGenImage get google => const AssetGenImage('assets/logos/google.webp');
 
+  /// File path: assets/logos/lexBox.png
+  AssetGenImage get lexBox => const AssetGenImage('assets/logos/lexBox.png');
+
   /// File path: assets/logos/wordsy.webp
   AssetGenImage get wordsy => const AssetGenImage('assets/logos/wordsy.webp');
 
   /// List of all assets
-  List<AssetGenImage> get values => [alphaBound, app, beeWise, google, wordsy];
+  List<AssetGenImage> get values =>
+      [alphaBound, app, beeWise, google, lexBox, wordsy];
 }
 
 class Assets {
@@ -43,10 +47,16 @@ class Assets {
       'assets/fiveLetterWordDictionary.txt';
   static const String gameLoading = 'assets/game_loading.riv';
   static const $AssetsLogosGen logos = $AssetsLogosGen();
+  static const String threeLetterWordDictionary =
+      'assets/threeLetterWordDictionary.txt';
 
   /// List of all assets
-  static List<String> get values =>
-      [atleastFourLetterWordDictionary, fiveLetterWordDictionary, gameLoading];
+  static List<String> get values => [
+        atleastFourLetterWordDictionary,
+        fiveLetterWordDictionary,
+        gameLoading,
+        threeLetterWordDictionary
+      ];
 }
 
 class AssetGenImage {

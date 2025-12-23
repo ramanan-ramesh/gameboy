@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:gameboy/data/auth/models/user_management.dart';
 
 import '../../auth/models/platform_user.dart';
@@ -9,8 +10,12 @@ abstract class AppDataFacade {
   Iterable<Game> get games;
 
   UserManagementFacade get userManagement;
+
+  ThemeMode get activeThemeMode;
 }
 
 abstract class AppDataModifier extends AppDataFacade {
   UserManagementModifier get userManagement;
+
+  Future toggleThemeMode();
 }

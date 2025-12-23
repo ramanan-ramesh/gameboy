@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 import 'polygon_border.dart';
 
@@ -122,6 +123,14 @@ class _LetterKeyState extends State<_LetterKey>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final centerColor = GameColors.beeWisePrimary;
+    final outerColor =
+        isDark ? const Color(0xFF3D3D54) : const Color(0xFFE8E8F0);
+    final textColor =
+        widget.isCentered ? Colors.black : theme.colorScheme.onSurface;
+
     return Padding(
       padding:
           EdgeInsets.only(left: widget.size * 0.4, right: widget.size * 0.4),
@@ -139,23 +148,37 @@ class _LetterKeyState extends State<_LetterKey>
               child: Material(
                 color: Colors.transparent,
                 clipBehavior: Clip.hardEdge,
-                shape: const PolygonBorder(
+                shape: PolygonBorder(
                   sides: 6,
                   borderRadius: 0.0,
                   rotate: 90.0,
-                  side: BorderSide.none,
+                  side: BorderSide(
+                    color: widget.isCentered
+                        ? GameColors.beeWiseAccent
+                        : (isDark ? Colors.white24 : Colors.black12),
+                    width: 2,
+                  ),
                 ),
                 child: ElevatedButton(
                   onPressed: () => widget.onLetterPressed(widget.letter),
                   style: ButtonStyle(
-                    overlayColor: const WidgetStatePropertyAll(Colors.black12),
+                    overlayColor: WidgetStatePropertyAll(
+                      widget.isCentered
+                          ? GameColors.beeWiseAccent.withValues(alpha: 0.3)
+                          : (isDark ? Colors.white12 : Colors.black12),
+                    ),
                     backgroundColor: WidgetStatePropertyAll(
-                      widget.isCentered ? Colors.yellow : Colors.white70,
+                      widget.isCentered ? centerColor : outerColor,
                     ),
                   ),
-                  child: Text(widget.letter.toUpperCase(),
-                      style:
-                          const TextStyle(color: Colors.black, fontSize: 24)),
+                  child: Text(
+                    widget.letter.toUpperCase(),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),

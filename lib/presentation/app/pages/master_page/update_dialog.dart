@@ -272,3 +272,11 @@ class UpdateDialog extends StatelessWidget {
     }
   }
 }
+
+void showUpdateDialog(BuildContext context, UpdateInfo updateInfo) {
+  showDialog(
+    context: context,
+    barrierDismissible: !updateInfo.isForceUpdate,
+    builder: (context) => UpdateDialog(updateInfo: updateInfo),
+  );
+}

@@ -6,6 +6,7 @@ import 'package:gameboy/blocs/game/states.dart';
 import 'package:gameboy/data/alphaBound/models/constants.dart';
 import 'package:gameboy/data/alphaBound/models/game_status.dart';
 import 'package:gameboy/presentation/alphaBound/extensions.dart';
+import 'package:gameboy/presentation/app/theming/app_colors.dart';
 
 class ProgressTracker extends StatelessWidget {
   const ProgressTracker({super.key});
@@ -27,7 +28,7 @@ class ProgressTracker extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: _createAttemptedGuessesCountTracker(
-                    statistics.numberOfWordsGuessedToday, gameState),
+                    statistics.numberOfWordsGuessedToday, gameState, context),
               ),
             ),
           ],
@@ -48,7 +49,10 @@ class ProgressTracker extends StatelessWidget {
       children: [
         Text(
           'GUESS',
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: GameColors.alphaBoundPrimary,
+                fontWeight: FontWeight.bold,
+              ),
         ),
         FittedBox(
           fit: BoxFit.contain,
@@ -61,8 +65,13 @@ class ProgressTracker extends StatelessWidget {
     );
   }
 
-  Widget _createAttemptedGuessesCountTracker(
-      int numberOfGuessesAttempted, AlphaBoundGameStatus gameState) {
+  Widget _createAttemptedGuessesCountTracker(int numberOfGuessesAttempted,
+      AlphaBoundGameStatus gameState, BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final inactiveColor =
+        isDark ? const Color(0xFF3D3D54) : const Color(0xFFE0E0E8);
+
     return Wrap(
       alignment: WrapAlignment.center,
       runAlignment: WrapAlignment.center,
@@ -73,13 +82,13 @@ class ProgressTracker extends StatelessWidget {
           if (index < numberOfGuessesAttempted) {
             backgroundColor = (gameState is GameWon &&
                     index == (numberOfGuessesAttempted - 1))
-                ? Colors.green
-                : Colors.red;
+                ? AppColors.success
+                : AppColors.error;
           } else {
             backgroundColor = (index == numberOfGuessesAttempted &&
                     !(gameState is GameWon || gameState is GameLost))
-                ? Colors.green
-                : Colors.grey;
+                ? GameColors.alphaBoundPrimary
+                : inactiveColor;
           }
           return Container(
             margin: const EdgeInsets.all(4.0),
@@ -88,6 +97,12 @@ class ProgressTracker extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: backgroundColor == inactiveColor
+                    ? (isDark ? Colors.white12 : Colors.black12)
+                    : Colors.transparent,
+                width: 1,
+              ),
             ),
           );
         },

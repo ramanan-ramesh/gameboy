@@ -1,7 +1,7 @@
 name: gameboy
 description: "Introducing \"gameboy\" – the app that makes you feel like a genius one day and question your life choices the next! 😅 Whether you're cracking Wordsy codes, flexing your vocabulary in BeeWise, or showing off random trivia knowledge, gameboy keeps your neurons firing and your ego in check. Perfect for those who think they’re smart… until they misspell \"yacht.\""
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.1.0+5
+version: 2.0.0+6
 
 environment:
   sdk: ^3.5.3

@@ -53,18 +53,27 @@ class _LexBoxGameWidget extends StatefulWidget {
 
 class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   List<int> _currentWordIndices = [];
-  Set<int> _usedLetterIndices = {};
   String _currentWord = '';
-  bool _hasWon = false;
   bool _showCelebration = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateUsedLetters();
+    // Check if game was already won on startup (state emitted before listener registered)
+    final currentState = context.getCurrentLexBoxState();
+    if (currentState is LexBoxWinOnStartup && !_showCelebration) {
+      // Defer setState to avoid calling it during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _showCelebration = true;
+          });
+        }
+      });
+    }
   }
 
-  void _updateUsedLetters() {
+  Set<int> _getUsedLetterIndices() {
     final gameEngine = context.getGameEngineData();
     final allWords = gameEngine.guessedWords;
     final letters = gameEngine.lettersOfTheDay;
@@ -78,26 +87,14 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
         }
       }
     }
-
-    final wasWon = _hasWon;
-    setState(() {
-      _usedLetterIndices = used;
-      _hasWon = used.length == 12;
-    });
-
-    // If just won (wasn't won before, but now is), show celebration
-    if (!wasWon && _hasWon) {
-      setState(() {
-        _showCelebration = true;
-      });
-    }
+    return used;
   }
 
   void _onWordComplete(List<int> indices) {
-    // Don't allow new words if already won
-    if (_hasWon) return;
-
     final gameEngine = context.getGameEngineData();
+    // Don't allow new words if already won
+    if (gameEngine.isWon) return;
+
     final letters = gameEngine.lettersOfTheDay;
     final word = indices.map((i) => letters[i]).join();
 
@@ -112,10 +109,10 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
   }
 
   void _onCurrentWordChanged(List<int> indices) {
-    // Don't allow new words if already won
-    if (_hasWon) return;
-
     final gameEngine = context.getGameEngineData();
+    // Don't allow new words if already won
+    if (gameEngine.isWon) return;
+
     final letters = gameEngine.lettersOfTheDay;
 
     setState(() {
@@ -154,35 +151,28 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
     final gameEngine = context.getGameEngineData();
     final letters = gameEngine.lettersOfTheDay;
     final guessedWords = gameEngine.guessedWords.toList();
+    final usedLetterIndices = _getUsedLetterIndices();
+    final isWon = gameEngine.isWon;
 
     return BlocListener<GameBloc, GameState>(
+      listenWhen: (previous, current) {
+        // Listen to LexBox-specific states and ShowStats
+        return current is LexBoxState || current is ShowStats;
+      },
       listener: (context, state) {
         if (state is LexBoxWinOnStartup) {
           // Show celebration on startup if already won
-          _updateUsedLetters();
           setState(() {
-            _hasWon = true;
             _showCelebration = true;
           });
         } else if (state is WordErased) {
           _showSnackBar('Erased: ${state.erasedWord.toUpperCase()}');
-          _updateUsedLetters();
-          // Reset celebration if word is erased and no longer won
-          if (_usedLetterIndices.length < 12) {
-            setState(() {
-              _hasWon = false;
-              _showCelebration = false;
-            });
-          }
         } else if (state is GuessedWordResult) {
           switch (state.guessedWordState) {
             case LexBoxGuessedWordState.valid:
               _showSnackBar('Word accepted!');
-              _updateUsedLetters();
             case LexBoxGuessedWordState.win:
-              _updateUsedLetters();
               setState(() {
-                _hasWon = true;
                 _showCelebration = true;
               });
             case LexBoxGuessedWordState.tooShort:
@@ -204,12 +194,12 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
             children: [
               // Progress indicator
               LettersProgressIndicator(
-                usedCount: _usedLetterIndices.length,
+                usedCount: usedLetterIndices.length,
                 totalCount: 12,
               ),
               const SizedBox(height: 8),
               // Win badge (shown after celebration)
-              if (_hasWon && !_showCelebration)
+              if (isWon && !_showCelebration)
                 const Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: LexBoxWinBadge(),
@@ -220,7 +210,7 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
                 child: WordsListWidget(
                   words: guessedWords,
                   currentWord: null, // Current word shown in indicator instead
-                  onEraseLastWord: guessedWords.isNotEmpty && !_hasWon
+                  onEraseLastWord: guessedWords.isNotEmpty && !isWon
                       ? _onEraseLastWord
                       : null,
                 ),
@@ -229,7 +219,7 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
               _CurrentWordIndicator(
                 currentWord: _currentWord,
                 isValid: _currentWord.length >= 3,
-                isDisabled: _hasWon,
+                isDisabled: isWon,
               ),
               // Letter box
               Expanded(
@@ -237,13 +227,13 @@ class _LexBoxGameWidgetState extends State<_LexBoxGameWidget> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: IgnorePointer(
-                    ignoring: _hasWon,
+                    ignoring: isWon,
                     child: Opacity(
-                      opacity: _hasWon ? 0.5 : 1.0,
+                      opacity: isWon ? 0.5 : 1.0,
                       child: LetterBoxWidget(
                         lettersOfTheDay: letters,
                         currentWordIndices: _currentWordIndices,
-                        usedLetterIndices: _usedLetterIndices,
+                        usedLetterIndices: usedLetterIndices,
                         onWordComplete: _onWordComplete,
                         onWordCancelled: _onClearWord,
                         onCurrentWordChanged: _onCurrentWordChanged,

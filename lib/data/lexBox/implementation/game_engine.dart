@@ -81,8 +81,8 @@ class LexBoxGameEngineImpl implements LexBoxGameEngineDriver {
   }
 
   bool _isWin(Iterable<String> words) {
-    var allLetters = lettersOfTheDay.split('').toSet();
-    var usedLetters = words.expand((w) => w.split('')).toSet();
+    var allLetters = lettersOfTheDay.toLowerCase().split('').toSet();
+    var usedLetters = words.expand((w) => w.toLowerCase().split('')).toSet();
     return allLetters.every(usedLetters.contains);
   }
 

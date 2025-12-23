@@ -9,6 +9,12 @@ abstract class LexBoxStatistics extends Statistics {
 }
 
 abstract class LexBoxStatsModifier extends LexBoxStatistics {
-  Future<bool> trySubmitWord(String word);
+  /// Records a word submission (persistence only, no game logic)
+  Future<bool> recordWord(String word);
+
+  /// Records a win - updates winCount, streak, etc.
+  Future<bool> registerWin();
+
+  /// Erases the last word from persistence
   Future<bool> eraseLastWord();
 }

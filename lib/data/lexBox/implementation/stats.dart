@@ -13,6 +13,7 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
   static const _maximumStreakField = 'maximumStreak';
   static const _lastPlayedMatchDateField = 'lastPlayedDate';
   static const _wordsSubmittedTodayField = 'lastGuessedWords';
+  static const _hasWonTodayField = 'hasWonToday';
   static final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   static final _firstDay = DateTime(2025, 4, 28);
 
@@ -28,6 +29,9 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
     var winCount = _getIntegerStatistic(userData, _winCountField);
     var currentStreak = _getIntegerStatistic(userData, _currentStreakField);
     var maximumStreak = _getIntegerStatistic(userData, _maximumStreakField);
+    var hasWonToday = userData.containsKey(_hasWonTodayField)
+        ? userData[_hasWonTodayField] as bool
+        : false;
     List<String> lastSubmittedWords = [];
     DateTime? lastPlayedMatchDay;
     if (userData.containsKey(_lastPlayedMatchDateField)) {
@@ -50,7 +54,8 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
         wordsSubmittedToday: lastSubmittedWords,
         userId: userId,
         lastCompletedMatchDay: lastPlayedMatchDay,
-        initializedDateTime: initializedDateTime);
+        initializedDateTime: initializedDateTime,
+        hadWonLastSession: hasWonToday);
   }
 
   @override
@@ -58,13 +63,12 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
     if (_lastCompletedMatchDay != null &&
         _lastCompletedMatchDay!.numberOfDaysInBetween(initializedDateTime) >
             0) {
-      // Check if user had won on the last played day
-      final hadWonLastDay = _isWin(wordsSubmittedToday);
       // Should reset streak if more than 1 day passed, or if 1 day passed without winning
+      // Note: _hadWonLastSession is set during initialization based on stored win state
       var shouldResetStreak =
           _lastCompletedMatchDay!.numberOfDaysInBetween(initializedDateTime) >
                   1 ||
-              !hadWonLastDay;
+              !_hadWonLastSession;
 
       final updateData = <String, Object?>{
         _wordsSubmittedTodayField: null,
@@ -104,47 +108,61 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
   @override
   int maximumStreak;
 
-  @override
-  Future<bool> trySubmitWord(String word) async {
-    var didSubmitWord = false;
-    final updatedWords = wordsSubmittedToday.toList()..add(word.toLowerCase());
+  /// Tracks if user had won in the last session (for streak calculation in reCalculate)
+  final bool _hadWonLastSession;
 
-    // Check if this word completes the game (uses all letters)
-    final willWin = _isWin(updatedWords);
+  /// Tracks current session win state (synced with Firebase)
+  bool _hasWonToday;
+
+  /// Whether the user has won today's challenge
+  bool get hasWonToday => _hasWonToday;
+
+  @override
+  Future<bool> recordWord(String word) async {
+    var didRecordWord = false;
+    final updatedWords = wordsSubmittedToday.toList()..add(word.toLowerCase());
 
     final updateData = <String, dynamic>{
       _wordsSubmittedTodayField: updatedWords,
       _lastPlayedMatchDateField: _dateFormat.format(initializedDateTime),
     };
 
-    // If this word causes a win, update streak and win count
-    if (willWin) {
-      final newCurrentStreak = currentStreak + 1;
-      final newMaximumStreak =
-          newCurrentStreak > maximumStreak ? newCurrentStreak : maximumStreak;
-      updateData[_winCountField] = winCount + 1;
-      updateData[_currentStreakField] = newCurrentStreak;
-      updateData[_maximumStreakField] = newMaximumStreak;
-    }
-
     await _userDataReference.update(updateData).then((_) {
-      didSubmitWord = true;
+      didRecordWord = true;
       wordsSubmittedToday.add(word.toLowerCase());
       _lastCompletedMatchDay ??= initializedDateTime;
-
-      // Update local streak values if won
-      if (willWin) {
-        winCount++;
-        currentStreak++;
-        if (currentStreak > maximumStreak) {
-          maximumStreak = currentStreak;
-        }
-      }
     }).onError((_, __) {
-      didSubmitWord = false;
+      didRecordWord = false;
     });
 
-    return didSubmitWord;
+    return didRecordWord;
+  }
+
+  @override
+  Future<bool> registerWin() async {
+    var didRegisterWin = false;
+    final newCurrentStreak = currentStreak + 1;
+    final newMaximumStreak =
+        newCurrentStreak > maximumStreak ? newCurrentStreak : maximumStreak;
+
+    final updateData = <String, dynamic>{
+      _winCountField: winCount + 1,
+      _currentStreakField: newCurrentStreak,
+      _maximumStreakField: newMaximumStreak,
+      _hasWonTodayField: true,
+    };
+
+    await _userDataReference.update(updateData).then((_) {
+      didRegisterWin = true;
+      winCount++;
+      currentStreak = newCurrentStreak;
+      maximumStreak = newMaximumStreak;
+      _hasWonToday = true;
+    }).onError((_, __) {
+      didRegisterWin = false;
+    });
+
+    return didRegisterWin;
   }
 
   @override
@@ -152,10 +170,7 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
     if (wordsSubmittedToday.isEmpty) return false;
     var didEraseWord = false;
 
-    // Check if currently won before erasing
-    final isCurrentlyWon = _isWin(wordsSubmittedToday);
     final updatedWords = wordsSubmittedToday.toList()..removeLast();
-    final willStillBeWon = _isWin(updatedWords);
 
     final updateData = <String, dynamic>{
       _wordsSubmittedTodayField: updatedWords.isEmpty ? null : updatedWords,
@@ -165,24 +180,11 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
       updateData[_lastPlayedMatchDateField] = null;
     }
 
-    // If erasing this word removes the win, revert the win and streak
-    if (isCurrentlyWon && !willStillBeWon) {
-      final newCurrentStreak = currentStreak > 0 ? currentStreak - 1 : 0;
-      updateData[_winCountField] = winCount > 0 ? winCount - 1 : 0;
-      updateData[_currentStreakField] = newCurrentStreak;
-    }
-
     await _userDataReference.update(updateData).then((_) {
       didEraseWord = true;
       wordsSubmittedToday.removeLast();
       if (wordsSubmittedToday.isEmpty) {
         _lastCompletedMatchDay = null;
-      }
-
-      // Update local state if win was reverted
-      if (isCurrentlyWon && !willStillBeWon) {
-        if (winCount > 0) winCount--;
-        if (currentStreak > 0) currentStreak--;
       }
     }).onError((_, __) {
       didEraseWord = false;
@@ -202,12 +204,6 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
       .child(_lexBoxRootField)
       .child(_userDataField)
       .child(_userId);
-
-  bool _isWin(Iterable<String> words) {
-    var allLetters = lettersOfTheDay.toLowerCase().split('').toSet();
-    var usedLetters = words.expand((w) => w.toLowerCase().split('')).toSet();
-    return allLetters.every(usedLetters.contains);
-  }
 
   static Future<String> _getLettersOfTheDay(
       DateTime initializedDateTime) async {
@@ -237,7 +233,10 @@ class LexBoxStatsRepo extends LexBoxStatsModifier {
       required this.wordsSubmittedToday,
       required String userId,
       required DateTime? lastCompletedMatchDay,
-      required this.initializedDateTime})
+      required this.initializedDateTime,
+      required bool hadWonLastSession})
       : _userId = userId,
-        _lastCompletedMatchDay = lastCompletedMatchDay;
+        _lastCompletedMatchDay = lastCompletedMatchDay,
+        _hadWonLastSession = hadWonLastSession,
+        _hasWonToday = hadWonLastSession;
 }

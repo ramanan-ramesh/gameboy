@@ -40,11 +40,20 @@ class LexBoxBloc extends GameBloc<LexBoxEvent, LexBoxState, LexBoxStatsModifier,
 
   FutureOr<void> _onSubmitWord(
       SubmitWord event, Emitter<GameState> emit) async {
+    var wasWonBefore = gameEngine.isWon;
     var currentWordCount = gameEngine.currentWordCount;
     var guessedWordState = await gameEngine.trySubmitWord(event.word);
+
     if (guessedWordState == LexBoxGuessedWordState.valid ||
         guessedWordState == LexBoxGuessedWordState.win) {
-      await stats.trySubmitWord(event.word);
+      // Record the word (persistence only - no game logic in stats)
+      await stats.recordWord(event.word);
+
+      // Check if this submission resulted in a win
+      if (!wasWonBefore && gameEngine.isWon) {
+        await stats.registerWin();
+      }
+
       var newWordCount = gameEngine.currentWordCount;
       emit(
           GuessWordAccepted(guessedWordState, newWordCount - currentWordCount));
@@ -55,13 +64,15 @@ class LexBoxBloc extends GameBloc<LexBoxEvent, LexBoxState, LexBoxStatsModifier,
 
   FutureOr<void> _onEraseLastWord(
       EraseLastWord event, Emitter<GameState> emit) async {
-    var didWinAlready = gameEngine.isWon;
-    if (!didWinAlready) {
-      final erasedWord = gameEngine.eraseLastWord();
-      if (erasedWord != null) {
-        await stats.eraseLastWord();
-        emit(WordErased(erasedWord));
-      }
+    // Disallow erasing if game has already been won
+    if (gameEngine.isWon) {
+      return;
+    }
+
+    final erasedWord = gameEngine.eraseLastWord();
+    if (erasedWord != null) {
+      await stats.eraseLastWord();
+      emit(WordErased(erasedWord));
     }
   }
 }
